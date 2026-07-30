@@ -2,6 +2,59 @@ let game = {};
 
 
 
+function chooseClub(club) {
+
+
+    console.log(
+        "Club sélectionné :",
+        club.nom
+    );
+
+
+    let selectedClub = {
+
+        name: club.nom,
+
+        budget: club.budget,
+
+        reputation: club.niveau
+
+    };
+
+
+    game.manager.startCareer(
+
+        "Nouvel Entraîneur",
+
+        selectedClub
+
+    );
+
+
+    game.ui.showManager({
+
+        managerName:
+            game.manager.managerName,
+
+        clubName:
+            game.manager.getClubName(),
+
+        budget:
+            game.manager.budget,
+
+        reputation:
+            game.manager.reputation,
+
+        season:
+            game.manager.season,
+
+        objectives:
+            game.manager.objectives
+
+    });
+
+}
+
 async function startGame() {
 
 
