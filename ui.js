@@ -1,5 +1,3 @@
-console.log("NOUVEAU UI CHARGE");
-
 class UI {
 
     constructor() {
