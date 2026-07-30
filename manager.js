@@ -1,9 +1,15 @@
 class ManagerCareer {
     constructor(managerName, club) {
+        this.id = Date.now();
+
         this.managerName = managerName;
         this.club = club;
 
+        this.createdAt = new Date().toLocaleDateString();
+
         this.season = "2026/2027";
+        this.seasonStatus = "En cours";
+
         this.reputation = 50;
         this.budget = 10000000;
 
@@ -16,9 +22,12 @@ class ManagerCareer {
 
     startCareer() {
         console.log("=== NOUVELLE CARRIÈRE ===");
+        console.log("ID :", this.id);
         console.log("Manager :", this.managerName);
         console.log("Club :", this.club);
+        console.log("Créée le :", this.createdAt);
         console.log("Saison :", this.season);
+        console.log("Statut :", this.seasonStatus);
         console.log("Réputation :", this.reputation);
         console.log("Budget :", this.budget + " €");
 
@@ -54,5 +63,19 @@ class ManagerCareer {
         if (this.budget < 0) {
             this.budget = 0;
         }
+    }
+
+    getCareerData() {
+        return {
+            id: this.id,
+            managerName: this.managerName,
+            club: this.club,
+            createdAt: this.createdAt,
+            season: this.season,
+            seasonStatus: this.seasonStatus,
+            reputation: this.reputation,
+            budget: this.budget,
+            objectives: this.objectives
+        };
     }
 }
