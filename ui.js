@@ -2,10 +2,21 @@ class UI {
 
     constructor() {
 
-        this.container =
-            document.getElementById("game");
+    this.container =
+        document.getElementById("game");
 
-    }
+
+    this.flags = {
+
+        "Premier League": "🇬🇧",
+        "Liga": "🇪🇸",
+        "Serie A": "🇮🇹",
+        "Bundesliga": "🇩🇪",
+        "Ligue 1": "🇫🇷"
+
+    };
+
+}
 
 
 
@@ -234,20 +245,23 @@ class UI {
         leagues.forEach(league => {
 
 
-            this.createButton(
+      
 
-                league,
 
-                () => {
+this.createButton(
 
-                    console.log(
-                        "Ligue choisie :",
-                        league
-                    );
+    this.flags[league] + " " + league,
 
-                }
+    () => {
 
-            );
+        console.log(
+            "Ligue choisie :",
+            league
+        );
+
+    }
+
+);
 
 
         });
