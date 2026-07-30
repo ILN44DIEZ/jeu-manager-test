@@ -4,6 +4,7 @@
 
 let manager = {
     club: "",
+    ligue: "",
     saison: 1,
     budget: 0,
     reputation: 50,
@@ -12,22 +13,22 @@ let manager = {
 };
 
 
-
 // =======================
-// CLUBS
+// DONNEES CLUBS
 // =======================
 
 let clubs = [];
 
+let calendrier = [];
 
 
 // =======================
-// CHARGEMENT DES CLUBS JSON
+// CHARGEMENT JSON
 // =======================
 
 async function chargerClubs(){
 
-    let reponse = await fetch("data/clubs.json");
+    const reponse = await fetch("data/clubs.json");
 
     clubs = await reponse.json();
 
@@ -38,7 +39,8 @@ async function chargerClubs(){
         club.victoires = 0;
         club.nuls = 0;
         club.defaites = 0;
-        club.buts = 0;
+        club.butsPour = 0;
+        club.butsContre = 0;
 
     });
 
@@ -54,31 +56,11 @@ chargerClubs();
 
 
 // =======================
-// CALENDRIER
-// =======================
-
-let calendrier = [
-    "Olympique de Marseille",
-    "AS Monaco",
-    "Olympique Lyonnais",
-    "Lille OSC",
-    "RC Lens",
-    "OGC Nice",
-    "Stade Rennais",
-    "Toulouse FC"
-];
-
-
-
-
-// =======================
-// CHOIX DU CLUB
+// CHOIX CLUB
 // =======================
 
 function startGame(clubChoisi){
 
-
-    // Empêche de changer de club
 
     if(manager.club !== ""){
 
@@ -90,23 +72,24 @@ function startGame(clubChoisi){
 
 
 
-    manager.club = clubChoisi;
+    let club = clubs.find(
 
-
-
-    let clubSelectionne = clubs.find(
-
-        club => club.nom === clubChoisi
+        c => c.nom === clubChoisi
 
     );
 
 
+    if(!club) return;
 
-    if(clubSelectionne){
 
-        manager.budget = clubSelectionne.budget;
 
-    }
+    manager.club = club.nom;
+    manager.ligue = club.ligue;
+    manager.budget = club.budget;
+
+
+
+    creerCalendrier();
 
 
 
@@ -116,16 +99,12 @@ function startGame(clubChoisi){
 
 
 
-
 // =======================
-// AFFICHER LES CLUBS
+// MENU CLUBS
 // =======================
 
 function afficherChoixClub(){
 
-
-    // Si club déjà choisi,
-    // on ne montre plus les autres
 
     if(manager.club !== ""){
 
@@ -175,9 +154,69 @@ function afficherChoixClub(){
 
 
 
+// =======================
+// CREATION CALENDRIER
+// =======================
+
+function creerCalendrier(){
+
+
+    calendrier = [];
+
+
+
+    let clubsLigue = clubs.filter(
+
+        club => club.ligue === manager.ligue
+
+    );
+
+
+
+    clubsLigue = clubsLigue.filter(
+
+        club => club.nom !== manager.club
+
+    );
+
+
+
+    // Matchs aller
+
+    clubsLigue.forEach(club => {
+
+        calendrier.push({
+
+            adversaire: club.nom,
+            domicile: true
+
+        });
+
+    });
+
+
+
+    // Matchs retour
+
+    clubsLigue.forEach(club => {
+
+        calendrier.push({
+
+            adversaire: club.nom,
+            domicile: false
+
+        });
+
+    });
+
+
+
+}
+
+
 
 // =======================
-// CALENDRIER
+// AFFICHAGE CALENDRIER
 // =======================
 
 function afficherCalendrier(){
@@ -188,6 +227,8 @@ function afficherCalendrier(){
     <h2>🏟 Saison ${manager.saison}</h2>
 
     <p>Club : ${manager.club}</p>
+
+    <p>Ligue : ${manager.ligue}</p>
 
     <p>Budget : ${manager.budget.toLocaleString()} €</p>
 
@@ -200,14 +241,14 @@ function afficherCalendrier(){
 
 
 
-    calendrier.forEach((adversaire,index)=>{
+    calendrier.forEach((match,index)=>{
 
 
         let statut = index < manager.matchActuel
 
-        ? "✅ Terminé"
+        ? "✅"
 
-        : "⏳ À jouer";
+        : "⏳";
 
 
 
@@ -221,9 +262,9 @@ function afficherCalendrier(){
 
         ${manager.club}
 
-        - 
+        -
 
-        ${adversaire}
+        ${match.adversaire}
 
         ${statut}
 
@@ -236,18 +277,27 @@ function afficherCalendrier(){
 
 
 
+    if(!manager.saisonTerminee){
+
+        html += `
+
+        <button onclick="jouerMatch()">
+
+        Jouer le prochain match
+
+        </button>
+
+        `;
+
+    }
+
+
+
     html += `
-
-    <button onclick="jouerMatch()">
-
-    Jouer le prochain match
-
-    </button>
-
 
     <button onclick="afficherClassement()">
 
-    Voir classement
+    🏆 Classement
 
     </button>
 
@@ -259,7 +309,6 @@ function afficherCalendrier(){
 
 
 }
-
 
 
 
@@ -280,13 +329,21 @@ function jouerMatch(){
 
 
 
-    let adversaire = calendrier[manager.matchActuel];
+    let match = calendrier[manager.matchActuel];
 
 
 
     let monClub = clubs.find(
 
-        club => club.nom === manager.club
+        c => c.nom === manager.club
+
+    );
+
+
+
+    let adversaire = clubs.find(
+
+        c => c.nom === match.adversaire
 
     );
 
@@ -298,11 +355,65 @@ function jouerMatch(){
 
 
 
-    monClub.buts += scoreMoi;
+    monClub.butsPour += scoreMoi;
+
+    monClub.butsContre += scoreAdverse;
 
 
 
-    let texte = `
+    adversaire.butsPour += scoreAdverse;
+
+    adversaire.butsContre += scoreMoi;
+
+
+
+    let resultat = "";
+
+
+
+    if(scoreMoi > scoreAdverse){
+
+        monClub.points += 3;
+
+        monClub.victoires++;
+
+        resultat = "✅ Victoire";
+
+    }
+
+    else if(scoreMoi < scoreAdverse){
+
+        adversaire.points += 3;
+
+        adversaire.victoires++;
+
+        monClub.defaites++;
+
+        resultat = "❌ Défaite";
+
+    }
+
+    else{
+
+        monClub.points++;
+
+        adversaire.points++;
+
+        monClub.nuls++;
+
+        adversaire.nuls++;
+
+        resultat = "🤝 Match nul";
+
+    }
+
+
+
+    manager.matchActuel++;
+
+
+
+    document.getElementById("result").innerHTML = `
 
     <h3>
 
@@ -314,62 +425,13 @@ function jouerMatch(){
 
     ${scoreAdverse}
 
-    ${adversaire}
+    ${adversaire.nom}
 
     </h3>
 
+    <p>${resultat}</p>
+
     `;
-
-
-
-    if(scoreMoi > scoreAdverse){
-
-
-        monClub.points += 3;
-
-        monClub.victoires++;
-
-        manager.reputation += 2;
-
-
-        texte += "✅ Victoire";
-
-
-    }
-
-    else if(scoreMoi < scoreAdverse){
-
-
-        monClub.defaites++;
-
-        manager.reputation -= 1;
-
-
-        texte += "❌ Défaite";
-
-
-    }
-
-    else{
-
-
-        monClub.points++;
-
-        monClub.nuls++;
-
-
-        texte += "🤝 Match nul";
-
-
-    }
-
-
-
-    manager.matchActuel++;
-
-
-
-    document.getElementById("result").innerHTML = texte;
 
 
 
@@ -380,7 +442,6 @@ function jouerMatch(){
 
 
 
-
 // =======================
 // CLASSEMENT
 // =======================
@@ -388,19 +449,38 @@ function jouerMatch(){
 function afficherClassement(){
 
 
-    clubs.sort((a,b)=> b.points - a.points);
+    let classement = clubs.filter(
+
+        club => club.ligue === manager.ligue
+
+    );
+
+
+
+    classement.sort((a,b)=>{
+
+        if(b.points !== a.points)
+
+            return b.points - a.points;
+
+
+        return b.butsPour - b.butsContre -
+
+               (a.butsPour - a.butsContre);
+
+    });
 
 
 
     let html = `
 
-    <h2>🏆 Classement</h2>
+    <h2>🏆 Classement ${manager.ligue}</h2>
 
     `;
 
 
 
-    clubs.slice(0,20).forEach((club,index)=>{
+    classement.forEach((club,index)=>{
 
 
         html += `
@@ -415,8 +495,19 @@ function afficherClassement(){
 
         `;
 
-
     });
+
+
+
+    html += `
+
+    <button onclick="afficherCalendrier()">
+
+    Retour
+
+    </button>
+
+    `;
 
 
 
@@ -427,15 +518,15 @@ function afficherClassement(){
 
 
 
-
 // =======================
-// FIN DE SAISON
+// FIN SAISON
 // =======================
 
 function finDeSaison(){
 
 
     manager.saisonTerminee = true;
+
 
 
     let club = clubs.find(
@@ -448,13 +539,11 @@ function finDeSaison(){
 
     document.getElementById("result").innerHTML = `
 
-
     <h2>🏁 Fin de saison</h2>
-
 
     <p>
 
-    ${manager.club}
+    ${club.nom}
 
     termine avec
 
@@ -471,12 +560,9 @@ function finDeSaison(){
 
     </button>
 
-
     `;
 
-
 }
-
 
 
 
@@ -494,7 +580,21 @@ function nouvelleSaison(){
     manager.saisonTerminee = false;
 
 
-    afficherCalendrier();
+    clubs.forEach(club=>{
 
+        club.points = 0;
+        club.victoires = 0;
+        club.nuls = 0;
+        club.defaites = 0;
+        club.butsPour = 0;
+        club.butsContre = 0;
+
+    });
+
+
+
+    creerCalendrier();
+
+    afficherCalendrier();
 
 }
