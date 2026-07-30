@@ -1,81 +1,143 @@
 class ManagerCareer {
-    constructor(managerName, club) {
-        this.id = Date.now();
+
+    constructor() {
+
+        this.managerName = "";
+
+        this.club = null;
+
+        this.season = 1;
+
+        this.budget = 0;
+
+        this.reputation = 0;
+
+        this.objectives = [];
+
+        this.history = [];
+
+    }
+
+
+
+    startCareer(managerName, club) {
 
         this.managerName = managerName;
+
         this.club = club;
 
-        this.createdAt = new Date().toLocaleDateString();
 
-        this.season = "2026/2027";
-        this.seasonStatus = "En cours";
+        this.budget = club.budget || 0;
 
-        this.reputation = 50;
-        this.budget = 10000000;
+        this.reputation = club.reputation || 50;
+
 
         this.objectives = [
-            "Finir dans le top 5 du championnat",
-            "Développer de jeunes joueurs",
-            "Respecter le budget du club"
+
+            "Terminer la saison avec succès",
+
+            "Développer les joueurs",
+
+            "Respecter le budget"
+
         ];
-    }
 
-    startCareer() {
-        console.log("=== NOUVELLE CARRIÈRE ===");
-        console.log("ID :", this.id);
-        console.log("Manager :", this.managerName);
-        console.log("Club :", this.club);
-        console.log("Créée le :", this.createdAt);
-        console.log("Saison :", this.season);
-        console.log("Statut :", this.seasonStatus);
-        console.log("Réputation :", this.reputation);
-        console.log("Budget :", this.budget + " €");
 
-        console.log("Objectifs :");
-        this.objectives.forEach(objective => {
-            console.log("- " + objective);
+        this.history.push({
+
+            season: this.season,
+
+            club: club.name
+
         });
+
+
+        return true;
+
     }
 
-    increaseReputation(points) {
-        this.reputation += points;
 
-        if (this.reputation > 100) {
-            this.reputation = 100;
+
+    getClubName() {
+
+        if (!this.club) {
+
+            return "Aucun club";
+
         }
+
+
+        return this.club.name;
+
     }
 
-    decreaseReputation(points) {
-        this.reputation -= points;
 
-        if (this.reputation < 0) {
-            this.reputation = 0;
-        }
-    }
 
-    addBudget(amount) {
+    changeBudget(amount) {
+
         this.budget += amount;
-    }
 
-    spendBudget(amount) {
-        this.budget -= amount;
 
         if (this.budget < 0) {
+
             this.budget = 0;
+
         }
+
     }
 
-    getCareerData() {
-        return {
-            id: this.id,
-            managerName: this.managerName,
-            club: this.club,
-            createdAt: this.createdAt,
-            season: this.season,
-            seasonStatus: this.seasonStatus,
-            reputation: this.reputation,
-            budget: this.budget,
-            objectives: this.objectives
-        };
+
+
+    changeReputation(amount) {
+
+        this.reputation += amount;
+
+
+        if (this.reputation < 0) {
+
+            this.reputation = 0;
+
+        }
+
+
+        if (this.reputation > 100) {
+
+            this.reputation = 100;
+
+        }
+
     }
+
+
+
+    nextSeason() {
+
+        this.season++;
+
+    }
+
+
+
+    getData() {
+
+        return {
+
+            managerName: this.managerName,
+
+            club: this.club,
+
+            season: this.season,
+
+            budget: this.budget,
+
+            reputation: this.reputation,
+
+            objectives: this.objectives,
+
+            history: this.history
+
+        };
+
+    }
+
 }
