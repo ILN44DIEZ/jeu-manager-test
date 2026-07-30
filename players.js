@@ -313,3 +313,78 @@ class Player {
         };
     }
 }
+
+
+class Squad {
+
+    constructor(name = "") {
+        this.name = name;
+        this.players = [];
+    }
+
+
+    addPlayer(player) {
+
+        this.players.push(player);
+    }
+
+
+    removePlayer(playerId) {
+
+        this.players =
+            this.players.filter(
+                player => player.id !== playerId
+            );
+    }
+
+
+    getPlayer(playerId) {
+
+        return this.players.find(
+            player => player.id === playerId
+        );
+    }
+
+
+    getPlayerCount() {
+
+        return this.players.length;
+    }
+
+
+    getAverageOverall() {
+
+        if (this.players.length === 0) {
+            return 0;
+        }
+
+
+        let total = 0;
+
+
+        this.players.forEach(player => {
+
+            total += player.overall;
+
+        });
+
+
+        return Math.round(
+            total / this.players.length
+        );
+    }
+
+
+    getData() {
+
+        return {
+
+            name: this.name,
+
+            players:
+                this.players.map(
+                    player => player.getData()
+                )
+        };
+    }
+}
