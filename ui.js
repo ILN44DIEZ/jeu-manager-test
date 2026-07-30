@@ -339,18 +339,15 @@ showClubDetails(club, dataManager, league) {
 
     this.createButton(
 
-        "✅ Choisir ce club",
+    "✅ Choisir ce club",
 
-        () => {
+    () => {
 
-            console.log(
-                "Club choisi :",
-                club.nom
-            );
+        chooseClub(club);
 
-        }
+    }
 
-    );
+);
 
 
     this.createButton(
