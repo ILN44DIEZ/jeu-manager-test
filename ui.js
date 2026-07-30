@@ -294,37 +294,11 @@ showClubSelection(dataManager, league) {
 
             () => {
 
-
-                this.showMessage(
-                    "⭐ Niveau : "
-                    + club.niveau
+                this.showClubDetails(
+                    club,
+                    dataManager,
+                    league
                 );
-
-
-                this.showMessage(
-                    "💰 Budget : "
-                    +
-                    club.budget.toLocaleString()
-                    +
-                    " €"
-                );
-
-
-                this.createButton(
-
-                    "✅ Choisir ce club",
-
-                    () => {
-
-                        console.log(
-                            "Club choisi :",
-                            club.nom
-                        );
-
-                    }
-
-                );
-
 
             }
 
@@ -332,6 +306,67 @@ showClubSelection(dataManager, league) {
 
 
     });
+
+
+}
+
+
+
+showClubDetails(club, dataManager, league) {
+
+    this.clear();
+
+
+    this.showTitle(
+        "🏟️ " + club.nom
+    );
+
+
+    this.showMessage(
+        "⭐ Niveau : "
+        + club.niveau
+    );
+
+
+    this.showMessage(
+        "💰 Budget : "
+        +
+        club.budget.toLocaleString()
+        +
+        " €"
+    );
+
+
+    this.createButton(
+
+        "✅ Choisir ce club",
+
+        () => {
+
+            console.log(
+                "Club choisi :",
+                club.nom
+            );
+
+        }
+
+    );
+
+
+    this.createButton(
+
+        "⬅️ Retour",
+
+        () => {
+
+            this.showClubSelection(
+                dataManager,
+                league
+            );
+
+        }
+
+    );
 
 
 }
