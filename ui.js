@@ -22,9 +22,26 @@ class UI {
         const h2 =
             document.createElement("h2");
 
+
         h2.textContent = title;
 
+
         this.container.appendChild(h2);
+
+    }
+
+
+
+    showMessage(message) {
+
+        const p =
+            document.createElement("p");
+
+
+        p.textContent = message;
+
+
+        this.container.appendChild(p);
 
     }
 
@@ -54,48 +71,88 @@ class UI {
 
 
 
-    showMessage(message) {
-
-        const p =
-            document.createElement("p");
-
-
-        p.textContent = message;
-
-
-        this.container.appendChild(p);
-
-    }
-
-
-
     showManager(manager) {
 
         this.clear();
 
 
         this.showTitle(
-            "Carrière Manager"
+            "⚽ Manager Career"
         );
 
 
+
         this.showMessage(
-            "Club : " +
+
+            "👔 Entraîneur : "
+            +
+            manager.managerName
+
+        );
+
+
+
+        this.showMessage(
+
+            "🏟️ Club : "
+            +
             manager.clubName
+
         );
 
 
+
         this.showMessage(
-            "Budget : " +
-            manager.budget +
+
+            "💰 Budget : "
+            +
+            manager.budget.toLocaleString()
+            +
             " €"
+
         );
+
 
 
         this.showMessage(
-            "Réputation : " +
+
+            "⭐ Réputation : "
+            +
             manager.reputation
+
         );
+
+
+
+        this.showMessage(
+
+            "📅 Saison : "
+            +
+            manager.season
+
+        );
+
+
+
+        this.showTitle(
+            "🎯 Objectifs"
+        );
+
+
+
+        manager.objectives.forEach(objective => {
+
+
+            this.showMessage(
+
+                "• "
+                +
+                objective
+
+            );
+
+
+        });
 
     }
 
@@ -107,18 +164,15 @@ class UI {
 
 
         this.showTitle(
-            "Effectif"
+            "👥 Effectif"
         );
 
 
         squad.players.forEach(player => {
 
 
-            const p =
-                document.createElement("p");
+            this.showMessage(
 
-
-            p.textContent =
                 player.getFullName()
                 +
                 " - "
@@ -127,10 +181,9 @@ class UI {
                 +
                 " - "
                 +
-                player.overall;
+                player.overall
 
-
-            this.container.appendChild(p);
+            );
 
 
         });
@@ -145,26 +198,27 @@ class UI {
 
 
         this.showTitle(
-            "Tactique"
+            "🧠 Tactique"
         );
 
 
         this.showMessage(
+
             "Formation : "
             +
             tactics.formation
+
         );
 
 
         this.showMessage(
+
             "Mentalité : "
             +
             tactics.style.mentality
+
         );
 
-
     }
-
-
 
 }
