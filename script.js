@@ -10,50 +10,68 @@ function startGame() {
     );
 
 
-    // Création interface
+    // Interface
 
     game.ui = new UI();
 
 
 
-    // Création manager
+    // Création carrière manager
 
-    game.manager = {
+    game.manager =
+        new ManagerCareer();
 
-        clubName: "Nouveau Club",
+
+
+    // Club temporaire (sera remplacé par clubs.json)
+
+    let club = {
+
+        name: "Nouveau Club",
 
         budget: 10000000,
 
-        reputation: 50,
-
-        season: 1,
-
-        objectives: []
+        reputation: 50
 
     };
 
 
 
-    // Création effectif
+    game.manager.startCareer(
 
-    game.squad = new Squad(
-        "Premier effectif"
+        "Nouvel Entraîneur",
+
+        club
+
     );
 
 
 
-    // Création tactique
+    // Effectif
 
-    game.tactics = new Tactics();
+    game.squad =
+        new Squad(
+            "Premier effectif"
+        );
 
 
 
-    // Marché des transferts
+    // Tactique
+
+    game.tactics =
+        new Tactics();
+
+
+
+    // Marché transferts
 
     game.market =
         new TransferMarket(
-            game.manager.clubName,
+
+            game.manager.getClubName(),
+
             game.manager.budget
+
         );
 
 
@@ -67,9 +85,18 @@ function startGame() {
 
     // Affichage
 
-    game.ui.showManager(
-        game.manager
-    );
+    game.ui.showManager({
+
+        clubName:
+            game.manager.getClubName(),
+
+        budget:
+            game.manager.budget,
+
+        reputation:
+            game.manager.reputation
+
+    });
 
 
 
@@ -80,8 +107,6 @@ function startGame() {
 }
 
 
-
-// Lancement automatique
 
 window.onload = () => {
 
