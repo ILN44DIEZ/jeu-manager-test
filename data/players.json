@@ -1,1 +1,247 @@
-    
+    [
+    {
+        "prenom": "Gianluigi",
+        "nom": "Donnarumma",
+        "club": "Paris Saint-Germain",
+        "poste": "GB",
+        "age": 26,
+        "note": 89,
+        "potentiel": 89,
+        "valeur": 45000000,
+        "salaire": 900000
+    },
+    {
+        "prenom": "Lucas",
+        "nom": "Chevalier",
+        "club": "Paris Saint-Germain",
+        "poste": "GB",
+        "age": 23,
+        "note": 78,
+        "potentiel": 85,
+        "valeur": 25000000,
+        "salaire": 250000
+    },
+    {
+        "prenom": "Matvey",
+        "nom": "Safonov",
+        "club": "Paris Saint-Germain",
+        "poste": "GB",
+        "age": 26,
+        "note": 77,
+        "potentiel": 80,
+        "valeur": 12000000,
+        "salaire": 180000
+    },
+
+    {
+        "prenom": "Achraf",
+        "nom": "Hakimi",
+        "club": "Paris Saint-Germain",
+        "poste": "DD",
+        "age": 26,
+        "note": 89,
+        "potentiel": 89,
+        "valeur": 65000000,
+        "salaire": 1000000
+    },
+    {
+        "prenom": "Nuno",
+        "nom": "Mendes",
+        "club": "Paris Saint-Germain",
+        "poste": "DG",
+        "age": 23,
+        "note": 86,
+        "potentiel": 89,
+        "valeur": 55000000,
+        "salaire": 700000
+    },
+    {
+        "prenom": "Marquinhos",
+        "nom": "Marquinhos",
+        "club": "Paris Saint-Germain",
+        "poste": "DC",
+        "age": 31,
+        "note": 87,
+        "potentiel": 87,
+        "valeur": 30000000,
+        "salaire": 1200000
+    },
+    {
+        "prenom": "Willian",
+        "nom": "Pacho",
+        "club": "Paris Saint-Germain",
+        "poste": "DC",
+        "age": 23,
+        "note": 82,
+        "potentiel": 86,
+        "valeur": 40000000,
+        "salaire": 350000
+    },
+    {
+        "prenom": "Illia",
+        "nom": "Zabarnyi",
+        "club": "Paris Saint-Germain",
+        "poste": "DC",
+        "age": 22,
+        "note": 79,
+        "potentiel": 84,
+        "valeur": 30000000,
+        "salaire": 300000
+    },
+    {
+        "prenom": "Lucas",
+        "nom": "Beraldo",
+        "club": "Paris Saint-Germain",
+        "poste": "DC",
+        "age": 21,
+        "note": 75,
+        "potentiel": 83,
+        "valeur": 18000000,
+        "salaire": 150000
+    },
+    {
+        "prenom": "Presnel",
+        "nom": "Kimpembe",
+        "club": "Paris Saint-Germain",
+        "poste": "DC",
+        "age": 30,
+        "note": 75,
+        "potentiel": 75,
+        "valeur": 8000000,
+        "salaire": 400000
+    }
+,
+{
+    "prenom": "Vitinha",
+    "nom": "Vitinha",
+    "club": "Paris Saint-Germain",
+    "poste": "MC",
+    "age": 25,
+    "note": 89,
+    "potentiel": 89,
+    "valeur": 70000000,
+    "salaire": 800000
+},
+{
+    "prenom": "João",
+    "nom": "Neves",
+    "club": "Paris Saint-Germain",
+    "poste": "MC",
+    "age": 20,
+    "note": 79,
+    "potentiel": 87,
+    "valeur": 45000000,
+    "salaire": 250000
+},
+{
+    "prenom": "Warren",
+    "nom": "Zaïre-Emery",
+    "club": "Paris Saint-Germain",
+    "poste": "MC",
+    "age": 19,
+    "note": 76,
+    "potentiel": 87,
+    "valeur": 50000000,
+    "salaire": 250000
+},
+{
+    "prenom": "Fabián",
+    "nom": "Ruiz",
+    "club": "Paris Saint-Germain",
+    "poste": "MC",
+    "age": 29,
+    "note": 80,
+    "potentiel": 80,
+    "valeur": 20000000,
+    "salaire": 500000
+},
+{
+    "prenom": "Senny",
+    "nom": "Mayulu",
+    "club": "Paris Saint-Germain",
+    "poste": "MC",
+    "age": 19,
+    "note": 68,
+    "potentiel": 80,
+    "valeur": 6000000,
+    "salaire": 50000
+},
+
+{
+    "prenom": "Ousmane",
+    "nom": "Dembélé",
+    "club": "Paris Saint-Germain",
+    "poste": "AD",
+    "age": 28,
+    "note": 90,
+    "potentiel": 90,
+    "valeur": 90000000,
+    "salaire": 1200000
+},
+{
+    "prenom": "Khvicha",
+    "nom": "Kvaratskhelia",
+    "club": "Paris Saint-Germain",
+    "poste": "AG",
+    "age": 24,
+    "note": 87,
+    "potentiel": 90,
+    "valeur": 85000000,
+    "salaire": 900000
+},
+{
+    "prenom": "Bradley",
+    "nom": "Barcola",
+    "club": "Paris Saint-Germain",
+    "poste": "AG",
+    "age": 22,
+    "note": 80,
+    "potentiel": 86,
+    "valeur": 55000000,
+    "salaire": 300000
+},
+{
+    "prenom": "Désiré",
+    "nom": "Doué",
+    "club": "Paris Saint-Germain",
+    "poste": "MOC",
+    "age": 20,
+    "note": 79,
+    "potentiel": 88,
+    "valeur": 50000000,
+    "salaire": 300000
+},
+
+{
+    "prenom": "Gonçalo",
+    "nom": "Ramos",
+    "club": "Paris Saint-Germain",
+    "poste": "BU",
+    "age": 24,
+    "note": 78,
+    "potentiel": 84,
+    "valeur": 30000000,
+    "salaire": 500000
+},
+{
+    "prenom": "Ibrahim",
+    "nom": "Mbaye",
+    "club": "Paris Saint-Germain",
+    "poste": "BU",
+    "age": 17,
+    "note": 62,
+    "potentiel": 80,
+    "valeur": 3000000,
+    "salaire": 30000
+},
+{
+    "prenom": "Kang-In",
+    "nom": "Lee",
+    "club": "Paris Saint-Germain",
+    "poste": "MOC",
+    "age": 24,
+    "note": 78,
+    "potentiel": 82,
+    "valeur": 25000000,
+    "salaire": 300000
+}
