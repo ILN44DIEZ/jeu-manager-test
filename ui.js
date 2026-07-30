@@ -226,6 +226,21 @@ class UI {
         });
 
 
+        this.createButton(
+
+    "👥 Effectif",
+
+    () => {
+
+        this.showClubPlayers(
+            game.players,
+            manager
+        );
+
+    }
+
+);
+
 
         this.createButton(
 
@@ -456,5 +471,65 @@ class UI {
         );
 
     }
+    
+    showClubPlayers(players, manager) {
+
+
+    this.clear();
+
+
+    this.showTitle(
+        "👥 Effectif "
+        +
+        manager.clubName
+    );
+
+
+    players.forEach(player => {
+
+
+        this.showMessage(
+
+            player.prenom
+            +
+            " "
+            +
+            player.nom
+            +
+            " - "
+            +
+            player.poste
+            +
+            " ⭐ "
+            +
+            player.note
+            +
+            " ⭐ | Valeur : "
+            +
+            player.valeur.toLocaleString()
+            +
+            " 💶"
+
+        );
+
+
+    });
+
+
+
+    this.createButton(
+
+        "⬅️ Retour carrière",
+
+        () => {
+
+            this.showManager(manager);
+
+        }
+
+    );
+
+
+}
 
 }
