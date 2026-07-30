@@ -4,6 +4,8 @@ class DataManager {
 
         this.clubs = [];
 
+        this.players = [];
+
         this.loaded = false;
 
     }
@@ -22,9 +24,6 @@ class DataManager {
                 await response.json();
 
 
-            this.loaded = true;
-
-
             console.log(
                 "✅ Clubs chargés :",
                 this.clubs.length
@@ -41,6 +40,57 @@ class DataManager {
 
 
         }
+
+    }
+
+
+
+    async loadPlayers() {
+
+        try {
+
+            const response =
+                await fetch("data/players.json");
+
+
+            this.players =
+                await response.json();
+
+
+            console.log(
+                "✅ Joueurs chargés :",
+                this.players.length
+            );
+
+
+        } catch(error) {
+
+
+            console.error(
+                "❌ Erreur chargement joueurs",
+                error
+            );
+
+
+        }
+
+    }
+
+
+
+    async loadAllData() {
+
+        await this.loadClubs();
+
+        await this.loadPlayers();
+
+
+        this.loaded = true;
+
+
+        console.log(
+            "✅ Toutes les données sont chargées"
+        );
 
     }
 
@@ -95,6 +145,21 @@ class DataManager {
 
             club =>
                 club.nom === name
+
+        );
+
+
+    }
+
+
+
+    getPlayersByClub(clubName) {
+
+
+        return this.players.filter(
+
+            player =>
+                player.club === clubName
 
         );
 
