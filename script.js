@@ -2,7 +2,7 @@ let game = {};
 
 
 
-function startGame() {
+async function startGame() {
 
 
     console.log(
@@ -16,6 +16,23 @@ function startGame() {
 
 
 
+    // Chargement des données
+
+    game.data =
+        new DataManager();
+
+
+    await game.data.loadClubs();
+
+
+
+    console.log(
+        "Ligues disponibles :",
+        game.data.getLeagues()
+    );
+
+
+
     // Création carrière manager
 
     game.manager =
@@ -23,7 +40,7 @@ function startGame() {
 
 
 
-    // Club temporaire (sera remplacé par clubs.json)
+    // Club temporaire (sera remplacé par sélection)
 
     let club = {
 
@@ -87,25 +104,25 @@ function startGame() {
 
     game.ui.showManager({
 
-    managerName:
-        game.manager.managerName,
+        managerName:
+            game.manager.managerName,
 
-    clubName:
-        game.manager.getClubName(),
+        clubName:
+            game.manager.getClubName(),
 
-    budget:
-        game.manager.budget,
+        budget:
+            game.manager.budget,
 
-    reputation:
-        game.manager.reputation,
+        reputation:
+            game.manager.reputation,
 
-    season:
-        game.manager.season,
+        season:
+            game.manager.season,
 
-    objectives:
-        game.manager.objectives
+        objectives:
+            game.manager.objectives
 
-});
+    });
 
 
 
