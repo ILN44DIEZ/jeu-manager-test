@@ -87,16 +87,25 @@ function startGame() {
 
     game.ui.showManager({
 
-        clubName:
-            game.manager.getClubName(),
+    managerName:
+        game.manager.managerName,
 
-        budget:
-            game.manager.budget,
+    clubName:
+        game.manager.getClubName(),
 
-        reputation:
-            game.manager.reputation
+    budget:
+        game.manager.budget,
 
-    });
+    reputation:
+        game.manager.reputation,
+
+    season:
+        game.manager.season,
+
+    objectives:
+        game.manager.objectives
+
+});
 
 
 
