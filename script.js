@@ -16,7 +16,7 @@ async function startGame() {
 
 
 
-    // Chargement des données
+    // Données
 
     game.data =
         new DataManager();
@@ -40,7 +40,7 @@ async function startGame() {
 
 
 
-    // Club temporaire (sera remplacé par sélection)
+    // Club temporaire
 
     let club = {
 
@@ -100,11 +100,12 @@ async function startGame() {
 
 
 
-    // Affichage
+    // Affichage actuel : choix de ligue
 
     game.ui.showLeagueSelection(
-    game.data
-);
+        game.data
+    );
+
 
 
     console.log(
