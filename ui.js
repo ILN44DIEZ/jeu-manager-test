@@ -85,6 +85,23 @@ class UI {
     showManager(manager) {
 
     this.clear();
+    
+    if (manager.logo) {
+
+    const img =
+        document.createElement("img");
+
+
+    img.src =
+        "assets/logos/" + manager.logo;
+
+
+    img.width = 120;
+
+
+    this.container.appendChild(img);
+
+}
 
 
     this.showTitle(
