@@ -1,55 +1,58 @@
-// =======================
-// MANAGER
-// =======================
+class ManagerCareer {
+    constructor(managerName, club) {
+        this.managerName = managerName;
+        this.club = club;
 
-let manager = {
-    club: "",
-    ligue: "",
-    saison: 1,
-    budget: 0,
-    reputation: 50,
-    journee: 0,
-    sauvegardeExiste: false
-};
+        this.season = "2026/2027";
+        this.reputation = 50;
+        this.budget = 10000000;
 
-// =======================
-// INITIALISER LES CLUBS
-// =======================
-
-function initialiserClubs() {
-
-    clubs.forEach(club => {
-        club.points = 0;
-        club.victoires = 0;
-        club.nuls = 0;
-        club.defaites = 0;
-        club.butsPour = 0;
-        club.butsContre = 0;
-        club.matchsJoues = 0;
-    });
-
-}
-
-// =======================
-// CHOIX DU CLUB
-// =======================
-
-function startGame(nomClub) {
-
-    if (manager.club !== "") {
-        afficherCalendrier();
-        return;
+        this.objectives = [
+            "Finir dans le top 5 du championnat",
+            "Développer de jeunes joueurs",
+            "Respecter le budget du club"
+        ];
     }
 
-    let club = clubs.find(c => c.nom === nomClub);
+    startCareer() {
+        console.log("=== NOUVELLE CARRIÈRE ===");
+        console.log("Manager :", this.managerName);
+        console.log("Club :", this.club);
+        console.log("Saison :", this.season);
+        console.log("Réputation :", this.reputation);
+        console.log("Budget :", this.budget + " €");
 
-    if (!club) return;
+        console.log("Objectifs :");
+        this.objectives.forEach(objective => {
+            console.log("- " + objective);
+        });
+    }
 
-    manager.club = club.nom;
-    manager.ligue = club.ligue;
-    manager.budget = club.budget || 0;
+    increaseReputation(points) {
+        this.reputation += points;
 
-    creerCalendrier();
-    afficherCalendrier();
+        if (this.reputation > 100) {
+            this.reputation = 100;
+        }
+    }
 
+    decreaseReputation(points) {
+        this.reputation -= points;
+
+        if (this.reputation < 0) {
+            this.reputation = 0;
+        }
+    }
+
+    addBudget(amount) {
+        this.budget += amount;
+    }
+
+    spendBudget(amount) {
+        this.budget -= amount;
+
+        if (this.budget < 0) {
+            this.budget = 0;
+        }
+    }
 }
