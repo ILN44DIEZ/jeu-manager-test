@@ -45,6 +45,19 @@ function chooseClub(club) {
         game.club
 
     );
+    
+    // Chargement de l'effectif du club
+
+game.players =
+    game.data.getPlayersByClub(
+        game.club.name
+    );
+
+
+console.log(
+    "Effectif chargé :",
+    game.players
+);
 
 
 
@@ -137,7 +150,7 @@ async function startGame() {
 
 
 
-    await game.data.loadClubs();
+    await game.data.loadAllData();
 
 
 
