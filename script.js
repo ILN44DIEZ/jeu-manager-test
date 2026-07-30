@@ -18,17 +18,19 @@ function chooseClub(club) {
 
     game.club = {
 
-        name: club.nom,
+    name: club.nom,
 
-        country: club.pays,
+    country: club.pays,
 
-        league: club.ligue,
+    league: club.ligue,
 
-        level: club.niveau,
+    level: club.niveau,
 
-        budget: club.budget
+    reputation: club.niveau,
 
-    };
+    budget: club.budget
+
+};
 
 
 
@@ -72,6 +74,14 @@ function chooseClub(club) {
         budget:
             game.manager.budget,
 
+        country:
+            game.club.country,
+
+        league:
+            game.club.league,
+
+        level:
+            game.club.level,
 
         reputation:
             game.manager.reputation,
