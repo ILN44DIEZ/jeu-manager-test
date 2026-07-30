@@ -84,83 +84,102 @@ class UI {
 
     showManager(manager) {
 
-        this.clear();
+    this.clear();
 
 
-
-        this.showMessage(
-
-            "👔 Entraîneur : "
-            +
-            manager.managerName
-
-        );
+    this.showTitle(
+        "👔 Carrière Manager"
+    );
 
 
-
-        this.showMessage(
-
-            "🏟️ Club : "
-            +
-            manager.clubName
-
-        );
+    this.showMessage(
+        "👤 Entraîneur : "
+        +
+        manager.managerName
+    );
 
 
-
-        this.showMessage(
-
-            "💰 Budget : "
-            +
-            manager.budget.toLocaleString()
-            +
-            " €"
-
-        );
+    this.showMessage(
+        "🏟️ Club : "
+        +
+        manager.clubName
+    );
 
 
+    if (manager.country) {
 
         this.showMessage(
-
-            "⭐ Réputation : "
+            "🌍 Pays : "
             +
-            manager.reputation
-
+            manager.country
         );
-
-
-
-        this.showMessage(
-
-            "📅 Saison : "
-            +
-            manager.season
-
-        );
-
-
-
-        this.showTitle(
-            "🎯 Objectifs"
-        );
-
-
-
-        manager.objectives.forEach(objective => {
-
-
-            this.showMessage(
-
-                "• "
-                +
-                objective
-
-            );
-
-
-        });
 
     }
+
+
+    if (manager.league) {
+
+        this.showMessage(
+            "🏆 Ligue : "
+            +
+            manager.league
+        );
+
+    }
+
+
+    if (manager.level) {
+
+        this.showMessage(
+            "⭐ Niveau : "
+            +
+            manager.level
+        );
+
+    }
+
+
+    this.showMessage(
+        "💰 Budget : "
+        +
+        manager.budget.toLocaleString()
+        +
+        " €"
+    );
+
+
+    this.showMessage(
+        "⭐ Réputation : "
+        +
+        manager.reputation
+    );
+
+
+    this.showMessage(
+        "📅 Saison : "
+        +
+        manager.season
+    );
+
+
+    this.showTitle(
+        "🎯 Objectifs"
+    );
+
+
+    manager.objectives.forEach(objective => {
+
+
+        this.showMessage(
+            "• "
+            +
+            objective
+        );
+
+
+    });
+
+}
 
 
 
