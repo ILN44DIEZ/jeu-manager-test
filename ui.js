@@ -233,7 +233,7 @@ class UI {
 
 
         this.showTitle(
-            "🏆 Choisir une ligue TEST"
+            "🏆 Choisir une ligue"
         );
 
 
