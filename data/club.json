@@ -1,1 +1,685 @@
-
+[
+  {
+    "nom": "Manchester City",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 95,
+    "budget": 300000000
+  },
+  {
+    "nom": "Liverpool",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 92,
+    "budget": 220000000
+  },
+  {
+    "nom": "Arsenal",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 91,
+    "budget": 200000000
+  },
+  {
+    "nom": "Chelsea",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 86,
+    "budget": 180000000
+  },
+  {
+    "nom": "Manchester United",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 84,
+    "budget": 170000000
+  },
+  {
+    "nom": "Tottenham Hotspur",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 84,
+    "budget": 160000000
+  },
+  {
+    "nom": "Newcastle United",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 82,
+    "budget": 150000000
+  },
+  {
+    "nom": "Aston Villa",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 82,
+    "budget": 120000000
+  },
+  {
+    "nom": "West Ham United",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 78,
+    "budget": 90000000
+  },
+  {
+    "nom": "Crystal Palace",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 76,
+    "budget": 70000000
+  },
+  {
+    "nom": "Everton",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 75,
+    "budget": 65000000
+  },
+  {
+    "nom": "Brighton",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 78,
+    "budget": 80000000
+  },
+  {
+    "nom": "Fulham",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 74,
+    "budget": 55000000
+  },
+  {
+    "nom": "Wolverhampton",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 73,
+    "budget": 50000000
+  },
+  {
+    "nom": "Bournemouth",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 72,
+    "budget": 45000000
+  },
+  {
+    "nom": "Brentford",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 73,
+    "budget": 50000000
+  },
+  {
+    "nom": "Nottingham Forest",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 72,
+    "budget": 45000000
+  },
+  {
+    "nom": "Leicester City",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 71,
+    "budget": 40000000
+  },
+  {
+    "nom": "Southampton",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 69,
+    "budget": 30000000
+  },
+  {
+    "nom": "Ipswich Town",
+    "pays": "Angleterre",
+    "ligue": "Premier League",
+    "niveau": 68,
+    "budget": 25000000
+  }
+,
+{
+  "nom": "Real Madrid",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 95,
+  "budget": 250000000
+},
+{
+  "nom": "FC Barcelone",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 92,
+  "budget": 180000000
+},
+{
+  "nom": "Atlético Madrid",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 87,
+  "budget": 120000000
+},
+{
+  "nom": "Athletic Bilbao",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 80,
+  "budget": 60000000
+},
+{
+  "nom": "Real Sociedad",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 79,
+  "budget": 55000000
+},
+{
+  "nom": "Real Betis",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 78,
+  "budget": 50000000
+},
+{
+  "nom": "Séville FC",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 78,
+  "budget": 60000000
+},
+{
+  "nom": "Valence CF",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 75,
+  "budget": 40000000
+},
+{
+  "nom": "Girona FC",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 77,
+  "budget": 45000000
+},
+{
+  "nom": "Villarreal CF",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 80,
+  "budget": 70000000
+},
+{
+  "nom": "Osasuna",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 73,
+  "budget": 30000000
+},
+{
+  "nom": "Celta Vigo",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 72,
+  "budget": 30000000
+},
+{
+  "nom": "Majorque",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 72,
+  "budget": 28000000
+},
+{
+  "nom": "Getafe",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 71,
+  "budget": 25000000
+},
+{
+  "nom": "Rayo Vallecano",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 70,
+  "budget": 22000000
+},
+{
+  "nom": "Las Palmas",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 69,
+  "budget": 20000000
+},
+{
+  "nom": "Alavés",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 69,
+  "budget": 20000000
+},
+{
+  "nom": "Leganés",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 68,
+  "budget": 18000000
+},
+{
+  "nom": "Espanyol Barcelone",
+  "pays": "Espagne",
+  "ligue": "Liga",
+  "niveau": 70,
+  "budget": 25000000
+}
+,
+{
+  "nom": "Inter Milan",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 89,
+  "budget": 120000000
+},
+{
+  "nom": "AC Milan",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 87,
+  "budget": 110000000
+},
+{
+  "nom": "Juventus",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 86,
+  "budget": 100000000
+},
+{
+  "nom": "Naples",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 84,
+  "budget": 90000000
+},
+{
+  "nom": "AS Roma",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 82,
+  "budget": 80000000
+},
+{
+  "nom": "Lazio Rome",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 80,
+  "budget": 60000000
+},
+{
+  "nom": "Atalanta",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 82,
+  "budget": 70000000
+},
+{
+  "nom": "Fiorentina",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 78,
+  "budget": 50000000
+},
+{
+  "nom": "Bologne",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 77,
+  "budget": 45000000
+},
+{
+  "nom": "Torino",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 74,
+  "budget": 35000000
+},
+{
+  "nom": "Genoa",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 72,
+  "budget": 30000000
+},
+{
+  "nom": "Monza",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 71,
+  "budget": 30000000
+},
+{
+  "nom": "Udinese",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 71,
+  "budget": 28000000
+},
+{
+  "nom": "Sassuolo",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 70,
+  "budget": 25000000
+},
+{
+  "nom": "Cagliari",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 69,
+  "budget": 22000000
+},
+{
+  "nom": "Lecce",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 68,
+  "budget": 20000000
+},
+{
+  "nom": "Hellas Vérone",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 68,
+  "budget": 20000000
+},
+{
+  "nom": "Empoli",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 67,
+  "budget": 18000000
+},
+{
+  "nom": "Parme",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 69,
+  "budget": 25000000
+},
+{
+  "nom": "Venise",
+  "pays": "Italie",
+  "ligue": "Serie A",
+  "niveau": 66,
+  "budget": 15000000
+}
+,
+{
+  "nom": "Bayern Munich",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 94,
+  "budget": 250000000
+},
+{
+  "nom": "Borussia Dortmund",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 86,
+  "budget": 120000000
+},
+{
+  "nom": "Bayer Leverkusen",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 88,
+  "budget": 150000000
+},
+{
+  "nom": "RB Leipzig",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 84,
+  "budget": 100000000
+},
+{
+  "nom": "Eintracht Francfort",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 80,
+  "budget": 70000000
+},
+{
+  "nom": "VfB Stuttgart",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 81,
+  "budget": 65000000
+},
+{
+  "nom": "Wolfsburg",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 76,
+  "budget": 50000000
+},
+{
+  "nom": "Borussia Mönchengladbach",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 75,
+  "budget": 45000000
+},
+{
+  "nom": "Werder Brême",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 73,
+  "budget": 35000000
+},
+{
+  "nom": "Hoffenheim",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 72,
+  "budget": 35000000
+},
+{
+  "nom": "SC Fribourg",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 73,
+  "budget": 30000000
+},
+{
+  "nom": "Mayence",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 71,
+  "budget": 28000000
+},
+{
+  "nom": "Augsbourg",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 69,
+  "budget": 22000000
+},
+{
+  "nom": "Union Berlin",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 70,
+  "budget": 25000000
+},
+{
+  "nom": "FC Heidenheim",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 68,
+  "budget": 18000000
+},
+{
+  "nom": "St Pauli",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 67,
+  "budget": 16000000
+},
+{
+  "nom": "Holstein Kiel",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 66,
+  "budget": 15000000
+},
+{
+  "nom": "VfL Bochum",
+  "pays": "Allemagne",
+  "ligue": "Bundesliga",
+  "niveau": 67,
+  "budget": 17000000
+}
+,
+{
+  "nom": "Paris Saint-Germain",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 88,
+  "budget": 200000000
+},
+{
+  "nom": "Olympique de Marseille",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 81,
+  "budget": 60000000
+},
+{
+  "nom": "AS Monaco",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 82,
+  "budget": 80000000
+},
+{
+  "nom": "Olympique Lyonnais",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 78,
+  "budget": 45000000
+},
+{
+  "nom": "Lille OSC",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 79,
+  "budget": 50000000
+},
+{
+  "nom": "RC Lens",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 76,
+  "budget": 35000000
+},
+{
+  "nom": "OGC Nice",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 76,
+  "budget": 40000000
+},
+{
+  "nom": "Stade Rennais",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 77,
+  "budget": 45000000
+},
+{
+  "nom": "Toulouse FC",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 72,
+  "budget": 25000000
+},
+{
+  "nom": "FC Nantes",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 70,
+  "budget": 20000000
+},
+{
+  "nom": "Montpellier HSC",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 69,
+  "budget": 18000000
+},
+{
+  "nom": "RC Strasbourg",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 71,
+  "budget": 22000000
+},
+{
+  "nom": "Stade Brestois",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 73,
+  "budget": 25000000
+},
+{
+  "nom": "AJ Auxerre",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 68,
+  "budget": 15000000
+},
+{
+  "nom": "Le Havre AC",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 67,
+  "budget": 15000000
+},
+{
+  "nom": "Angers SCO",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 66,
+  "budget": 12000000
+},
+{
+  "nom": "FC Metz",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 66,
+  "budget": 12000000
+},
+{
+  "nom": "AS Saint-Étienne",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 70,
+  "budget": 20000000
+},
+{
+  "nom": "Girondins de Bordeaux",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 65,
+  "budget": 10000000
+},
+{
+  "nom": "Paris FC",
+  "pays": "France",
+  "ligue": "Ligue 1",
+  "niveau": 68,
+  "budget": 18000000
+}
+]
