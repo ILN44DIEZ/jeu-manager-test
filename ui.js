@@ -270,7 +270,7 @@ this.createButton(
     }
     
     
-    showClubSelection(dataManager, league) {
+showClubSelection(dataManager, league) {
 
     this.clear();
 
@@ -290,14 +290,41 @@ this.createButton(
 
         this.createButton(
 
-            club.nom,
+            "🏟️ " + club.nom,
 
             () => {
 
-                console.log(
-                    "Club choisi :",
-                    club.nom
+
+                this.showMessage(
+                    "⭐ Niveau : "
+                    + club.niveau
                 );
+
+
+                this.showMessage(
+                    "💰 Budget : "
+                    +
+                    club.budget.toLocaleString()
+                    +
+                    " €"
+                );
+
+
+                this.createButton(
+
+                    "✅ Choisir ce club",
+
+                    () => {
+
+                        console.log(
+                            "Club choisi :",
+                            club.nom
+                        );
+
+                    }
+
+                );
+
 
             }
 
