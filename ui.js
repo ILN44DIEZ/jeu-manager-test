@@ -254,10 +254,10 @@ this.createButton(
 
     () => {
 
-        console.log(
-            "Ligue choisie :",
-            league
-        );
+        this.showClubSelection(
+    dataManager,
+    league
+);
 
     }
 
@@ -268,5 +268,45 @@ this.createButton(
 
 
     }
+    
+    
+    showClubSelection(dataManager, league) {
+
+    this.clear();
+
+
+    this.showTitle(
+        "🏟️ " + league
+    );
+
+
+    const clubs =
+        dataManager.getClubsByLeague(league);
+
+
+
+    clubs.forEach(club => {
+
+
+        this.createButton(
+
+            club.nom,
+
+            () => {
+
+                console.log(
+                    "Club choisi :",
+                    club.nom
+                );
+
+            }
+
+        );
+
+
+    });
+
+
+}
 
 }
