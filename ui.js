@@ -2,21 +2,21 @@ class UI {
 
     constructor() {
 
-    this.container =
-        document.getElementById("game");
+        this.container =
+            document.getElementById("game");
 
 
-    this.flags = {
+        this.flags = {
 
-        "Premier League": "🇬🇧",
-        "Liga": "🇪🇸",
-        "Serie A": "🇮🇹",
-        "Bundesliga": "🇩🇪",
-        "Ligue 1": "🇫🇷"
+            "Premier League": "🇬🇧",
+            "Liga": "🇪🇸",
+            "Serie A": "🇮🇹",
+            "Bundesliga": "🇩🇪",
+            "Ligue 1": "🇫🇷"
 
-    };
+        };
 
-}
+    }
 
 
 
@@ -84,119 +84,164 @@ class UI {
 
     showManager(manager) {
 
-    this.clear();
-    
-    if (manager.logo) {
-
-    const img =
-        document.createElement("img");
+        this.clear();
 
 
-    img.src =
-        "assets/logos/" + manager.logo;
+
+        // Logo du club
+
+        if (manager.logo) {
+
+            const img =
+                document.createElement("img");
 
 
-    img.width = 120;
+            img.src =
+                "assets/logos/" + manager.logo;
 
 
-    this.container.appendChild(img);
-
-}
+            img.width = 120;
 
 
-    this.showTitle(
-        "👔 Carrière Manager"
-    );
+            img.style.display = "block";
+            img.style.margin = "auto";
 
 
-    this.showMessage(
-        "👤 Entraîneur : "
-        +
-        manager.managerName
-    );
+            this.container.appendChild(img);
+
+        }
 
 
-    this.showMessage(
-        "🏟️ Club : "
-        +
-        manager.clubName
-    );
+
+        this.showTitle(
+            "🎴 Carrière Manager"
+        );
 
 
-    if (manager.country) {
 
         this.showMessage(
-            "🌍 Pays : "
+            "🏟️ Club : "
             +
-            manager.country
+            manager.clubName
+        );
+
+
+
+        if (manager.country) {
+
+            this.showMessage(
+                "🌍 Pays : "
+                +
+                manager.country
+            );
+
+        }
+
+
+
+        if (manager.league) {
+
+            this.showMessage(
+                "🏆 Ligue : "
+                +
+                manager.league
+            );
+
+        }
+
+
+
+        if (manager.level) {
+
+            this.showMessage(
+                "⭐ Niveau : "
+                +
+                manager.level
+            );
+
+        }
+
+
+
+        this.showTitle(
+            "👔 Manager"
+        );
+
+
+
+        this.showMessage(
+            "Nom : "
+            +
+            manager.managerName
+        );
+
+
+
+        this.showMessage(
+            "📅 Saison : "
+            +
+            manager.season
+        );
+
+
+
+        this.showTitle(
+            "💰 Gestion"
+        );
+
+
+
+        this.showMessage(
+            "Budget : "
+            +
+            manager.budget.toLocaleString()
+            +
+            " €"
+        );
+
+
+
+        this.showMessage(
+            "⭐ Réputation : "
+            +
+            manager.reputation
+        );
+
+
+
+        this.showTitle(
+            "🎯 Objectifs"
+        );
+
+
+
+        manager.objectives.forEach(objective => {
+
+            this.showMessage(
+                "• "
+                +
+                objective
+            );
+
+        });
+
+
+
+        this.createButton(
+
+            "🏠 Menu carrière",
+
+            () => {
+
+                console.log(
+                    "Retour menu"
+                );
+
+            }
+
         );
 
     }
-
-
-    if (manager.league) {
-
-        this.showMessage(
-            "🏆 Ligue : "
-            +
-            manager.league
-        );
-
-    }
-
-
-    if (manager.level) {
-
-        this.showMessage(
-            "⭐ Niveau : "
-            +
-            manager.level
-        );
-
-    }
-
-
-    this.showMessage(
-        "💰 Budget : "
-        +
-        manager.budget.toLocaleString()
-        +
-        " €"
-    );
-
-
-    this.showMessage(
-        "⭐ Réputation : "
-        +
-        manager.reputation
-    );
-
-
-    this.showMessage(
-        "📅 Saison : "
-        +
-        manager.season
-    );
-
-
-    this.showTitle(
-        "🎯 Objectifs"
-    );
-
-
-    manager.objectives.forEach(objective => {
-
-
-        this.showMessage(
-            "• "
-            +
-            objective
-        );
-
-
-    });
-
-}
 
 
 
@@ -212,7 +257,6 @@ class UI {
 
         squad.players.forEach(player => {
 
-
             this.showMessage(
 
                 player.getFullName()
@@ -226,7 +270,6 @@ class UI {
                 player.overall
 
             );
-
 
         });
 
@@ -263,6 +306,8 @@ class UI {
 
     }
 
+
+
     showLeagueSelection(dataManager) {
 
         this.clear();
@@ -281,57 +326,127 @@ class UI {
         leagues.forEach(league => {
 
 
-      
+            this.createButton(
+
+                this.flags[league] 
+                +
+                " "
+                +
+                league,
 
 
-this.createButton(
+                () => {
 
-    this.flags[league] + " " + league,
+                    this.showClubSelection(
+                        dataManager,
+                        league
+                    );
 
-    () => {
+                }
 
-        this.showClubSelection(
-    dataManager,
-    league
-);
-
-    }
-
-);
+            );
 
 
         });
 
+    }
+
+
+
+    showClubSelection(dataManager, league) {
+
+        this.clear();
+
+
+        this.showTitle(
+            "🏟️ " + league
+        );
+
+
+        const clubs =
+            dataManager.getClubsByLeague(league);
+
+
+
+        clubs.forEach(club => {
+
+
+            this.createButton(
+
+                "🏟️ " + club.nom,
+
+
+                () => {
+
+                    this.showClubDetails(
+                        club,
+                        dataManager,
+                        league
+                    );
+
+                }
+
+            );
+
+
+        });
 
     }
-    
-    
-showClubSelection(dataManager, league) {
-
-    this.clear();
-
-
-    this.showTitle(
-        "🏟️ " + league
-    );
-
-
-    const clubs =
-        dataManager.getClubsByLeague(league);
 
 
 
-    clubs.forEach(club => {
+    showClubDetails(club, dataManager, league) {
+
+        this.clear();
+
+
+        this.showTitle(
+            "🏟️ " + club.nom
+        );
+
+
+
+        this.showMessage(
+            "⭐ Niveau : "
+            +
+            club.niveau
+        );
+
+
+
+        this.showMessage(
+            "💰 Budget : "
+            +
+            club.budget.toLocaleString()
+            +
+            " €"
+        );
+
 
 
         this.createButton(
 
-            "🏟️ " + club.nom,
+            "✅ Choisir ce club",
+
 
             () => {
 
-                this.showClubDetails(
-                    club,
+                chooseClub(club);
+
+            }
+
+        );
+
+
+
+        this.createButton(
+
+            "⬅️ Retour",
+
+
+            () => {
+
+                this.showClubSelection(
                     dataManager,
                     league
                 );
@@ -340,68 +455,6 @@ showClubSelection(dataManager, league) {
 
         );
 
-
-    });
-
-
-}
-
-
-
-showClubDetails(club, dataManager, league) {
-
-    this.clear();
-
-
-    this.showTitle(
-        "🏟️ " + club.nom
-    );
-
-
-    this.showMessage(
-        "⭐ Niveau : "
-        + club.niveau
-    );
-
-
-    this.showMessage(
-        "💰 Budget : "
-        +
-        club.budget.toLocaleString()
-        +
-        " €"
-    );
-
-
-    this.createButton(
-
-    "✅ Choisir ce club",
-
-    () => {
-
-        chooseClub(club);
-
     }
-
-);
-
-
-    this.createButton(
-
-        "⬅️ Retour",
-
-        () => {
-
-            this.showClubSelection(
-                dataManager,
-                league
-            );
-
-        }
-
-    );
-
-
-}
 
 }
