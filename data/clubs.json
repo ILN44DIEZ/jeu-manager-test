@@ -544,10 +544,11 @@
 ,
 {
   "nom": "Paris Saint-Germain",
-  "pays": "France",
   "ligue": "Ligue 1",
+  "pays": "France",
   "niveau": 88,
-  "budget": 200000000
+  "budget": 200000000,
+  "logo": "psg.png"
 },
 {
   "nom": "Olympique de Marseille",
