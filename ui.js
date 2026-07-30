@@ -76,11 +76,6 @@ class UI {
         this.clear();
 
 
-        this.showTitle(
-            "⚽ Manager Career"
-        );
-
-
 
         this.showMessage(
 
