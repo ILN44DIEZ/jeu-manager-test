@@ -216,4 +216,43 @@ class UI {
 
     }
 
+    showLeagueSelection(dataManager) {
+
+        this.clear();
+
+
+        this.showTitle(
+            "🏆 Choisir une ligue"
+        );
+
+
+        const leagues =
+            dataManager.getLeagues();
+
+
+
+        leagues.forEach(league => {
+
+
+            this.createButton(
+
+                league,
+
+                () => {
+
+                    console.log(
+                        "Ligue choisie :",
+                        league
+                    );
+
+                }
+
+            );
+
+
+        });
+
+
+    }
+
 }
