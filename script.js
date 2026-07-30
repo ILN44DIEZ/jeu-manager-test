@@ -28,7 +28,9 @@ function chooseClub(club) {
 
     reputation: club.niveau,
 
-    budget: club.budget
+    budget: club.budget,
+
+    logo: club.logo,
 
 };
 
@@ -69,6 +71,9 @@ function chooseClub(club) {
 
         clubName:
             game.manager.getClubName(),
+            
+        logo:
+            game.club.logo,
 
 
         budget:
