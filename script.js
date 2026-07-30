@@ -1,5 +1,7 @@
 let game = {};
 
+game.club = null;
+
 
 
 function chooseClub(club) {
@@ -11,49 +13,91 @@ function chooseClub(club) {
     );
 
 
-    let selectedClub = {
+
+    // Création du vrai club de carrière
+
+    game.club = {
 
         name: club.nom,
 
-        budget: club.budget,
+        country: club.pays,
 
-        reputation: club.niveau
+        league: club.ligue,
+
+        level: club.niveau,
+
+        budget: club.budget
 
     };
 
+
+
+    // Création de la carrière
 
     game.manager.startCareer(
 
         "Nouvel Entraîneur",
 
-        selectedClub
+        game.club
 
     );
 
+
+
+    // Marché des transferts lié au vrai club
+
+    game.market =
+        new TransferMarket(
+
+            game.club.name,
+
+            game.club.budget
+
+        );
+
+
+
+    // Affichage fiche manager
 
     game.ui.showManager({
 
         managerName:
             game.manager.managerName,
 
+
         clubName:
             game.manager.getClubName(),
+
 
         budget:
             game.manager.budget,
 
+
         reputation:
             game.manager.reputation,
 
+
         season:
             game.manager.season,
+
 
         objectives:
             game.manager.objectives
 
     });
 
+
+
+    console.log(
+        "Carrière créée avec :",
+        game.club
+    );
+
 }
+
+
+
+
 
 async function startGame() {
 
@@ -63,16 +107,19 @@ async function startGame() {
     );
 
 
+
     // Interface
 
-    game.ui = new UI();
+    game.ui =
+        new UI();
 
 
 
-    // Données
+    // Chargement des données
 
     game.data =
         new DataManager();
+
 
 
     await game.data.loadClubs();
@@ -86,34 +133,10 @@ async function startGame() {
 
 
 
-    // Création carrière manager
+    // Création du manager
 
     game.manager =
         new ManagerCareer();
-
-
-
-    // Club temporaire
-
-    let club = {
-
-        name: "Nouveau Club",
-
-        budget: 10000000,
-
-        reputation: 50
-
-    };
-
-
-
-    game.manager.startCareer(
-
-        "Nouvel Entraîneur",
-
-        club
-
-    );
 
 
 
@@ -133,19 +156,6 @@ async function startGame() {
 
 
 
-    // Marché transferts
-
-    game.market =
-        new TransferMarket(
-
-            game.manager.getClubName(),
-
-            game.manager.budget
-
-        );
-
-
-
     // Sauvegarde
 
     game.save =
@@ -153,7 +163,7 @@ async function startGame() {
 
 
 
-    // Affichage actuel : choix de ligue
+    // Première étape : choisir une ligue
 
     game.ui.showLeagueSelection(
         game.data
@@ -166,6 +176,8 @@ async function startGame() {
     );
 
 }
+
+
 
 
 
