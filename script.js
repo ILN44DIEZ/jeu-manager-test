@@ -102,28 +102,9 @@ async function startGame() {
 
     // Affichage
 
-    game.ui.showManager({
-
-        managerName:
-            game.manager.managerName,
-
-        clubName:
-            game.manager.getClubName(),
-
-        budget:
-            game.manager.budget,
-
-        reputation:
-            game.manager.reputation,
-
-        season:
-            game.manager.season,
-
-        objectives:
-            game.manager.objectives
-
-    });
-
+    game.ui.showLeagueSelection(
+    game.data
+);
 
 
     console.log(
