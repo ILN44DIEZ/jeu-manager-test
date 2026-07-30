@@ -1,37 +1,44 @@
-// ==================================
-// FOOTBALL MANAGER GAME
-// VERSION CARRIERE
-// ==================================
+// =====================================
+// FOOTBALL MANAGER
+// MOTEUR CARRIERE COMPLET
+// PARTIE 1/4
+// =====================================
 
 
 // =======================
-// DONNEES DU MANAGER
+// DONNEES MANAGER
 // =======================
 
 let manager = {
 
     club: "",
     ligue: "",
+
     saison: 1,
+
     budget: 0,
+
     reputation: 50,
 
     journee: 0,
-    saisonTerminee: false
+
+    sauvegardeExiste: false
 
 };
 
 
 
+
 // =======================
-// DONNEES GENERALES
+// DONNEES DU JEU
 // =======================
 
 let clubs = [];
 
 let calendrier = [];
 
-let resultats = [];
+let historiqueMatchs = [];
+
 
 
 
@@ -60,24 +67,24 @@ async function chargerClubs(){
         afficherChoixClub();
 
 
-    }
 
-    catch(erreur){
+    } catch(error){
+
 
 
         document.getElementById("result").innerHTML = `
 
-        <h2>❌ Erreur chargement clubs</h2>
+        <h2>❌ Erreur</h2>
 
         <p>
-        Vérifie que le fichier clubs.json est bien dans :
-        data/clubs.json
+        Impossible de charger clubs.json
         </p>
 
         `;
 
 
-        console.log(erreur);
+        console.log(error);
+
 
 
     }
@@ -94,10 +101,11 @@ chargerClubs();
 
 
 // =======================
-// INITIALISATION CLUBS
+// INITIALISER LES CLUBS
 // =======================
 
 function initialiserClubs(){
+
 
 
     clubs.forEach(club=>{
@@ -126,6 +134,9 @@ function initialiserClubs(){
 
 
 
+
+
+
 // =======================
 // CHOIX DU CLUB
 // =======================
@@ -134,10 +145,13 @@ function startGame(nomClub){
 
 
 
+    // Impossible de changer de club
+
     if(manager.club !== ""){
 
 
         afficherCalendrier();
+
 
         return;
 
@@ -148,13 +162,18 @@ function startGame(nomClub){
 
     let club = clubs.find(
 
-        c => c.nom === nomClub
+        c=>c.nom === nomClub
 
     );
 
 
 
-    if(!club) return;
+    if(!club){
+
+        return;
+
+    }
+
 
 
 
@@ -165,7 +184,8 @@ function startGame(nomClub){
     manager.ligue = club.ligue;
 
 
-    manager.budget = club.budget;
+    manager.budget = club.budget || 0;
+
 
 
 
@@ -174,12 +194,12 @@ function startGame(nomClub){
 
 
 
+
     afficherCalendrier();
 
 
 
 }
-
 
 
 
@@ -198,10 +218,13 @@ function afficherChoixClub(){
 
         afficherCalendrier();
 
+
         return;
 
 
     }
+
+
 
 
 
@@ -212,7 +235,7 @@ function afficherChoixClub(){
 
 
     <p>
-    Choisis ton club
+    Choisis ton club :
     </p>
 
 
@@ -220,7 +243,9 @@ function afficherChoixClub(){
 
 
 
+
     clubs.forEach(club=>{
+
 
 
         html += `
@@ -244,7 +269,9 @@ function afficherChoixClub(){
         `;
 
 
+
     });
+
 
 
 
@@ -253,15 +280,15 @@ function afficherChoixClub(){
 
 
 
-}
-
-
-
+}// =====================================
+// PARTIE 2/4
+// CREATION DU VRAI CALENDRIER
+// =====================================
 
 
 
 // =======================
-// CREATION DU CALENDRIER
+// CREATION CHAMPIONNAT
 // =======================
 
 function creerCalendrier(){
@@ -269,7 +296,7 @@ function creerCalendrier(){
 
     calendrier = [];
 
-    resultats = [];
+    historiqueMatchs = [];
 
 
 
@@ -281,28 +308,34 @@ function creerCalendrier(){
 
 
 
-    equipes = equipes.filter(
+    // Création matchs aller
 
-        club => club.nom !== manager.club
-
-    );
+    let aller = genererJournees(equipes);
 
 
 
-    // MATCHS ALLER
+    // Création matchs retour
+
+    let retour = aller.map(journee=>{
 
 
-    equipes.forEach(club=>{
+        return journee.map(match=>{
 
 
-        calendrier.push({
+            return {
 
-            adversaire: club.nom,
 
-            domicile:true
+                domicile: match.exterieur,
+
+
+                exterieur: match.domicile
+
+
+
+            };
+
 
         });
-
 
 
     });
@@ -310,99 +343,279 @@ function creerCalendrier(){
 
 
 
-    // MATCHS RETOUR
+    calendrier = aller.concat(retour);
 
 
-    equipes.forEach(club=>{
+
+}
 
 
-        calendrier.push({
 
-            adversaire:club.nom,
 
-            domicile:false
+
+
+// =======================
+// GENERATEUR DE JOURNEES
+// =======================
+
+function genererJournees(equipes){
+
+
+
+    let liste = [...equipes];
+
+
+
+    // Ajout équipe fictive si nombre impair
+
+    if(liste.length % 2 !== 0){
+
+
+        liste.push({
+
+            nom:"Repos"
 
         });
 
 
-
-    });
-
+    }
 
 
-}// =======================
+
+
+    let totalEquipes = liste.length;
+
+
+    let nombreJournees = totalEquipes - 1;
+
+
+    let matchsParJournee = totalEquipes / 2;
+
+
+
+    let journees = [];
+
+
+
+
+    for(let jour = 0; jour < nombreJournees; jour++){
+
+
+
+        let matchs = [];
+
+
+
+        for(
+
+        let i = 0;
+
+        i < matchsParJournee;
+
+        i++
+
+        ){
+
+
+
+            let equipe1 = liste[i];
+
+            let equipe2 = liste[totalEquipes - 1 - i];
+
+
+
+            if(
+
+            equipe1.nom !== "Repos"
+
+            &&
+
+            equipe2.nom !== "Repos"
+
+            ){
+
+
+
+                matchs.push({
+
+
+
+                    domicile:equipe1.nom,
+
+
+                    exterieur:equipe2.nom
+
+
+
+                });
+
+
+
+            }
+
+
+
+        }
+
+
+
+
+
+        journees.push(matchs);
+
+
+
+
+        // Rotation type championnat
+
+        let derniere = liste.pop();
+
+
+        liste.splice(1,0,derniere);
+
+
+
+    }
+
+
+
+
+    return journees;
+
+
+
+}
+
+
+
+
+
+
+
+// =======================
 // AFFICHAGE CALENDRIER
 // =======================
 
 function afficherCalendrier(){
 
 
+
     let html = `
+
 
 
     <h2>🏟 Saison ${manager.saison}</h2>
 
 
     <p>
-    Club : <strong>${manager.club}</strong>
+
+    Club :
+
+    <strong>${manager.club}</strong>
+
     </p>
+
 
 
     <p>
-    Championnat : ${manager.ligue}
+
+    Championnat :
+
+    ${manager.ligue}
+
     </p>
+
+
 
 
     <p>
-    Budget : ${manager.budget.toLocaleString()} €
+
+    Journée :
+
+    ${manager.journee + 1}
+
+    / ${calendrier.length}
+
     </p>
 
 
-    <p>
-    Réputation : ${manager.reputation}/100
-    </p>
 
 
     <hr>
 
 
+
     <h3>
-    Journée ${manager.journee + 1}/${calendrier.length}
+
+    📅 Prochaine journée
+
     </h3>
+
 
 
     `;
 
 
 
-    if(manager.journee < calendrier.length){
+
+
+    let journeeActuelle = calendrier[manager.journee];
 
 
 
-        let match = calendrier[manager.journee];
+
+
+    if(journeeActuelle){
+
+
+
+        journeeActuelle.forEach(match=>{
+
+
+
+            html += `
+
+
+            <p>
+
+
+            ${match.domicile}
+
+
+            🆚
+
+
+            ${match.exterieur}
+
+
+            </p>
+
+
+            `;
+
+
+
+        });
+
+
+
 
 
 
         html += `
 
 
-        <p>
-
-        ${manager.club}
-
-        🆚
-
-        ${match.adversaire}
-
-        </p>
-
-
 
         <button onclick="jouerJournee()">
 
-        ▶ Jouer le match
+
+
+        ▶ Jouer la journée
+
+
 
         </button>
+
 
 
         `;
@@ -414,22 +627,33 @@ function afficherCalendrier(){
     else{
 
 
+
         html += `
 
 
+
         <h3>
+
         🏁 Saison terminée
+
         </h3>
+
 
 
         <button onclick="afficherClassement()">
 
+
+
         Voir classement
+
+
 
         </button>
 
 
+
         `;
+
 
 
     }
@@ -437,29 +661,42 @@ function afficherCalendrier(){
 
 
 
+
     html += `
+
 
 
     <br><br>
 
 
+
     <button onclick="afficherClassement()">
+
+
 
     🏆 Classement
 
+
+
     </button>
+
+
 
 
     `;
 
 
 
+
+
     document.getElementById("result").innerHTML = html;
 
 
-}
 
-
+}// =====================================
+// PARTIE 3/4
+// MATCHS + CLASSEMENT EVOLUTIF
+// =====================================
 
 
 
@@ -470,8 +707,11 @@ function afficherCalendrier(){
 function jouerJournee(){
 
 
+    let matchs = calendrier[manager.journee];
 
-    if(manager.journee >= calendrier.length){
+
+
+    if(!matchs){
 
 
         finDeSaison();
@@ -484,30 +724,28 @@ function jouerJournee(){
 
 
 
-    let match = calendrier[manager.journee];
+
+    matchs.forEach(match=>{
 
 
+        jouerMatch(
 
-    // Match du joueur
+            match.domicile,
 
-    jouerMatch(
+            match.exterieur
 
-        manager.club,
-
-        match.adversaire
-
-    );
+        );
 
 
+    });
 
-    // Simulation des autres matchs
-
-    simulerAutresMatchs();
 
 
 
 
     manager.journee++;
+
+
 
 
 
@@ -520,8 +758,11 @@ function jouerJournee(){
 
 
 
+
+
+
 // =======================
-// JOUER UN MATCH
+// GENERATION RESULTAT MATCH
 // =======================
 
 function jouerMatch(equipe1,equipe2){
@@ -543,15 +784,21 @@ function jouerMatch(equipe1,equipe2){
 
 
 
-    if(!club1 || !club2) return;
+    if(!club1 || !club2){
+
+        return;
+
+    }
 
 
 
 
 
-    let force1 = club1.niveau || 70;
+    let niveau1 = club1.note || 75;
 
-    let force2 = club2.niveau || 70;
+    let niveau2 = club2.note || 75;
+
+
 
 
 
@@ -570,23 +817,32 @@ function jouerMatch(equipe1,equipe2){
 
 
 
-    if(force1 > force2){
 
 
-        if(Math.random()>0.5)
+    // Influence légère du niveau
+
+    if(niveau1 > niveau2){
+
+
+        if(Math.random() > 0.5){
 
             score1++;
+
+        }
 
 
     }
 
 
-    if(force2 > force1){
+
+    if(niveau2 > niveau1){
 
 
-        if(Math.random()>0.5)
+        if(Math.random() > 0.5){
 
             score2++;
+
+        }
 
 
     }
@@ -598,6 +854,8 @@ function jouerMatch(equipe1,equipe2){
     club1.matchsJoues++;
 
     club2.matchsJoues++;
+
+
 
 
 
@@ -618,30 +876,35 @@ function jouerMatch(equipe1,equipe2){
     if(score1 > score2){
 
 
+
         club1.points += 3;
 
         club1.victoires++;
 
+
         club2.defaites++;
+
 
 
     }
 
-
     else if(score2 > score1){
+
 
 
         club2.points += 3;
 
         club2.victoires++;
 
+
         club1.defaites++;
+
 
 
     }
 
-
     else{
+
 
 
         club1.points++;
@@ -654,19 +917,29 @@ function jouerMatch(equipe1,equipe2){
         club2.nuls++;
 
 
+
     }
 
 
 
-    resultats.push({
+
+
+    historiqueMatchs.push({
+
+
 
         equipe1:equipe1,
 
+
         score1:score1,
+
 
         score2:score2,
 
+
         equipe2:equipe2
+
+
 
     });
 
@@ -677,99 +950,10 @@ function jouerMatch(equipe1,equipe2){
 
 
 
+
+
+
 // =======================
-// SIMULATION DES AUTRES MATCHS
-// =======================
-
-function simulerAutresMatchs(){
-
-
-
-    let equipes = clubs.filter(
-
-        club=>club.ligue===manager.ligue
-
-    );
-
-
-
-    for(let i=0;i<equipes.length;i++){
-
-
-
-        for(let j=i+1;j<equipes.length;j++){
-
-
-
-            let a = equipes[i];
-
-            let b = equipes[j];
-
-
-
-            let dejaJoue = resultats.some(
-
-                match =>
-
-                (
-
-                match.equipe1===a.nom &&
-
-                match.equipe2===b.nom
-
-                )
-
-                ||
-
-                (
-
-                match.equipe1===b.nom &&
-
-                match.equipe2===a.nom
-
-                )
-
-            );
-
-
-
-            if(!dejaJoue){
-
-
-                if(
-
-                a.nom !== manager.club &&
-
-                b.nom !== manager.club
-
-                ){
-
-
-                    jouerMatch(
-
-                        a.nom,
-
-                        b.nom
-
-                    );
-
-
-                }
-
-
-            }
-
-
-
-        }
-
-
-
-    }
-
-
-
-}// =======================
 // CLASSEMENT
 // =======================
 
@@ -779,9 +963,11 @@ function afficherClassement(){
 
     let classement = clubs.filter(
 
-        club => club.ligue === manager.ligue
+        club=>club.ligue === manager.ligue
 
     );
+
+
 
 
 
@@ -792,16 +978,28 @@ function afficherClassement(){
         if(b.points !== a.points){
 
 
+
             return b.points - a.points;
+
 
 
         }
 
 
 
-        let differenceA = a.butsPour - a.butsContre;
 
-        let differenceB = b.butsPour - b.butsContre;
+
+        let differenceA =
+
+        a.butsPour - a.butsContre;
+
+
+
+
+        let differenceB =
+
+        b.butsPour - b.butsContre;
+
 
 
 
@@ -815,41 +1013,55 @@ function afficherClassement(){
 
 
 
+
+
     let html = `
 
 
+
     <h2>🏆 Classement ${manager.ligue}</h2>
+
 
 
     `;
 
 
 
+
+
     classement.forEach((club,index)=>{
+
 
 
         html += `
 
 
+
         <p>
+
 
 
         ${index+1}.
 
+
         ${club.nom}
+
 
 
         -
 
+
         ${club.points} pts
 
 
-        |
+
+        <br>
+
+
 
         ⚽ ${club.butsPour}
 
-
-        :
+        -
 
 
         ${club.butsContre}
@@ -859,7 +1071,9 @@ function afficherClassement(){
         </p>
 
 
+
         `;
+
 
 
     });
@@ -868,19 +1082,26 @@ function afficherClassement(){
 
 
 
+
     html += `
+
 
 
     <button onclick="afficherCalendrier()">
 
 
+
     Retour
+
 
 
     </button>
 
 
+
     `;
+
+
 
 
 
@@ -888,9 +1109,10 @@ function afficherClassement(){
 
 
 
-}
-
-
+}// =====================================
+// PARTIE 4/4
+// FIN DE SAISON + SAUVEGARDE
+// =====================================
 
 
 
@@ -904,23 +1126,44 @@ function finDeSaison(){
 
     let classement = clubs.filter(
 
-        club=>club.ligue===manager.ligue
+        club=>club.ligue === manager.ligue
 
     );
 
 
 
-    classement.sort(
+    classement.sort((a,b)=>{
 
-        (a,b)=>b.points-a.points
 
-    );
+        if(b.points !== a.points){
+
+
+            return b.points-a.points;
+
+
+        }
+
+
+        return (
+
+            (b.butsPour-b.butsContre)
+
+            -
+
+            (a.butsPour-a.butsContre)
+
+        );
+
+
+    });
+
+
 
 
 
     let position = classement.findIndex(
 
-        club=>club.nom===manager.club
+        club=>club.nom === manager.club
 
     ) + 1;
 
@@ -936,7 +1179,7 @@ function finDeSaison(){
 
     }
 
-    else if(position >= 17){
+    else if(position >= classement.length-2){
 
 
         manager.reputation -= 5;
@@ -955,6 +1198,7 @@ function finDeSaison(){
     <h2>🏁 Fin de saison</h2>
 
 
+
     <p>
 
     ${manager.club}
@@ -969,6 +1213,7 @@ function finDeSaison(){
 
 
 
+
     <p>
 
     Réputation :
@@ -979,21 +1224,25 @@ function finDeSaison(){
 
 
 
+
     <button onclick="nouvelleSaison()">
+
 
 
     🔄 Nouvelle saison
 
 
+
     </button>
+
 
 
     `;
 
 
 
-
 }
+
 
 
 
@@ -1009,10 +1258,10 @@ function nouvelleSaison(){
     manager.saison++;
 
 
+
     manager.journee = 0;
 
 
-    manager.saisonTerminee = false;
 
 
 
@@ -1021,6 +1270,7 @@ function nouvelleSaison(){
 
 
     creerCalendrier();
+
 
 
 
@@ -1033,31 +1283,51 @@ function nouvelleSaison(){
 
 
 
+
+
 // =======================
-// SAUVEGARDE SIMPLE
+// SAUVEGARDE
 // =======================
 
 function sauvegarder(){
 
 
+
+    let sauvegarde = {
+
+
+
+        manager:manager,
+
+
+        clubs:clubs,
+
+
+        calendrier:calendrier,
+
+
+        historique:historiqueMatchs
+
+
+
+    };
+
+
+
+
+
     localStorage.setItem(
 
-        "carriere",
+        "football_manager_save",
 
-        JSON.stringify({
-
-            manager:manager,
-
-            clubs:clubs,
-
-            calendrier:calendrier
-
-        })
+        JSON.stringify(sauvegarde)
 
     );
 
 
+
     alert("💾 Carrière sauvegardée");
+
 
 
 }
@@ -1066,8 +1336,10 @@ function sauvegarder(){
 
 
 
+
+
 // =======================
-// CHARGER SAUVEGARDE
+// CHARGER UNE CARRIERE
 // =======================
 
 function chargerSauvegarde(){
@@ -1076,22 +1348,26 @@ function chargerSauvegarde(){
 
     let sauvegarde = localStorage.getItem(
 
-        "carriere"
+        "football_manager_save"
 
     );
+
+
 
 
 
     if(!sauvegarde){
 
 
-        alert("Aucune sauvegarde");
+        alert("Aucune sauvegarde trouvée");
 
 
         return;
 
 
     }
+
+
 
 
 
@@ -1103,13 +1379,23 @@ function chargerSauvegarde(){
 
 
 
+
+
     manager = data.manager;
+
 
 
     clubs = data.clubs;
 
 
+
     calendrier = data.calendrier;
+
+
+
+    historiqueMatchs = data.historique || [];
+
+
 
 
 
