@@ -1,0 +1,82 @@
+[
+  {
+    "nom": "4-3-3",
+    "postes": [
+      "GB",
+      "DD",
+      "DC",
+      "DC",
+      "DG",
+      "MC",
+      "MC",
+      "MOC",
+      "AD",
+      "BU",
+      "AG"
+    ]
+  },
+  {
+    "nom": "4-2-3-1",
+    "postes": [
+      "GB",
+      "DD",
+      "DC",
+      "DC",
+      "DG",
+      "MDC",
+      "MC",
+      "AD",
+      "MOC",
+      "AG",
+      "BU"
+    ]
+  },
+  {
+    "nom": "4-4-2",
+    "postes": [
+      "GB",
+      "DD",
+      "DC",
+      "DC",
+      "DG",
+      "MD",
+      "MC",
+      "MC",
+      "MG",
+      "BU",
+      "AC"
+    ]
+  },
+  {
+    "nom": "3-5-2",
+    "postes": [
+      "GB",
+      "DCD",
+      "DC",
+      "DCG",
+      "MD",
+      "MC",
+      "MDC",
+      "MC",
+      "MG",
+      "BU",
+      "AC"
+    ]
+  },
+  {
+    "nom": "5-3-2",
+    "postes": [
+      "GB",
+      "DD",
+      "DCD",
+      "DC",
+      "DCG",
+      "DG",
+      "MC",
+      "MC",
+      "MOC",
+      "BU",
+      "AC"
+    ]
+  }
+]
