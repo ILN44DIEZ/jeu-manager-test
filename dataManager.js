@@ -31,15 +31,12 @@ class DataManager {
                 this.clubs.length
             );
 
-
         } catch(error) {
-
 
             console.error(
                 "❌ Erreur chargement clubs",
                 error
             );
-
 
         }
 
@@ -64,15 +61,12 @@ class DataManager {
                 this.players.length
             );
 
-
         } catch(error) {
-
 
             console.error(
                 "❌ Erreur chargement joueurs",
                 error
             );
-
 
         }
 
@@ -97,15 +91,12 @@ class DataManager {
                 this.formations.length
             );
 
-
         } catch(error) {
-
 
             console.error(
                 "❌ Erreur chargement formations",
                 error
             );
-
 
         }
 
@@ -115,7 +106,6 @@ class DataManager {
 
     async loadAllData() {
 
-
         await this.loadClubs();
 
         await this.loadPlayers();
@@ -123,15 +113,12 @@ class DataManager {
         await this.loadFormations();
 
 
-
         this.loaded = true;
-
 
 
         console.log(
             "✅ Toutes les données sont chargées"
         );
-
 
     }
 
@@ -139,38 +126,29 @@ class DataManager {
 
     getLeagues() {
 
-
         let leagues = [];
-
 
 
         this.clubs.forEach(club => {
 
-
             if (!leagues.includes(club.ligue)) {
-
 
                 leagues.push(
                     club.ligue
                 );
 
-
             }
-
 
         });
 
 
-
         return leagues;
-
 
     }
 
 
 
     getClubsByLeague(league) {
-
 
         return this.clubs.filter(
 
@@ -179,13 +157,11 @@ class DataManager {
 
         );
 
-
     }
 
 
 
     getClub(name) {
-
 
         return this.clubs.find(
 
@@ -194,13 +170,11 @@ class DataManager {
 
         );
 
-
     }
 
 
 
     getPlayersByClub(clubName) {
-
 
         return this.players.filter(
 
@@ -209,13 +183,11 @@ class DataManager {
 
         );
 
-
     }
 
 
 
     getFormation(name) {
-
 
         return this.formations.find(
 
@@ -224,19 +196,14 @@ class DataManager {
 
         );
 
-
     }
 
 
 
-    getFormations() {
-
+    getAllFormations() {
 
         return this.formations;
 
-
     }
-
-
 
 }
