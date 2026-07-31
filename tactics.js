@@ -1,6 +1,8 @@
 class Tactics {
 
-    constructor() {
+    constructor(dataManager = null) {
+
+        this.dataManager = dataManager;
 
         this.formation = "4-3-3";
 
@@ -28,25 +30,80 @@ class Tactics {
 
 
 
+    setDataManager(dataManager) {
+
+        this.dataManager = dataManager;
+
+    }
+
+
+
     setFormation(formation) {
 
-        const formations = [
-            "4-3-3",
-            "4-4-2",
-            "4-2-3-1",
-            "3-5-2"
-        ];
-
-
-        if (formations.includes(formation)) {
+        if (!this.dataManager) {
 
             this.formation = formation;
 
             return true;
+
+        }
+
+
+        const formationData =
+            this.dataManager.getFormation(formation);
+
+
+        if (formationData) {
+
+            this.formation = formation;
+
+            return true;
+
         }
 
 
         return false;
+
+    }
+
+
+
+    getFormation() {
+
+        return this.formation;
+
+    }
+
+
+
+    getFormationData() {
+
+        if (!this.dataManager) {
+
+            return null;
+
+        }
+
+
+        return this.dataManager.getFormation(
+            this.formation
+        );
+
+    }
+
+
+
+    getAvailableFormations() {
+
+        if (!this.dataManager) {
+
+            return [];
+
+        }
+
+
+        return this.dataManager.getAllFormations();
+
     }
 
 
@@ -71,6 +128,7 @@ class Tactics {
 
 
         return true;
+
     }
 
 
@@ -107,7 +165,16 @@ class Tactics {
 
     addSubstitute(player) {
 
+        if (this.substitutes.length >= 12) {
+
+            return false;
+
+        }
+
+
         this.substitutes.push(player);
+
+        return true;
 
     }
 
@@ -127,6 +194,14 @@ class Tactics {
     setRole(playerId, role) {
 
         this.roles[playerId] = role;
+
+    }
+
+
+
+    getRole(playerId) {
+
+        return this.roles[playerId] || "";
 
     }
 
@@ -158,7 +233,7 @@ class Tactics {
 
         this.lineup.forEach(player => {
 
-            total += player.overall;
+            total += player.note;
 
         });
 
@@ -166,6 +241,7 @@ class Tactics {
         return Math.round(
             total / this.lineup.length
         );
+
     }
 
 
@@ -175,16 +251,15 @@ class Tactics {
         let bonus = 0;
 
 
-        if (this.style.mentality === "Offensive") {
+        switch (this.style.mentality) {
 
-            bonus += 5;
+            case "Offensive":
+                bonus += 5;
+                break;
 
-        }
-
-
-        if (this.style.mentality === "Défensive") {
-
-            bonus -= 2;
+            case "Défensive":
+                bonus -= 2;
+                break;
 
         }
 
@@ -205,15 +280,9 @@ class Tactics {
 
             formation: this.formation,
 
-            lineup:
-                this.lineup.map(
-                    player => player.getData()
-                ),
+            lineup: this.lineup,
 
-            substitutes:
-                this.substitutes.map(
-                    player => player.getData()
-                ),
+            substitutes: this.substitutes,
 
             roles: this.roles,
 
