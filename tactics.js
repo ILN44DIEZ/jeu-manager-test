@@ -6,6 +6,8 @@ class Tactics {
 
         this.formation = "4-3-3";
 
+        this.currentTactic = "Équilibrée";
+
         this.lineup = [];
 
         this.substitutes = [];
@@ -103,6 +105,72 @@ class Tactics {
 
 
         return this.dataManager.getAllFormations();
+
+    }
+
+
+
+    setTactic(name) {
+
+        if (!this.dataManager) {
+
+            return false;
+
+        }
+
+
+        const tactic =
+            this.dataManager.getTactic(name);
+
+
+        if (!tactic) {
+
+            return false;
+
+        }
+
+
+        this.currentTactic =
+            tactic.nom;
+
+
+        this.style.mentality =
+            tactic.mentalite;
+
+        this.style.pressing =
+            tactic.pressing;
+
+        this.style.tempo =
+            tactic.tempo;
+
+        this.style.possession =
+            tactic.possession;
+
+
+        return true;
+
+    }
+
+
+
+    getCurrentTactic() {
+
+        return this.currentTactic;
+
+    }
+
+
+
+    getAvailableTactics() {
+
+        if (!this.dataManager) {
+
+            return [];
+
+        }
+
+
+        return this.dataManager.getAllTactics();
 
     }
 
@@ -279,6 +347,8 @@ class Tactics {
         return {
 
             formation: this.formation,
+
+            currentTactic: this.currentTactic,
 
             lineup: this.lineup,
 
