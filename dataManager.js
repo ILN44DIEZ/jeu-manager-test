@@ -8,6 +8,8 @@ class DataManager {
 
         this.formations = [];
 
+        this.tactics = [];
+
         this.loaded = false;
 
     }
@@ -104,6 +106,36 @@ class DataManager {
 
 
 
+    async loadTactics() {
+
+        try {
+
+            const response =
+                await fetch("data/tactics.json");
+
+
+            this.tactics =
+                await response.json();
+
+
+            console.log(
+                "✅ Styles tactiques chargés :",
+                this.tactics.length
+            );
+
+        } catch(error) {
+
+            console.error(
+                "❌ Erreur chargement tactiques",
+                error
+            );
+
+        }
+
+    }
+
+
+
     async loadAllData() {
 
         await this.loadClubs();
@@ -111,6 +143,8 @@ class DataManager {
         await this.loadPlayers();
 
         await this.loadFormations();
+
+        await this.loadTactics();
 
 
         this.loaded = true;
@@ -203,6 +237,27 @@ class DataManager {
     getAllFormations() {
 
         return this.formations;
+
+    }
+
+
+
+    getTactic(name) {
+
+        return this.tactics.find(
+
+            tactic =>
+                tactic.nom === name
+
+        );
+
+    }
+
+
+
+    getAllTactics() {
+
+        return this.tactics;
 
     }
 
