@@ -16,6 +16,10 @@ class UI {
 
         };
 
+
+        this.squadUI =
+            new SquadUI(this);
+
     }
 
 
@@ -88,8 +92,6 @@ class UI {
 
 
 
-        // Logo du club
-
         if (manager.logo) {
 
             const img =
@@ -97,13 +99,15 @@ class UI {
 
 
             img.src =
-                "assets/logos/" + manager.logo;
+                "assets/logos/" +
+                manager.logo;
 
 
             img.width = 120;
 
 
             img.style.display = "block";
+
             img.style.margin = "auto";
 
 
@@ -120,8 +124,7 @@ class UI {
 
 
         this.showMessage(
-            "🏟️ Club : "
-            +
+            "🏟️ Club : " +
             manager.clubName
         );
 
@@ -130,8 +133,7 @@ class UI {
         if (manager.country) {
 
             this.showMessage(
-                "🌍 Pays : "
-                +
+                "🌍 Pays : " +
                 manager.country
             );
 
@@ -142,8 +144,7 @@ class UI {
         if (manager.league) {
 
             this.showMessage(
-                "🏆 Ligue : "
-                +
+                "🏆 Ligue : " +
                 manager.league
             );
 
@@ -154,8 +155,7 @@ class UI {
         if (manager.level) {
 
             this.showMessage(
-                "⭐ Niveau : "
-                +
+                "⭐ Niveau : " +
                 manager.level
             );
 
@@ -170,16 +170,14 @@ class UI {
 
 
         this.showMessage(
-            "Nom : "
-            +
+            "Nom : " +
             manager.managerName
         );
 
 
 
         this.showMessage(
-            "📅 Saison : "
-            +
+            "📅 Saison : " +
             manager.season
         );
 
@@ -192,18 +190,15 @@ class UI {
 
 
         this.showMessage(
-            "Budget : "
-            +
-            manager.budget.toLocaleString()
-            +
+            "Budget : " +
+            manager.budget.toLocaleString() +
             " €"
         );
 
 
 
         this.showMessage(
-            "⭐ Réputation : "
-            +
+            "⭐ Réputation : " +
             manager.reputation
         );
 
@@ -218,28 +213,32 @@ class UI {
         manager.objectives.forEach(objective => {
 
             this.showMessage(
-                "• "
-                +
+                "• " +
                 objective
             );
 
         });
 
 
+
         this.createButton(
 
-    "👥 Effectif",
+            "👥 Effectif",
 
-    () => {
+            () => {
 
-        this.showClubPlayers(
-            game.players,
-            manager
+                this.squadUI.showClubPlayers(
+
+                    game.players,
+
+                    manager
+
+                );
+
+            }
+
         );
 
-    }
-
-);
 
 
         this.createButton(
@@ -340,15 +339,13 @@ class UI {
 
         leagues.forEach(league => {
 
-
             this.createButton(
 
-                this.flags[league] 
+                this.flags[league]
                 +
                 " "
                 +
                 league,
-
 
                 () => {
 
@@ -360,7 +357,6 @@ class UI {
                 }
 
             );
-
 
         });
 
@@ -374,35 +370,40 @@ class UI {
 
 
         this.showTitle(
-            "🏟️ " + league
+            "🏟️ " +
+            league
         );
 
 
         const clubs =
-            dataManager.getClubsByLeague(league);
+            dataManager.getClubsByLeague(
+                league
+            );
 
 
 
         clubs.forEach(club => {
 
-
             this.createButton(
 
-                "🏟️ " + club.nom,
-
+                "🏟️ " +
+                club.nom,
 
                 () => {
 
                     this.showClubDetails(
+
                         club,
+
                         dataManager,
+
                         league
+
                     );
 
                 }
 
             );
-
 
         });
 
@@ -416,22 +417,21 @@ class UI {
 
 
         this.showTitle(
-            "🏟️ " + club.nom
+            "🏟️ " +
+            club.nom
         );
 
 
 
         this.showMessage(
-            "⭐ Niveau : "
-            +
+            "⭐ Niveau : " +
             club.niveau
         );
 
 
 
         this.showMessage(
-            "💰 Budget : "
-            +
+            "💰 Budget : " +
             club.budget.toLocaleString()
             +
             " €"
@@ -442,7 +442,6 @@ class UI {
         this.createButton(
 
             "✅ Choisir ce club",
-
 
             () => {
 
@@ -458,12 +457,14 @@ class UI {
 
             "⬅️ Retour",
 
-
             () => {
 
                 this.showClubSelection(
+
                     dataManager,
+
                     league
+
                 );
 
             }
@@ -471,65 +472,5 @@ class UI {
         );
 
     }
-    
-    showClubPlayers(players, manager) {
-
-
-    this.clear();
-
-
-    this.showTitle(
-        "👥 Effectif "
-        +
-        manager.clubName
-    );
-
-
-    players.forEach(player => {
-
-
-        this.showMessage(
-
-            player.prenom
-            +
-            " "
-            +
-            player.nom
-            +
-            " - "
-            +
-            player.poste
-            +
-            " ⭐ "
-            +
-            player.note
-            +
-            " ⭐ | Valeur : "
-            +
-            player.valeur.toLocaleString()
-            +
-            " 💶"
-
-        );
-
-
-    });
-
-
-
-    this.createButton(
-
-        "⬅️ Retour carrière",
-
-        () => {
-
-            this.showManager(manager);
-
-        }
-
-    );
-
-
-}
 
 }
