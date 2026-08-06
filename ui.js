@@ -20,6 +20,10 @@ class UI {
         this.squadUI =
             new SquadUI(this);
 
+
+        this.tacticsUI =
+            new TacticsUI(this);
+
     }
 
 
@@ -191,7 +195,8 @@ class UI {
 
         this.showMessage(
             "Budget : " +
-            manager.budget.toLocaleString() +
+            manager.budget.toLocaleString()
+            +
             " €"
         );
 
@@ -230,6 +235,26 @@ class UI {
                 this.squadUI.showClubPlayers(
 
                     game.players,
+
+                    manager
+
+                );
+
+            }
+
+        );
+
+
+
+        this.createButton(
+
+            "🧠 Tactiques",
+
+            () => {
+
+                this.tacticsUI.show(
+
+                    game.tactics,
 
                     manager
 
@@ -286,37 +311,6 @@ class UI {
             );
 
         });
-
-    }
-
-
-
-    showTactics(tactics) {
-
-        this.clear();
-
-
-        this.showTitle(
-            "🧠 Tactique"
-        );
-
-
-        this.showMessage(
-
-            "Formation : "
-            +
-            tactics.formation
-
-        );
-
-
-        this.showMessage(
-
-            "Mentalité : "
-            +
-            tactics.style.mentality
-
-        );
 
     }
 
