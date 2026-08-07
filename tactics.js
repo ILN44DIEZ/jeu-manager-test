@@ -52,7 +52,9 @@ class Tactics {
 
 
         const formationData =
-            this.dataManager.getFormation(formation);
+            this.dataManager.getFormation(
+                formation
+            );
 
 
         if (formationData) {
@@ -80,16 +82,41 @@ class Tactics {
 
     getFormationData() {
 
+        console.log(
+            "DataManager :",
+            this.dataManager
+        );
+
+        console.log(
+            "Formation actuelle :",
+            this.formation
+        );
+
+
         if (!this.dataManager) {
+
+            console.error(
+                "❌ Aucun DataManager"
+            );
 
             return null;
 
         }
 
 
-        return this.dataManager.getFormation(
-            this.formation
+        const formation =
+            this.dataManager.getFormation(
+                this.formation
+            );
+
+
+        console.log(
+            "Formation trouvée :",
+            formation
         );
+
+
+        return formation;
 
     }
 
@@ -120,7 +147,9 @@ class Tactics {
 
 
         const tactic =
-            this.dataManager.getTactic(name);
+            this.dataManager.getTactic(
+                name
+            );
 
 
         if (!tactic) {
@@ -225,26 +254,26 @@ class Tactics {
 
     getPosition(playerId) {
 
-        return this.positions[playerId] || "Libre";
+    return this.positions[playerId] || "Libre";
+
+}
+
+
+
+addSubstitute(player) {
+
+    if (this.substitutes.length >= 12) {
+
+        return false;
 
     }
 
 
+    this.substitutes.push(player);
 
-    addSubstitute(player) {
+    return true;
 
-        if (this.substitutes.length >= 12) {
-
-            return false;
-
-        }
-
-
-        this.substitutes.push(player);
-
-        return true;
-
-    }
+}
 
 
 
