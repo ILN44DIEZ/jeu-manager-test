@@ -13,7 +13,7 @@ function chooseClub(club) {
 
 
 
-    // Création du vrai club de carrière
+    // Création du club de carrière
 
     game.club = {
 
@@ -29,7 +29,7 @@ function chooseClub(club) {
 
         budget: club.budget,
 
-        logo: club.logo,
+        logo: club.logo
 
     };
 
@@ -47,7 +47,7 @@ function chooseClub(club) {
 
 
 
-    // Chargement de l'effectif du club
+    // Chargement de l'effectif
 
     game.players =
         game.data.getPlayersByClub(
@@ -189,7 +189,7 @@ async function startGame() {
 
 
 
-    // Choix de la ligue
+    // Sélection de la ligue
 
     game.ui.showLeagueSelection(
         game.data
@@ -202,6 +202,8 @@ async function startGame() {
     );
 
 }
+
+
 
 
 
