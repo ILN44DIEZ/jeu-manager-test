@@ -1,1 +1,142 @@
- 
+[
+  {
+    "nom": "Équilibrée",
+    "mentalite": "Équilibrée",
+    "pressing": 50,
+    "tempo": 50,
+    "possession": 50
+  },
+  {
+    "nom": "Offensive",
+    "mentalite": "Offensive",
+    "pressing": 75,
+    "tempo": 70,
+    "possession": 55
+  },
+  {
+    "nom": "Très offensive",
+    "mentalite": "Offensive",
+    "pressing": 90,
+    "tempo": 90,
+    "possession": 60
+  },
+  {
+    "nom": "Défensive",
+    "mentalite": "Défensive",
+    "pressing": 35,
+    "tempo": 40,
+    "possession": 45
+  },
+  {
+    "nom": "Très défensive",
+    "mentalite": "Défensive",
+    "pressing": 20,
+    "tempo": 25,
+    "possession": 35
+  },
+  {
+    "nom": "Possession",
+    "mentalite": "Équilibrée",
+    "pressing": 60,
+    "tempo": 45,
+    "possession": 80
+  },
+  {
+    "nom": "Contre-attaque",
+    "mentalite": "Défensive",
+    "pressing": 45,
+    "tempo": 80,
+    "possession": 35
+  },
+  {
+    "nom": "Pressing intense",
+    "mentalite": "Offensive",
+    "pressing": 95,
+    "tempo": 75,
+    "possession": 55
+  },
+  {
+    "nom": "Jeu direct",
+    "mentalite": "Équilibrée",
+    "pressing": 55,
+    "tempo": 85,
+    "possession": 30
+  },
+  {
+    "nom": "Construction lente",
+    "mentalite": "Équilibrée",
+    "pressing": 40,
+    "tempo": 30,
+    "possession": 75
+  },
+  {
+    "nom": "Largeur maximale",
+    "mentalite": "Offensive",
+    "pressing": 70,
+    "tempo": 65,
+    "possession": 60
+  },
+  {
+    "nom": "Bloc bas",
+    "mentalite": "Défensive",
+    "pressing": 20,
+    "tempo": 35,
+    "possession": 40
+  },
+  {
+    "nom": "Bloc médian",
+    "mentalite": "Équilibrée",
+    "pressing": 50,
+    "tempo": 50,
+    "possession": 50
+  },
+  {
+    "nom": "Bloc haut",
+    "mentalite": "Offensive",
+    "pressing": 85,
+    "tempo": 70,
+    "possession": 60
+  },
+  {
+    "nom": "Tiki-Taka",
+    "mentalite": "Offensive",
+    "pressing": 80,
+    "tempo": 45,
+    "possession": 90
+  },
+  {
+    "nom": "Catenaccio",
+    "mentalite": "Défensive",
+    "pressing": 25,
+    "tempo": 20,
+    "possession": 30
+  },
+  {
+    "nom": "Gegenpress",
+    "mentalite": "Offensive",
+    "pressing": 100,
+    "tempo": 90,
+    "possession": 65
+  },
+  {
+    "nom": "Équilibre prudent",
+    "mentalite": "Équilibrée",
+    "pressing": 45,
+    "tempo": 45,
+    "possession": 55
+  },
+  {
+    "nom": "Attaque totale",
+    "mentalite": "Offensive",
+    "pressing": 100,
+    "tempo": 100,
+    "possession": 70
+  },
+  {
+    "nom": "Verrouillage",
+    "mentalite": "Défensive",
+    "pressing": 15,
+    "tempo": 15,
+    "possession": 25
+  }
+] 
