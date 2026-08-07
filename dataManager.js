@@ -223,14 +223,24 @@ class DataManager {
 
     getFormation(name) {
 
-        return this.formations.find(
+    console.log(
+        "Toutes les formations :",
+        this.formations
+    );
 
-            formation =>
-                formation.nom === name
+    console.log(
+        "Recherche :",
+        name
+    );
 
-        );
+    return this.formations.find(
 
-    }
+        formation =>
+            formation.nom === name
+
+    );
+
+}
 
 
 
