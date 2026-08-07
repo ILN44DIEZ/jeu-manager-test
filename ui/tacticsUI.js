@@ -42,12 +42,10 @@ class TacticsUI {
 
         this.drawPitch(tactics);
 
-
         this.drawFormationList(
             tactics,
             manager
         );
-
 
         this.drawTacticsList(
             tactics,
@@ -81,6 +79,21 @@ class TacticsUI {
 
         if (!formation) {
 
+            this.ui.showMessage(
+                "❌ Formation introuvable."
+            );
+
+            return;
+
+        }
+
+
+        if (!formation.postes) {
+
+            this.ui.showMessage(
+                "❌ Aucun poste trouvé."
+            );
+
             return;
 
         }
@@ -96,27 +109,29 @@ class TacticsUI {
 
         formation.postes.forEach(poste => {
 
-            const player =
+            const joueur =
                 document.createElement("div");
 
 
-            player.className =
+            joueur.className =
                 "pitch-player";
 
 
-            player.textContent =
+            joueur.innerText =
                 poste.poste;
 
 
-            player.style.left =
+            joueur.style.left =
                 poste.x + "%";
 
 
-            player.style.top =
+            joueur.style.top =
                 poste.y + "%";
 
 
-            pitch.appendChild(player);
+            pitch.appendChild(
+                joueur
+            );
 
         });
 
@@ -134,36 +149,47 @@ class TacticsUI {
         manager
     ) {
 
+        const formations =
+            tactics.getAvailableFormations();
+
+
+        if (
+            !formations ||
+            formations.length === 0
+        ) {
+
+            return;
+
+        }
+
+
         this.ui.showTitle(
             "📐 Formations"
         );
 
 
-        tactics
-            .getAvailableFormations()
-            .forEach(formation => {
+        formations.forEach(formation => {
 
-                this.ui.createButton(
+            this.ui.createButton(
 
-                    formation.nom,
+                formation.nom,
 
-                    () => {
+                () => {
 
-                        tactics.setFormation(
-                            formation.nom
-                        );
+                    tactics.setFormation(
+                        formation.nom
+                    );
 
+                    this.show(
+                        tactics,
+                        manager
+                    );
 
-                        this.show(
-                            tactics,
-                            manager
-                        );
+                }
 
-                    }
+            );
 
-                );
-
-            });
+        });
 
     }
 
@@ -174,36 +200,47 @@ class TacticsUI {
         manager
     ) {
 
+        const styles =
+            tactics.getAvailableTactics();
+
+
+        if (
+            !styles ||
+            styles.length === 0
+        ) {
+
+            return;
+
+        }
+
+
         this.ui.showTitle(
             "⚙️ Styles tactiques"
         );
 
 
-        tactics
-            .getAvailableTactics()
-            .forEach(style => {
+        styles.forEach(style => {
 
-                this.ui.createButton(
+            this.ui.createButton(
 
-                    style.nom,
+                style.nom,
 
-                    () => {
+                () => {
 
-                        tactics.setTactic(
-                            style.nom
-                        );
+                    tactics.setTactic(
+                        style.nom
+                    );
 
+                    this.show(
+                        tactics,
+                        manager
+                    );
 
-                        this.show(
-                            tactics,
-                            manager
-                        );
+                }
 
-                    }
+            );
 
-                );
-
-            });
+        });
 
     }
 
