@@ -6,6 +6,8 @@ class SquadUI {
 
         this.container = ui.container;
 
+        this.currentManager = null;
+
     }
 
 
@@ -19,6 +21,10 @@ class SquadUI {
 
 
     showClubPlayers(players, manager) {
+
+        this.currentManager =
+            manager;
+
 
         this.clear();
 
@@ -51,7 +57,9 @@ class SquadUI {
 
             () => {
 
-                this.ui.showManager(manager);
+                this.ui.showManager(
+                    manager
+                );
 
             }
 
@@ -106,7 +114,13 @@ class SquadUI {
 
             () => {
 
-                this.showPlayerProfile(player);
+                this.showPlayerProfile(
+
+                    player,
+
+                    this.currentManager
+
+                );
 
             }
 
@@ -119,7 +133,7 @@ class SquadUI {
 
 
 
-    showPlayerProfile(player) {
+    showPlayerProfile(player, manager) {
 
         this.clear();
 
@@ -224,8 +238,11 @@ class SquadUI {
             () => {
 
                 this.showClubPlayers(
+
                     game.players,
-                    game.manager.getManagerData()
+
+                    manager
+
                 );
 
             }
