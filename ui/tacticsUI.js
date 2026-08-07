@@ -23,11 +23,9 @@ class TacticsUI {
         this.clear();
 
 
-
         this.ui.showTitle(
             "🧠 Tactiques"
         );
-
 
 
         this.ui.showMessage(
@@ -36,104 +34,25 @@ class TacticsUI {
         );
 
 
-
         this.ui.showMessage(
-            "⚙️ Style de jeu : " +
+            "⚙️ Style : " +
             tactics.getCurrentTactic()
         );
 
 
-
-        const formation =
-            tactics.getFormationData();
+        this.drawPitch(tactics);
 
 
-
-        if (formation) {
-
-            this.ui.showTitle(
-                "👕 Composition"
-            );
-
-
-
-            formation.postes.forEach(poste => {
-
-                this.createPositionButton(
-                    poste,
-                    tactics
-                );
-
-            });
-
-        }
-
-
-
-        this.ui.showTitle(
-            "📐 Formations"
+        this.drawFormationList(
+            tactics,
+            manager
         );
 
 
-
-        tactics
-            .getAvailableFormations()
-            .forEach(formation => {
-
-                this.ui.createButton(
-
-                    formation.nom,
-
-                    () => {
-
-                        tactics.setFormation(
-                            formation.nom
-                        );
-
-                        this.show(
-                            tactics,
-                            manager
-                        );
-
-                    }
-
-                );
-
-            });
-
-
-
-        this.ui.showTitle(
-            "⚙️ Styles tactiques"
+        this.drawTacticsList(
+            tactics,
+            manager
         );
-
-
-
-        tactics
-            .getAvailableTactics()
-            .forEach(style => {
-
-                this.ui.createButton(
-
-                    style.nom,
-
-                    () => {
-
-                        tactics.setTactic(
-                            style.nom
-                        );
-
-                        this.show(
-                            tactics,
-                            manager
-                        );
-
-                    }
-
-                );
-
-            });
-
 
 
         this.ui.createButton(
@@ -154,29 +73,137 @@ class TacticsUI {
 
 
 
-    createPositionButton(poste, tactics) {
+    drawPitch(tactics) {
 
-        this.ui.createButton(
+        const formation =
+            tactics.getFormationData();
 
-            poste.poste,
 
-            () => {
+        if (!formation) {
 
-                console.log(
+            return;
 
-                    "Poste :",
+        }
 
-                    poste.poste,
 
-                    poste.x,
+        const pitch =
+            document.createElement("div");
 
-                    poste.y
+
+        pitch.className =
+            "pitch";
+
+
+        formation.postes.forEach(poste => {
+
+            const player =
+                document.createElement("div");
+
+
+            player.className =
+                "pitch-player";
+
+
+            player.textContent =
+                poste.poste;
+
+
+            player.style.left =
+                poste.x + "%";
+
+
+            player.style.top =
+                poste.y + "%";
+
+
+            pitch.appendChild(player);
+
+        });
+
+
+        this.container.appendChild(
+            pitch
+        );
+
+    }
+
+
+
+    drawFormationList(
+        tactics,
+        manager
+    ) {
+
+        this.ui.showTitle(
+            "📐 Formations"
+        );
+
+
+        tactics
+            .getAvailableFormations()
+            .forEach(formation => {
+
+                this.ui.createButton(
+
+                    formation.nom,
+
+                    () => {
+
+                        tactics.setFormation(
+                            formation.nom
+                        );
+
+
+                        this.show(
+                            tactics,
+                            manager
+                        );
+
+                    }
 
                 );
 
-            }
+            });
 
+    }
+
+
+
+    drawTacticsList(
+        tactics,
+        manager
+    ) {
+
+        this.ui.showTitle(
+            "⚙️ Styles tactiques"
         );
+
+
+        tactics
+            .getAvailableTactics()
+            .forEach(style => {
+
+                this.ui.createButton(
+
+                    style.nom,
+
+                    () => {
+
+                        tactics.setTactic(
+                            style.nom
+                        );
+
+
+                        this.show(
+                            tactics,
+                            manager
+                        );
+
+                    }
+
+                );
+
+            });
 
     }
 
