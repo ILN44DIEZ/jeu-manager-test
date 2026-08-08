@@ -38,12 +38,20 @@ class TacticsUI {
         );
 
 
+        this.ui.showMessage(
+            "👥 Titulaires : " +
+            tactics.lineup.length +
+            " / 11"
+        );
+
+
         this.drawPitch(
             tactics
         );
 
 
         this.drawPlayersList(
+            tactics,
             manager
         );
 
@@ -103,15 +111,11 @@ class TacticsUI {
 
 
         const players =
-            game.players || [];
-
-
-        const availablePlayers =
-            [...players];
+            tactics.lineup;
 
 
         formation.postes.forEach(
-            poste => {
+            (poste, index) => {
 
                 const player =
                     document.createElement("div");
@@ -121,41 +125,8 @@ class TacticsUI {
                     "pitch-player";
 
 
-                let index =
-                    availablePlayers.findIndex(
-
-                        joueur =>
-                            joueur.poste ===
-                            poste.poste
-
-                    );
-
-
-                if (index === -1) {
-
-                    index = 0;
-
-                }
-
-
-                let selectedPlayer =
-                    null;
-
-
-                if (
-                    availablePlayers.length > 0
-                ) {
-
-                    selectedPlayer =
-                        availablePlayers[index];
-
-
-                    availablePlayers.splice(
-                        index,
-                        1
-                    );
-
-                }
+                const selectedPlayer =
+                    players[index];
 
 
                 if (selectedPlayer) {
@@ -214,7 +185,10 @@ class TacticsUI {
     }
 
 
-    drawPlayersList(manager) {
+    drawPlayersList(
+        tactics,
+        manager
+    ) {
 
         this.ui.showTitle(
             "👥 Joueurs disponibles"
@@ -249,6 +223,23 @@ class TacticsUI {
                     "tactics-player-card";
 
 
+                const alreadyStarter =
+                    tactics.lineup.some(
+                        starter =>
+                            starter.id ===
+                            player.id
+                    );
+
+
+                if (alreadyStarter) {
+
+                    card.classList.add(
+                        "selected"
+                    );
+
+                }
+
+
                 card.innerHTML = `
 
                     <strong>
@@ -271,29 +262,53 @@ class TacticsUI {
                     "click",
                     () => {
 
-                        document
-                            .querySelectorAll(
-                                ".tactics-player-card"
-                            )
-                            .forEach(
-                                otherCard => {
-
-                                    otherCard.classList.remove(
-                                        "selected"
-                                    );
-
-                                }
+                        const alreadySelected =
+                            tactics.lineup.some(
+                                starter =>
+                                    starter.id ===
+                                    player.id
                             );
 
 
-                        card.classList.add(
-                            "selected"
+                        if (alreadySelected) {
+
+                            console.log(
+                                "⚠️ Joueur déjà titulaire :",
+                                player.nom
+                            );
+
+                            return;
+
+                        }
+
+
+                        if (
+                            tactics.lineup.length >= 11
+                        ) {
+
+                            console.log(
+                                "⚠️ Les 11 places sont déjà occupées."
+                            );
+
+                            return;
+
+                        }
+
+
+                        tactics.addStarter(
+                            player
                         );
 
 
                         console.log(
-                            "👤 Joueur sélectionné :",
+                            "✅ Joueur ajouté aux titulaires :",
                             player
+                        );
+
+
+                        this.show(
+                            tactics,
+                            manager
                         );
 
                     }
