@@ -38,6 +38,34 @@ class Tactics {
     }
 
 
+    getPlayerKey(player) {
+
+        if (!player) {
+
+            return "";
+
+        }
+
+
+        if (player.id !== undefined &&
+            player.id !== null) {
+
+            return String(player.id);
+
+        }
+
+
+        return (
+            String(player.prenom || "") +
+            "_" +
+            String(player.nom || "") +
+            "_" +
+            String(player.numero || "")
+        );
+
+    }
+
+
     setFormation(formation) {
 
         if (!this.dataManager) {
@@ -171,15 +199,9 @@ class Tactics {
     }
 
 
-    /*
-     * =========================
-     * INITIALISATION EFFECTIF
-     * =========================
-     *
-     * 11 titulaires
-     * 9 remplaçants
-     * Le reste = réservistes
-     */
+    /* ========================= */
+    /* INITIALISATION EFFECTIF */
+    /* ========================= */
 
     initializeSquad(players) {
 
@@ -192,7 +214,10 @@ class Tactics {
         this.roles = {};
 
 
-        if (!players || players.length === 0) {
+        if (
+            !players ||
+            players.length === 0
+        ) {
 
             return;
 
@@ -206,7 +231,7 @@ class Tactics {
         if (!formation) {
 
             console.error(
-                "❌ Impossible d'initialiser l'effectif : formation introuvable."
+                "❌ Formation introuvable."
             );
 
             return;
@@ -218,9 +243,9 @@ class Tactics {
             [...players];
 
 
-        /*
-         * Sélection des 11 titulaires
-         */
+        /* ========================= */
+        /* 11 TITULAIRES */
+        /* ========================= */
 
         formation.postes.forEach(
             poste => {
@@ -241,12 +266,6 @@ class Tactics {
                             poste.poste
                     );
 
-
-                /*
-                 * Si aucun joueur ne correspond
-                 * exactement au poste, on prend
-                 * le meilleur joueur disponible.
-                 */
 
                 if (index === -1) {
 
@@ -274,7 +293,9 @@ class Tactics {
                 );
 
 
-                this.positions[player.id] =
+                this.positions[
+                    this.getPlayerKey(player)
+                ] =
                     poste.poste;
 
 
@@ -287,11 +308,9 @@ class Tactics {
         );
 
 
-        /*
-         * Si certaines positions n'ont pas
-         * trouvé de joueur, on complète
-         * avec les meilleurs joueurs restants.
-         */
+        /* ========================= */
+        /* COMPLÉTER LES 11 */
+        /* ========================= */
 
         while (
             this.lineup.length < 11 &&
@@ -302,20 +321,22 @@ class Tactics {
                 availablePlayers.shift();
 
 
+            const poste =
+                formation.postes[
+                    this.lineup.length
+                ];
+
+
             this.lineup.push(
                 player
             );
 
 
-            const poste =
-                formation.postes[
-                    this.lineup.length - 1
-                ];
-
-
             if (poste) {
 
-                this.positions[player.id] =
+                this.positions[
+                    this.getPlayerKey(player)
+                ] =
                     poste.poste;
 
             }
@@ -323,9 +344,9 @@ class Tactics {
         }
 
 
-        /*
-         * 9 remplaçants
-         */
+        /* ========================= */
+        /* 9 REMPLAÇANTS */
+        /* ========================= */
 
         while (
             this.substitutes.length < 9 &&
@@ -340,13 +361,13 @@ class Tactics {
 
 
         console.log(
-            "⚽ Équipe initialisée :",
+            "⚽ Composition initiale :",
             this.lineup.length,
-            "titulaires,",
+            "titulaires /",
             this.substitutes.length,
-            "remplaçants,",
+            "remplaçants /",
             availablePlayers.length,
-            "réservistes."
+            "réservistes"
         );
 
     }
@@ -402,6 +423,10 @@ class Tactics {
     }
 
 
+    /* ========================= */
+    /* TITULAIRES */
+    /* ========================= */
+
     addStarter(
         player,
         position = null
@@ -416,10 +441,16 @@ class Tactics {
         }
 
 
+        const key =
+            this.getPlayerKey(player);
+
+
         const alreadyStarter =
             this.lineup.some(
                 starter =>
-                    starter.id === player.id
+                    this.getPlayerKey(
+                        starter
+                    ) === key
             );
 
 
@@ -433,7 +464,9 @@ class Tactics {
         const alreadySubstitute =
             this.substitutes.some(
                 substitute =>
-                    substitute.id === player.id
+                    this.getPlayerKey(
+                        substitute
+                    ) === key
             );
 
 
@@ -451,7 +484,7 @@ class Tactics {
 
         if (position) {
 
-            this.positions[player.id] =
+            this.positions[key] =
                 position;
 
         }
@@ -464,14 +497,31 @@ class Tactics {
 
     removeStarter(playerId) {
 
-        this.lineup =
-            this.lineup.filter(
-                player =>
-                    player.id !== playerId
+        const player =
+            this.lineup.find(
+                joueur =>
+                    this.getPlayerKey(
+                        joueur
+                    ) === String(playerId)
             );
 
 
-        delete this.positions[playerId];
+        if (player) {
+
+            delete this.positions[
+                this.getPlayerKey(player)
+            ];
+
+        }
+
+
+        this.lineup =
+            this.lineup.filter(
+                joueur =>
+                    this.getPlayerKey(
+                        joueur
+                    ) !== String(playerId)
+            );
 
     }
 
@@ -481,7 +531,9 @@ class Tactics {
         position
     ) {
 
-        this.positions[playerId] =
+        this.positions[
+            String(playerId)
+        ] =
             position;
 
     }
@@ -490,12 +542,18 @@ class Tactics {
     getPosition(playerId) {
 
         return (
-            this.positions[playerId] ||
+            this.positions[
+                String(playerId)
+            ] ||
             "Libre"
         );
 
     }
 
+
+    /* ========================= */
+    /* REMPLAÇANTS */
+    /* ========================= */
 
     addSubstitute(player) {
 
@@ -508,10 +566,16 @@ class Tactics {
         }
 
 
+        const key =
+            this.getPlayerKey(player);
+
+
         const alreadyStarter =
             this.lineup.some(
                 starter =>
-                    starter.id === player.id
+                    this.getPlayerKey(
+                        starter
+                    ) === key
             );
 
 
@@ -525,7 +589,9 @@ class Tactics {
         const alreadySubstitute =
             this.substitutes.some(
                 substitute =>
-                    substitute.id === player.id
+                    this.getPlayerKey(
+                        substitute
+                    ) === key
             );
 
 
@@ -551,15 +617,26 @@ class Tactics {
         this.substitutes =
             this.substitutes.filter(
                 player =>
-                    player.id !== playerId
+                    this.getPlayerKey(
+                        player
+                    ) !== String(playerId)
             );
 
     }
 
 
-    setRole(playerId, role) {
+    /* ========================= */
+    /* RÔLES */
+    /* ========================= */
 
-        this.roles[playerId] =
+    setRole(
+        playerId,
+        role
+    ) {
+
+        this.roles[
+            String(playerId)
+        ] =
             role;
 
     }
@@ -568,14 +645,23 @@ class Tactics {
     getRole(playerId) {
 
         return (
-            this.roles[playerId] ||
+            this.roles[
+                String(playerId)
+            ] ||
             ""
         );
 
     }
 
 
-    setStyle(type, value) {
+    /* ========================= */
+    /* STYLE */
+    /* ========================= */
+
+    setStyle(
+        type,
+        value
+    ) {
 
         if (
             this.style[type] !== undefined
@@ -588,6 +674,10 @@ class Tactics {
 
     }
 
+
+    /* ========================= */
+    /* FORCE ÉQUIPE */
+    /* ========================= */
 
     getTeamStrength() {
 
@@ -623,6 +713,10 @@ class Tactics {
     }
 
 
+    /* ========================= */
+    /* BONUS TACTIQUE */
+    /* ========================= */
+
     getTacticalBonus() {
 
         let bonus = 0;
@@ -650,7 +744,8 @@ class Tactics {
 
         bonus +=
             (
-                this.style.pressing - 50
+                this.style.pressing -
+                50
             ) / 10;
 
 
@@ -660,6 +755,10 @@ class Tactics {
 
     }
 
+
+    /* ========================= */
+    /* DONNÉES */
+    /* ========================= */
 
     getData() {
 
