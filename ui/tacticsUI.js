@@ -267,6 +267,39 @@ class TacticsUI {
                 `;
 
 
+                card.addEventListener(
+                    "click",
+                    () => {
+
+                        document
+                            .querySelectorAll(
+                                ".tactics-player-card"
+                            )
+                            .forEach(
+                                otherCard => {
+
+                                    otherCard.classList.remove(
+                                        "selected"
+                                    );
+
+                                }
+                            );
+
+
+                        card.classList.add(
+                            "selected"
+                        );
+
+
+                        console.log(
+                            "👤 Joueur sélectionné :",
+                            player
+                        );
+
+                    }
+                );
+
+
                 this.container.appendChild(
                     card
                 );
