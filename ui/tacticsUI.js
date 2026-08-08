@@ -52,11 +52,6 @@ class TacticsUI {
         );
 
 
-        this.assignPositions(
-            tactics
-        );
-
-
         this.drawPitch(
             tactics,
             manager
@@ -109,60 +104,6 @@ class TacticsUI {
     }
 
 
-    assignPositions(tactics) {
-
-        const formation =
-            tactics.getFormationData();
-
-
-        if (!formation) {
-
-            return;
-
-        }
-
-
-        tactics.lineup.forEach(
-            (player, index) => {
-
-                const currentPosition =
-                    tactics.getPosition(
-                        player.id
-                    );
-
-
-                if (
-                    currentPosition &&
-                    currentPosition !== "Libre"
-                ) {
-
-                    return;
-
-                }
-
-
-                const poste =
-                    formation.postes[index];
-
-
-                if (!poste) {
-
-                    return;
-
-                }
-
-
-                tactics.setPosition(
-                    player.id,
-                    poste.poste
-                );
-
-            }
-        );
-
-    }
-
-
     drawPitch(
         tactics,
         manager
@@ -184,7 +125,9 @@ class TacticsUI {
 
 
         const pitch =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         pitch.className =
@@ -237,19 +180,15 @@ class TacticsUI {
                         () => {
 
                             console.log(
-                                "❌ Titulaire retiré :",
+                                "👤 Titulaire sélectionné :",
                                 selectedPlayer.nom
                             );
 
 
-                            tactics.removeStarter(
-                                selectedPlayer.id
-                            );
-
-
-                            this.show(
+                            this.showPlayerActions(
                                 tactics,
-                                manager
+                                manager,
+                                selectedPlayer
                             );
 
                         }
@@ -293,6 +232,83 @@ class TacticsUI {
     }
 
 
+    showPlayerActions(
+        tactics,
+        manager,
+        player
+    ) {
+
+        const actionBox =
+            document.createElement(
+                "div"
+            );
+
+
+        actionBox.className =
+            "player-actions";
+
+
+        actionBox.innerHTML = `
+
+            <h3>
+                ${player.prenom}
+                ${player.nom}
+            </h3>
+
+            <p>
+                ⭐ Note :
+                ${player.note}
+            </p>
+
+        `;
+
+
+        const removeButton =
+            document.createElement(
+                "button"
+            );
+
+
+        removeButton.textContent =
+            "❌ Retirer des titulaires";
+
+
+        removeButton.addEventListener(
+            "click",
+            () => {
+
+                tactics.removeStarter(
+                    player.id
+                );
+
+
+                console.log(
+                    "❌ Titulaire retiré :",
+                    player.nom
+                );
+
+
+                this.show(
+                    tactics,
+                    manager
+                );
+
+            }
+        );
+
+
+        actionBox.appendChild(
+            removeButton
+        );
+
+
+        this.container.appendChild(
+            actionBox
+        );
+
+    }
+
+
     drawSubstitutes(
         tactics,
         manager
@@ -310,6 +326,8 @@ class TacticsUI {
             this.ui.showMessage(
                 "Aucun remplaçant."
             );
+
+            return;
 
         }
 
@@ -350,19 +368,15 @@ class TacticsUI {
                     () => {
 
                         console.log(
-                            "❌ Remplaçant retiré :",
+                            "🪑 Remplaçant sélectionné :",
                             player.nom
                         );
 
 
-                        tactics.removeSubstitute(
-                            player.id
-                        );
-
-
-                        this.show(
+                        this.showSubstituteActions(
                             tactics,
-                            manager
+                            manager,
+                            player
                         );
 
                     }
@@ -374,6 +388,83 @@ class TacticsUI {
                 );
 
             }
+        );
+
+    }
+
+
+    showSubstituteActions(
+        tactics,
+        manager,
+        player
+    ) {
+
+        const actionBox =
+            document.createElement(
+                "div"
+            );
+
+
+        actionBox.className =
+            "player-actions";
+
+
+        actionBox.innerHTML = `
+
+            <h3>
+                ${player.prenom}
+                ${player.nom}
+            </h3>
+
+            <p>
+                ⭐ Note :
+                ${player.note}
+            </p>
+
+        `;
+
+
+        const removeButton =
+            document.createElement(
+                "button"
+            );
+
+
+        removeButton.textContent =
+            "❌ Retirer du banc";
+
+
+        removeButton.addEventListener(
+            "click",
+            () => {
+
+                tactics.removeSubstitute(
+                    player.id
+                );
+
+
+                console.log(
+                    "❌ Remplaçant retiré :",
+                    player.nom
+                );
+
+
+                this.show(
+                    tactics,
+                    manager
+                );
+
+            }
+        );
+
+
+        actionBox.appendChild(
+            removeButton
+        );
+
+
+        this.container.appendChild(
+            actionBox
         );
 
     }
@@ -414,7 +505,9 @@ class TacticsUI {
             );
 
 
-        if (reserves.length === 0) {
+        if (
+            reserves.length === 0
+        ) {
 
             return;
 
@@ -481,34 +574,50 @@ class TacticsUI {
             game.players || [];
 
 
-        players.forEach(
-            player => {
+        const availablePlayers =
+            players.filter(
+                player => {
 
-                const isStarter =
-                    tactics.lineup.some(
-                        starter =>
-                            starter.id ===
-                            player.id
+                    const isStarter =
+                        tactics.lineup.some(
+                            starter =>
+                                starter.id ===
+                                player.id
+                        );
+
+
+                    const isSubstitute =
+                        tactics.substitutes.some(
+                            substitute =>
+                                substitute.id ===
+                                player.id
+                        );
+
+
+                    return (
+                        !isStarter &&
+                        !isSubstitute
                     );
-
-
-                const isSubstitute =
-                    tactics.substitutes.some(
-                        substitute =>
-                            substitute.id ===
-                            player.id
-                    );
-
-
-                if (
-                    isStarter ||
-                    isSubstitute
-                ) {
-
-                    return;
 
                 }
+            );
 
+
+        if (
+            availablePlayers.length === 0
+        ) {
+
+            this.ui.showMessage(
+                "Tous les joueurs sont affectés."
+            );
+
+            return;
+
+        }
+
+
+        availablePlayers.forEach(
+            player => {
 
                 const card =
                     document.createElement(
@@ -573,7 +682,7 @@ class TacticsUI {
                         } else {
 
                             console.log(
-                                "⚠️ Titulaires et remplaçants complets."
+                                "⚠️ Équipe complète."
                             );
 
                         }
