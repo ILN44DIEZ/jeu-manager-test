@@ -40,12 +40,17 @@ class TacticsUI {
         );
 
 
-        this.drawPitch(tactics);
+        this.drawPitch(
+            tactics,
+            manager
+        );
+
 
         this.drawFormationList(
             tactics,
             manager
         );
+
 
         this.drawTacticsList(
             tactics,
@@ -71,7 +76,7 @@ class TacticsUI {
 
 
 
-    drawPitch(tactics) {
+    drawPitch(tactics, manager) {
 
         const formation =
             tactics.getFormationData();
@@ -88,17 +93,6 @@ class TacticsUI {
         }
 
 
-        if (!formation.postes) {
-
-            this.ui.showMessage(
-                "❌ Aucun poste trouvé."
-            );
-
-            return;
-
-        }
-
-
         const pitch =
             document.createElement("div");
 
@@ -107,30 +101,153 @@ class TacticsUI {
             "pitch";
 
 
+        /*
+         * Récupération de l'effectif
+         */
+
+        const players =
+            game.players || [];
+
+
+        /*
+         * Copie de l'effectif pour éviter
+         * d'utiliser deux fois le même joueur
+         */
+
+        const availablePlayers =
+            [...players];
+
+
+        /*
+         * Création des 11 positions
+         */
+
         formation.postes.forEach(poste => {
 
-            const joueur =
+            const player =
                 document.createElement("div");
 
 
-            joueur.className =
+            player.className =
                 "pitch-player";
 
 
-            joueur.innerText =
-                poste.poste;
+            /*
+             * Recherche d'un joueur
+             * correspondant au poste
+             */
+
+            let index =
+                availablePlayers.findIndex(
+
+                    joueur =>
+                        joueur.poste === poste.poste
+
+                );
 
 
-            joueur.style.left =
+            /*
+             * Si aucun joueur ne correspond
+             * exactement au poste, on prend
+             * simplement le premier disponible.
+             */
+
+            if (index === -1) {
+
+                index = 0;
+
+            }
+
+
+            let selectedPlayer = null;
+
+
+            if (
+                availablePlayers.length > 0 &&
+                index >= 0
+            ) {
+
+                selectedPlayer =
+                    availablePlayers[index];
+
+
+                availablePlayers.splice(
+                    index,
+                    1
+                );
+
+            }
+
+
+            /*
+             * Affichage du joueur
+             */
+
+            if (selectedPlayer) {
+
+                player.innerHTML = `
+
+                    <strong>
+                        ${selectedPlayer.prenom}
+                    </strong>
+
+                    <br>
+
+                    <span>
+                        ${selectedPlayer.nom}
+                    </span>
+
+                    <br>
+
+                    <small>
+                        ${selectedPlayer.poste}
+                        ⭐
+                        ${selectedPlayer.note}
+                    </small>
+
+                `;
+
+            } else {
+
+                player.innerHTML = `
+
+                    <strong>
+                        ${poste.poste}
+                    </strong>
+
+                    <br>
+
+                    <small>
+                        Aucun joueur
+                    </small>
+
+                `;
+
+            }
+
+
+            /*
+             * Position sur le terrain
+             */
+
+            player.style.left =
                 poste.x + "%";
 
 
-            joueur.style.top =
+            player.style.top =
                 poste.y + "%";
 
 
+            /*
+             * Centrage du joueur
+             */
+
+            player.style.transform =
+                "translate(-50%, -50%)";
+
+
             pitch.appendChild(
-                joueur
+                player
             );
 
         });
@@ -149,47 +266,41 @@ class TacticsUI {
         manager
     ) {
 
-        const formations =
-            tactics.getAvailableFormations();
-
-
-        if (
-            !formations ||
-            formations.length === 0
-        ) {
-
-            return;
-
-        }
-
-
         this.ui.showTitle(
             "📐 Formations"
         );
 
 
-        formations.forEach(formation => {
+        tactics
+            .getAvailableFormations()
+            .forEach(formation => {
 
-            this.ui.createButton(
+                this.ui.createButton(
 
-                formation.nom,
+                    formation.nom,
 
-                () => {
+                    () => {
 
-                    tactics.setFormation(
-                        formation.nom
-                    );
+                        const changed =
+                            tactics.setFormation(
+                                formation.nom
+                            );
 
-                    this.show(
-                        tactics,
-                        manager
-                    );
 
-                }
+                        if (changed) {
 
-            );
+                            this.show(
+                                tactics,
+                                manager
+                            );
 
-        });
+                        }
+
+                    }
+
+                );
+
+            });
 
     }
 
@@ -200,48 +311,44 @@ class TacticsUI {
         manager
     ) {
 
-        const styles =
-            tactics.getAvailableTactics();
-
-
-        if (
-            !styles ||
-            styles.length === 0
-        ) {
-
-            return;
-
-        }
-
-
         this.ui.showTitle(
             "⚙️ Styles tactiques"
         );
 
 
-        styles.forEach(style => {
+        tactics
+            .getAvailableTactics()
+            .forEach(style => {
 
-            this.ui.createButton(
+                this.ui.createButton(
 
-                style.nom,
+                    style.nom,
 
-                () => {
+                    () => {
 
-                    tactics.setTactic(
-                        style.nom
-                    );
+                        const changed =
+                            tactics.setTactic(
+                                style.nom
+                            );
 
-                    this.show(
-                        tactics,
-                        manager
-                    );
 
-                }
+                        if (changed) {
 
-            );
+                            this.show(
+                                tactics,
+                                manager
+                            );
 
-        });
+                        }
+
+                    }
+
+                );
+
+            });
 
     }
+
+}
 
 }
