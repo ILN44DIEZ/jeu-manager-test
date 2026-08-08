@@ -101,26 +101,13 @@ class TacticsUI {
             "pitch";
 
 
-        /*
-         * Récupération de l'effectif
-         */
-
         const players =
             game.players || [];
 
 
-        /*
-         * Copie de l'effectif pour éviter
-         * d'utiliser deux fois le même joueur
-         */
-
         const availablePlayers =
             [...players];
 
-
-        /*
-         * Création des 11 positions
-         */
 
         formation.postes.forEach(poste => {
 
@@ -132,25 +119,12 @@ class TacticsUI {
                 "pitch-player";
 
 
-            /*
-             * Recherche d'un joueur
-             * correspondant au poste
-             */
-
             let index =
                 availablePlayers.findIndex(
-
                     joueur =>
                         joueur.poste === poste.poste
-
                 );
 
-
-            /*
-             * Si aucun joueur ne correspond
-             * exactement au poste, on prend
-             * simplement le premier disponible.
-             */
 
             if (index === -1) {
 
@@ -178,10 +152,6 @@ class TacticsUI {
 
             }
 
-
-            /*
-             * Affichage du joueur
-             */
 
             if (selectedPlayer) {
 
@@ -226,10 +196,6 @@ class TacticsUI {
             }
 
 
-            /*
-             * Position sur le terrain
-             */
-
             player.style.left =
                 poste.x + "%";
 
@@ -237,10 +203,6 @@ class TacticsUI {
             player.style.top =
                 poste.y + "%";
 
-
-            /*
-             * Centrage du joueur
-             */
 
             player.style.transform =
                 "translate(-50%, -50%)";
@@ -304,6 +266,52 @@ class TacticsUI {
 
     }
 
+
+
+    drawTacticsList(
+        tactics,
+        manager
+    ) {
+
+        this.ui.showTitle(
+            "⚙️ Styles tactiques"
+        );
+
+
+        tactics
+            .getAvailableTactics()
+            .forEach(style => {
+
+                this.ui.createButton(
+
+                    style.nom,
+
+                    () => {
+
+                        const changed =
+                            tactics.setTactic(
+                                style.nom
+                            );
+
+
+                        if (changed) {
+
+                            this.show(
+                                tactics,
+                                manager
+                            );
+
+                        }
+
+                    }
+
+                );
+
+            });
+
+    }
+
+}
 
 
     drawTacticsList(
