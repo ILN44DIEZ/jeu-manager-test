@@ -1,1 +1,33 @@
-.
+const GAME_CONSTANTS = {
+
+    MAX_STARTERS: 11,
+
+    MAX_SUBSTITUTES: 12,
+
+    DEFAULT_FORMATION: "4-3-3",
+
+    DEFAULT_TACTIC: "Équilibrée",
+
+    MIN_RATING: 1,
+
+    MAX_RATING: 99,
+
+    MIN_FORM: 0,
+
+    MAX_FORM: 100,
+
+    MIN_MORALE: 0,
+
+    MAX_MORALE: 100,
+
+    MIN_FATIGUE: 0,
+
+    MAX_FATIGUE: 100,
+
+    STARTING_SEASON: 2026,
+
+    DEFAULT_MANAGER_NAME: "Nouvel Entraîneur",
+
+    CURRENCY: "€"
+
+};
