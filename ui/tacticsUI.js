@@ -8,6 +8,8 @@ class TacticsUI {
 
         this.pitchElement = null;
 
+        this.dragData = null;
+
     }
 
 
@@ -16,6 +18,8 @@ class TacticsUI {
         this.container.innerHTML = "";
 
         this.pitchElement = null;
+
+        this.dragData = null;
 
     }
 
@@ -193,9 +197,48 @@ class TacticsUI {
                         "</span>";
 
 
+                    /*
+                     * Important pour le tactile
+                     */
+
+                    player.style.touchAction =
+                        "none";
+
+
+                    /*
+                     * Glisser-déposer
+                     */
+
+                    this.enableDrag(
+                        player,
+                        selectedPlayer,
+                        poste,
+                        formation,
+                        tactics,
+                        manager
+                    );
+
+
+                    /*
+                     * Clic normal
+                     */
+
                     player.addEventListener(
                         "click",
-                        () => {
+                        event => {
+
+                            if (
+                                player.dataset.dragged ===
+                                "true"
+                            ) {
+
+                                player.dataset.dragged =
+                                    "false";
+
+                                return;
+
+                            }
+
 
                             console.log(
                                 "👤 Titulaire sélectionné :",
@@ -247,6 +290,479 @@ class TacticsUI {
         this.container.appendChild(
             pitch
         );
+
+    }
+
+
+    /* ========================= */
+    /* DRAG & DROP */
+    /* ========================= */
+
+    enableDrag(
+        element,
+        player,
+        originalPoste,
+        formation,
+        tactics,
+        manager
+    ) {
+
+        let startX = 0;
+
+        let startY = 0;
+
+        let dragging = false;
+
+
+        element.addEventListener(
+            "pointerdown",
+            event => {
+
+                /*
+                 * Empêche le comportement
+                 * tactile du navigateur.
+                 */
+
+                event.preventDefault();
+
+
+                startX =
+                    event.clientX;
+
+                startY =
+                    event.clientY;
+
+
+                dragging = false;
+
+
+                element.dataset.dragged =
+                    "false";
+
+
+                element.setPointerCapture(
+                    event.pointerId
+                );
+
+            }
+        );
+
+
+        element.addEventListener(
+            "pointermove",
+            event => {
+
+                const distance =
+                    Math.sqrt(
+
+                        Math.pow(
+                            event.clientX -
+                            startX,
+                            2
+                        )
+
+                        +
+
+                        Math.pow(
+                            event.clientY -
+                            startY,
+                            2
+                        )
+
+                    );
+
+
+                /*
+                 * On commence le déplacement
+                 * après quelques pixels.
+                 */
+
+                if (
+                    !dragging &&
+                    distance > 8
+                ) {
+
+                    dragging = true;
+
+                    element.dataset.dragged =
+                        "true";
+
+
+                    element.classList.add(
+                        "dragging"
+                    );
+
+                }
+
+
+                if (!dragging) {
+
+                    return;
+
+                }
+
+
+                /*
+                 * Position visuelle
+                 * pendant le déplacement.
+                 */
+
+                const rect =
+                    this.pitchElement.getBoundingClientRect();
+
+
+                let x =
+                    (
+                        event.clientX -
+                        rect.left
+                    ) /
+                    rect.width *
+                    100;
+
+
+                let y =
+                    (
+                        event.clientY -
+                        rect.top
+                    ) /
+                    rect.height *
+                    100;
+
+
+                /*
+                 * Empêcher le joueur
+                 * de sortir du terrain.
+                 */
+
+                x =
+                    Math.max(
+                        2,
+                        Math.min(
+                            98,
+                            x
+                        )
+                    );
+
+
+                y =
+                    Math.max(
+                        2,
+                        Math.min(
+                            98,
+                            y
+                        )
+                    );
+
+
+                element.style.left =
+                    x + "%";
+
+
+                element.style.top =
+                    y + "%";
+
+
+                element.style.transform =
+                    "translate(-50%, -50%) scale(1.12)";
+
+            }
+        );
+
+
+        element.addEventListener(
+            "pointerup",
+            event => {
+
+                if (!dragging) {
+
+                    return;
+
+                }
+
+
+                dragging = false;
+
+
+                element.classList.remove(
+                    "dragging"
+                );
+
+
+                element.releasePointerCapture(
+                    event.pointerId
+                );
+
+
+                /*
+                 * Trouver la position
+                 * la plus proche.
+                 */
+
+                const targetPoste =
+                    this.findNearestPosition(
+                        event.clientX,
+                        event.clientY,
+                        formation
+                    );
+
+
+                if (!targetPoste) {
+
+                    this.show(
+                        tactics,
+                        manager
+                    );
+
+                    return;
+
+                }
+
+
+                /*
+                 * Position actuelle
+                 */
+
+                const playerKey =
+                    tactics.getPlayerKey(
+                        player
+                    );
+
+
+                const oldPosition =
+                    tactics.getPosition(
+                        playerKey
+                    );
+
+
+                /*
+                 * Chercher le joueur qui
+                 * occupe la nouvelle position.
+                 */
+
+                const otherPlayer =
+                    tactics.lineup.find(
+                        other => {
+
+                            if (
+                                tactics.getPlayerKey(
+                                    other
+                                ) ===
+                                playerKey
+                            ) {
+
+                                return false;
+
+                            }
+
+
+                            return (
+                                tactics.getPosition(
+                                    tactics.getPlayerKey(
+                                        other
+                                    )
+                                ) ===
+                                targetPoste.poste
+                            );
+
+                        }
+                    );
+
+
+                /*
+                 * Si un autre joueur est
+                 * déjà sur cette position,
+                 * on échange les deux.
+                 */
+
+                if (otherPlayer) {
+
+                    const otherKey =
+                        tactics.getPlayerKey(
+                            otherPlayer
+                        );
+
+
+                    tactics.setPosition(
+                        playerKey,
+                        targetPoste.poste
+                    );
+
+
+                    tactics.setPosition(
+                        otherKey,
+                        oldPosition
+                    );
+
+
+                    console.log(
+                        "🔄 Positions échangées :",
+                        player.nom,
+                        "↔",
+                        otherPlayer.nom
+                    );
+
+                } else {
+
+                    /*
+                     * Sinon le joueur prend
+                     * simplement la nouvelle position.
+                     */
+
+                    tactics.setPosition(
+                        playerKey,
+                        targetPoste.poste
+                    );
+
+
+                    console.log(
+                        "📍 Nouvelle position :",
+                        player.nom,
+                        "→",
+                        targetPoste.poste
+                    );
+
+                }
+
+
+                /*
+                 * Redessiner proprement
+                 * le terrain.
+                 */
+
+                this.show(
+                    tactics,
+                    manager
+                );
+
+            }
+        );
+
+
+        element.addEventListener(
+            "pointercancel",
+            () => {
+
+                dragging = false;
+
+                element.classList.remove(
+                    "dragging"
+                );
+
+                this.show(
+                    tactics,
+                    manager
+                );
+
+            }
+        );
+
+    }
+
+
+    /* ========================= */
+    /* POSITION LA PLUS PROCHE */
+    /* ========================= */
+
+    findNearestPosition(
+        clientX,
+        clientY,
+        formation
+    ) {
+
+        if (
+            !this.pitchElement
+        ) {
+
+            return null;
+
+        }
+
+
+        const rect =
+            this.pitchElement.getBoundingClientRect();
+
+
+        const x =
+            (
+                clientX -
+                rect.left
+            ) /
+            rect.width *
+            100;
+
+
+        const y =
+            (
+                clientY -
+                rect.top
+            ) /
+            rect.height *
+            100;
+
+
+        let nearest =
+            null;
+
+
+        let smallestDistance =
+            Infinity;
+
+
+        formation.postes.forEach(
+            poste => {
+
+                const distance =
+                    Math.sqrt(
+
+                        Math.pow(
+                            x -
+                            poste.x,
+                            2
+                        )
+
+                        +
+
+                        Math.pow(
+                            y -
+                            poste.y,
+                            2
+                        )
+
+                    );
+
+
+                if (
+                    distance <
+                    smallestDistance
+                ) {
+
+                    smallestDistance =
+                        distance;
+
+                    nearest =
+                        poste;
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Il faut être suffisamment
+         * proche d'une position.
+         */
+
+        if (
+            smallestDistance > 15
+        ) {
+
+            return null;
+
+        }
+
+
+        return nearest;
 
     }
 
@@ -305,9 +821,9 @@ class TacticsUI {
         `;
 
 
-        /* ========================= */
-        /* BOUTON REMPLACER */
-        /* ========================= */
+        /*
+         * Bouton remplacer
+         */
 
         const replaceButton =
             document.createElement(
@@ -339,9 +855,9 @@ class TacticsUI {
         );
 
 
-        /* ========================= */
-        /* BOUTON RETIRER */
-        /* ========================= */
+        /*
+         * Bouton retirer
+         */
 
         const removeButton =
             document.createElement(
@@ -388,11 +904,13 @@ class TacticsUI {
         );
 
 
-        /* ========================= */
-        /* AFFICHAGE SOUS LE TERRAIN */
-        /* ========================= */
+        /*
+         * Affichage sous le terrain
+         */
 
-        if (this.pitchElement) {
+        if (
+            this.pitchElement
+        ) {
 
             this.pitchElement.insertAdjacentElement(
                 "afterend",
@@ -466,16 +984,6 @@ class TacticsUI {
         `;
 
 
-        if (
-            tactics.substitutes.length === 0
-        ) {
-
-            box.innerHTML +=
-                "<p>Aucun remplaçant disponible.</p>";
-
-        }
-
-
         tactics.substitutes.forEach(
             substitute => {
 
@@ -546,7 +1054,9 @@ class TacticsUI {
         );
 
 
-        if (this.pitchElement) {
+        if (
+            this.pitchElement
+        ) {
 
             this.pitchElement.insertAdjacentElement(
                 "afterend",
@@ -571,7 +1081,7 @@ class TacticsUI {
 
 
     /* ========================= */
-    /* ÉCHANGE TITULAIRE / BANC */
+    /* REMPLACEMENT */
     /* ========================= */
 
     replacePlayer(
@@ -626,23 +1136,17 @@ class TacticsUI {
         }
 
 
-        /* Nouveau titulaire */
-
         tactics.lineup[
             starterIndex
         ] =
             substitute;
 
 
-        /* Ancien titulaire sur le banc */
-
         tactics.substitutes[
             substituteIndex
         ] =
             starter;
 
-
-        /* Conserver la position */
 
         delete tactics.positions[
             starterKey
