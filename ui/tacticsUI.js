@@ -1,86 +1,57 @@
 class TacticsUI {
 
     constructor(ui) {
-
         this.ui = ui;
-
         this.container = ui.container;
-
     }
-
 
 
     clear() {
-
         this.container.innerHTML = "";
-
     }
-
 
 
     show(tactics, manager) {
 
         this.clear();
 
-
-        this.ui.showTitle(
-            "🧠 Tactiques"
-        );
-
+        this.ui.showTitle("🧠 Tactiques");
 
         this.ui.showMessage(
             "📐 Formation : " +
             tactics.getFormation()
         );
 
-
         this.ui.showMessage(
             "⚙️ Style : " +
             tactics.getCurrentTactic()
         );
 
-
-        this.drawPitch(
-            tactics,
-            manager
-        );
-
+        this.drawPitch(tactics);
 
         this.drawFormationList(
             tactics,
             manager
         );
 
-
         this.drawTacticsList(
             tactics,
             manager
         );
 
-
         this.ui.createButton(
-
             "⬅️ Retour carrière",
-
             () => {
-
-                this.ui.showManager(
-                    manager
-                );
-
+                this.ui.showManager(manager);
             }
-
         );
-
     }
 
 
-
-    drawPitch(tactics, manager) {
+    drawPitch(tactics) {
 
         const formation =
             tactics.getFormationData();
-
 
         if (!formation) {
 
@@ -89,21 +60,15 @@ class TacticsUI {
             );
 
             return;
-
         }
-
 
         const pitch =
             document.createElement("div");
 
-
-        pitch.className =
-            "pitch";
-
+        pitch.className = "pitch";
 
         const players =
             game.players || [];
-
 
         const availablePlayers =
             [...players];
@@ -113,7 +78,6 @@ class TacticsUI {
 
             const player =
                 document.createElement("div");
-
 
             player.className =
                 "pitch-player";
@@ -127,100 +91,62 @@ class TacticsUI {
 
 
             if (index === -1) {
-
                 index = 0;
-
             }
 
 
             let selectedPlayer = null;
 
 
-            if (
-                availablePlayers.length > 0 &&
-                index >= 0
-            ) {
+            if (availablePlayers.length > 0) {
 
                 selectedPlayer =
                     availablePlayers[index];
-
 
                 availablePlayers.splice(
                     index,
                     1
                 );
-
             }
 
 
             if (selectedPlayer) {
 
-                player.innerHTML = `
-
-                    <strong>
-                        ${selectedPlayer.prenom}
-                    </strong>
-
-                    <br>
-
-                    <span>
-                        ${selectedPlayer.nom}
-                    </span>
-
-                    <br>
-
-                    <small>
-                        ${selectedPlayer.poste}
-                        ⭐
-                        ${selectedPlayer.note}
-                    </small>
-
-                `;
+                player.innerHTML =
+                    selectedPlayer.prenom +
+                    " " +
+                    selectedPlayer.nom +
+                    "<br>" +
+                    "<small>" +
+                    selectedPlayer.poste +
+                    " ⭐ " +
+                    selectedPlayer.note +
+                    "</small>";
 
             } else {
 
-                player.innerHTML = `
-
-                    <strong>
-                        ${poste.poste}
-                    </strong>
-
-                    <br>
-
-                    <small>
-                        Aucun joueur
-                    </small>
-
-                `;
-
+                player.innerHTML =
+                    poste.poste;
             }
 
 
             player.style.left =
                 poste.x + "%";
 
-
             player.style.top =
                 poste.y + "%";
-
 
             player.style.transform =
                 "translate(-50%, -50%)";
 
 
-            pitch.appendChild(
-                player
-            );
+            pitch.appendChild(player);
 
         });
 
 
-        this.container.appendChild(
-            pitch
-        );
-
+        this.container.appendChild(pitch);
     }
-
 
 
     drawFormationList(
@@ -238,34 +164,26 @@ class TacticsUI {
             .forEach(formation => {
 
                 this.ui.createButton(
-
                     formation.nom,
-
                     () => {
 
-                        const changed =
+                        if (
                             tactics.setFormation(
                                 formation.nom
-                            );
-
-
-                        if (changed) {
+                            )
+                        ) {
 
                             this.show(
                                 tactics,
                                 manager
                             );
-
                         }
 
                     }
-
                 );
 
             });
-
     }
-
 
 
     drawTacticsList(
@@ -283,80 +201,25 @@ class TacticsUI {
             .forEach(style => {
 
                 this.ui.createButton(
-
                     style.nom,
-
                     () => {
 
-                        const changed =
+                        if (
                             tactics.setTactic(
                                 style.nom
-                            );
-
-
-                        if (changed) {
+                            )
+                        ) {
 
                             this.show(
                                 tactics,
                                 manager
                             );
-
                         }
 
                     }
-
                 );
 
             });
-
     }
-
-}
-
-
-    drawTacticsList(
-        tactics,
-        manager
-    ) {
-
-        this.ui.showTitle(
-            "⚙️ Styles tactiques"
-        );
-
-
-        tactics
-            .getAvailableTactics()
-            .forEach(style => {
-
-                this.ui.createButton(
-
-                    style.nom,
-
-                    () => {
-
-                        const changed =
-                            tactics.setTactic(
-                                style.nom
-                            );
-
-
-                        if (changed) {
-
-                            this.show(
-                                tactics,
-                                manager
-                            );
-
-                        }
-
-                    }
-
-                );
-
-            });
-
-    }
-
-}
 
 }
