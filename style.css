@@ -168,7 +168,8 @@ button {
 
     left: 50%;
 
-    transform: translate(-50%, -50%);
+    transform:
+        translate(-50%, -50%);
 
     width: 100%;
 
@@ -189,6 +190,7 @@ button {
     text-overflow: ellipsis;
 
 }
+
 
 /* Note */
 
@@ -211,7 +213,8 @@ button {
 
     left: 50%;
 
-    transform: translateX(-50%);
+    transform:
+        translateX(-50%);
 
     margin-top: 4px;
 
@@ -236,5 +239,59 @@ button {
     transform:
         translate(-50%, -50%)
         scale(1.1);
+
+}
+
+
+/* ========================= */
+/* Joueurs disponibles */
+/* ========================= */
+
+.tactics-player-card {
+
+    width: 90%;
+
+    max-width: 420px;
+
+    margin: 8px auto;
+
+    padding: 12px;
+
+    box-sizing: border-box;
+
+    background: #222;
+
+    border: 1px solid #555;
+
+    border-radius: 10px;
+
+    text-align: center;
+
+    cursor: pointer;
+
+}
+
+
+.tactics-player-card strong {
+
+    font-size: 16px;
+
+}
+
+
+.tactics-player-card span {
+
+    font-size: 14px;
+
+}
+
+
+/* Joueur sélectionné */
+
+.tactics-player-card.selected {
+
+    border: 2px solid white;
+
+    transform: scale(1.02);
 
 }
