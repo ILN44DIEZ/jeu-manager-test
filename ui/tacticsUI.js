@@ -149,10 +149,22 @@ class TacticsUI {
 
                 const selectedPlayer =
                     tactics.lineup.find(
-                        joueur =>
-                            tactics.getPosition(
-                                joueur.id
-                            ) === poste.poste
+                        joueur => {
+
+                            const key =
+                                tactics.getPlayerKey(
+                                    joueur
+                                );
+
+
+                            return (
+                                tactics.getPosition(
+                                    key
+                                ) ===
+                                poste.poste
+                            );
+
+                        }
                     );
 
 
@@ -256,6 +268,13 @@ class TacticsUI {
             </h3>
 
             <p>
+                📍 Poste :
+                ${tactics.getPosition(
+                    tactics.getPlayerKey(player)
+                )}
+            </p>
+
+            <p>
                 ⭐ Note :
                 ${player.note}
             </p>
@@ -277,8 +296,14 @@ class TacticsUI {
             "click",
             () => {
 
+                const key =
+                    tactics.getPlayerKey(
+                        player
+                    );
+
+
                 tactics.removeStarter(
-                    player.id
+                    key
                 );
 
 
@@ -438,8 +463,14 @@ class TacticsUI {
             "click",
             () => {
 
+                const key =
+                    tactics.getPlayerKey(
+                        player
+                    );
+
+
                 tactics.removeSubstitute(
-                    player.id
+                    key
                 );
 
 
@@ -480,19 +511,27 @@ class TacticsUI {
             players.filter(
                 player => {
 
+                    const key =
+                        tactics.getPlayerKey(
+                            player
+                        );
+
+
                     const isStarter =
                         tactics.lineup.some(
                             starter =>
-                                starter.id ===
-                                player.id
+                                tactics.getPlayerKey(
+                                    starter
+                                ) === key
                         );
 
 
                     const isSubstitute =
                         tactics.substitutes.some(
                             substitute =>
-                                substitute.id ===
-                                player.id
+                                tactics.getPlayerKey(
+                                    substitute
+                                ) === key
                         );
 
 
@@ -578,19 +617,27 @@ class TacticsUI {
             players.filter(
                 player => {
 
+                    const key =
+                        tactics.getPlayerKey(
+                            player
+                        );
+
+
                     const isStarter =
                         tactics.lineup.some(
                             starter =>
-                                starter.id ===
-                                player.id
+                                tactics.getPlayerKey(
+                                    starter
+                                ) === key
                         );
 
 
                     const isSubstitute =
                         tactics.substitutes.some(
                             substitute =>
-                                substitute.id ===
-                                player.id
+                                tactics.getPlayerKey(
+                                    substitute
+                                ) === key
                         );
 
 
