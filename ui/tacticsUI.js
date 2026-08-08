@@ -1,13 +1,18 @@
 class TacticsUI {
 
     constructor(ui) {
+
         this.ui = ui;
+
         this.container = ui.container;
+
     }
 
 
     clear() {
+
         this.container.innerHTML = "";
+
     }
 
 
@@ -15,7 +20,9 @@ class TacticsUI {
 
         this.clear();
 
-        this.ui.showTitle("🧠 Tactiques");
+        this.ui.showTitle(
+            "🧠 Tactiques"
+        );
 
         this.ui.showMessage(
             "📐 Formation : " +
@@ -42,9 +49,14 @@ class TacticsUI {
         this.ui.createButton(
             "⬅️ Retour carrière",
             () => {
-                this.ui.showManager(manager);
+
+                this.ui.showManager(
+                    manager
+                );
+
             }
         );
+
     }
 
 
@@ -53,6 +65,7 @@ class TacticsUI {
         const formation =
             tactics.getFormationData();
 
+
         if (!formation) {
 
             this.ui.showMessage(
@@ -60,15 +73,21 @@ class TacticsUI {
             );
 
             return;
+
         }
+
 
         const pitch =
             document.createElement("div");
 
-        pitch.className = "pitch";
+
+        pitch.className =
+            "pitch";
+
 
         const players =
             game.players || [];
+
 
         const availablePlayers =
             [...players];
@@ -79,73 +98,98 @@ class TacticsUI {
             const player =
                 document.createElement("div");
 
+
             player.className =
                 "pitch-player";
 
 
             let index =
                 availablePlayers.findIndex(
+
                     joueur =>
                         joueur.poste === poste.poste
+
                 );
 
 
             if (index === -1) {
+
                 index = 0;
+
             }
 
 
             let selectedPlayer = null;
 
 
-            if (availablePlayers.length > 0) {
+            if (
+                availablePlayers.length > 0
+            ) {
 
                 selectedPlayer =
                     availablePlayers[index];
+
 
                 availablePlayers.splice(
                     index,
                     1
                 );
+
             }
 
 
             if (selectedPlayer) {
 
                 player.innerHTML =
-                    selectedPlayer.prenom +
-                    " " +
+
+                    "<strong>" +
                     selectedPlayer.nom +
+                    "</strong>" +
+
                     "<br>" +
-                    "<small>" +
-                    selectedPlayer.poste +
-                    " ⭐ " +
+
+                    "<small>⭐ " +
                     selectedPlayer.note +
-                    "</small>";
+                    "</small>" +
+
+                    "<span class=\"player-position\">" +
+                    poste.poste +
+                    "</span>";
 
             } else {
 
                 player.innerHTML =
-                    poste.poste;
+
+                    "<strong>" +
+                    poste.poste +
+                    "</strong>";
+
             }
 
 
             player.style.left =
                 poste.x + "%";
 
+
             player.style.top =
                 poste.y + "%";
+
 
             player.style.transform =
                 "translate(-50%, -50%)";
 
 
-            pitch.appendChild(player);
+            pitch.appendChild(
+                player
+            );
 
         });
 
 
-        this.container.appendChild(pitch);
+        this.container.appendChild(
+            pitch
+        );
+
     }
 
 
@@ -164,7 +208,9 @@ class TacticsUI {
             .forEach(formation => {
 
                 this.ui.createButton(
+
                     formation.nom,
+
                     () => {
 
                         if (
@@ -177,12 +223,15 @@ class TacticsUI {
                                 tactics,
                                 manager
                             );
+
                         }
 
                     }
+
                 );
 
             });
+
     }
 
 
@@ -201,7 +250,9 @@ class TacticsUI {
             .forEach(style => {
 
                 this.ui.createButton(
+
                     style.nom,
+
                     () => {
 
                         if (
@@ -214,12 +265,15 @@ class TacticsUI {
                                 tactics,
                                 manager
                             );
+
                         }
 
                     }
+
                 );
 
             });
+
     }
 
 }
