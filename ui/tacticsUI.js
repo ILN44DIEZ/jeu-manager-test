@@ -6,12 +6,16 @@ class TacticsUI {
 
         this.container = ui.container;
 
+        this.pitchElement = null;
+
     }
 
 
     clear() {
 
         this.container.innerHTML = "";
+
+        this.pitchElement = null;
 
     }
 
@@ -65,11 +69,6 @@ class TacticsUI {
 
 
         this.drawReserves(
-            tactics
-        );
-
-
-        this.drawPlayersList(
             tactics,
             manager
         );
@@ -104,6 +103,10 @@ class TacticsUI {
     }
 
 
+    /* ========================= */
+    /* TERRAIN */
+    /* ========================= */
+
     drawPitch(
         tactics,
         manager
@@ -132,6 +135,10 @@ class TacticsUI {
 
         pitch.className =
             "pitch";
+
+
+        this.pitchElement =
+            pitch;
 
 
         formation.postes.forEach(
@@ -244,11 +251,28 @@ class TacticsUI {
     }
 
 
+    /* ========================= */
+    /* ACTIONS TITULAIRE */
+    /* ========================= */
+
     showPlayerActions(
         tactics,
         manager,
         player
     ) {
+
+        const oldActions =
+            this.container.querySelector(
+                ".player-actions"
+            );
+
+
+        if (oldActions) {
+
+            oldActions.remove();
+
+        }
+
 
         const actionBox =
             document.createElement(
@@ -263,7 +287,7 @@ class TacticsUI {
         actionBox.innerHTML = `
 
             <h3>
-                ${player.prenom}
+                ⚽ ${player.prenom}
                 ${player.nom}
             </h3>
 
@@ -327,12 +351,38 @@ class TacticsUI {
         );
 
 
-        this.container.appendChild(
-            actionBox
-        );
+        /*
+         * On place les actions
+         * directement sous le terrain.
+         */
+
+        if (this.pitchElement) {
+
+            this.pitchElement.insertAdjacentElement(
+                "afterend",
+                actionBox
+            );
+
+        } else {
+
+            this.container.appendChild(
+                actionBox
+            );
+
+        }
+
+
+        actionBox.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
 
     }
 
+
+    /* ========================= */
+    /* REMPLAÇANTS */
+    /* ========================= */
 
     drawSubstitutes(
         tactics,
@@ -418,11 +468,28 @@ class TacticsUI {
     }
 
 
+    /* ========================= */
+    /* ACTIONS REMPLAÇANT */
+    /* ========================= */
+
     showSubstituteActions(
         tactics,
         manager,
         player
     ) {
+
+        const oldActions =
+            this.container.querySelector(
+                ".player-actions"
+            );
+
+
+        if (oldActions) {
+
+            oldActions.remove();
+
+        }
+
 
         const actionBox =
             document.createElement(
@@ -437,9 +504,14 @@ class TacticsUI {
         actionBox.innerHTML = `
 
             <h3>
-                ${player.prenom}
+                🪑 ${player.prenom}
                 ${player.nom}
             </h3>
+
+            <p>
+                📍 Poste :
+                ${player.poste}
+            </p>
 
             <p>
                 ⭐ Note :
@@ -494,14 +566,24 @@ class TacticsUI {
         );
 
 
-        this.container.appendChild(
-            actionBox
+        this.container.insertBefore(
+            actionBox,
+            this.container.querySelector(
+                ".tactics-player-card"
+            )
         );
 
     }
 
 
-    drawReserves(tactics) {
+    /* ========================= */
+    /* RÉSERVISTES */
+    /* ========================= */
+
+    drawReserves(
+        tactics,
+        manager
+    ) {
 
         const players =
             game.players || [];
@@ -519,19 +601,29 @@ class TacticsUI {
 
                     const isStarter =
                         tactics.lineup.some(
-                            starter =>
-                                tactics.getPlayerKey(
-                                    starter
-                                ) === key
+                            starter => {
+
+                                return (
+                                    tactics.getPlayerKey(
+                                        starter
+                                    ) === key
+                                );
+
+                            }
                         );
 
 
                     const isSubstitute =
                         tactics.substitutes.some(
-                            substitute =>
-                                tactics.getPlayerKey(
-                                    substitute
-                                ) === key
+                            substitute => {
+
+                                return (
+                                    tactics.getPlayerKey(
+                                        substitute
+                                    ) === key
+                                );
+
+                            }
                         );
 
 
@@ -544,18 +636,22 @@ class TacticsUI {
             );
 
 
+        this.ui.showTitle(
+            "📋 Réservistes"
+        );
+
+
         if (
             reserves.length === 0
         ) {
 
+            this.ui.showMessage(
+                "Aucun réserviste."
+            );
+
             return;
 
         }
-
-
-        this.ui.showTitle(
-            "📋 Réservistes"
-        );
 
 
         reserves.forEach(
@@ -599,160 +695,9 @@ class TacticsUI {
     }
 
 
-    drawPlayersList(
-        tactics,
-        manager
-    ) {
-
-        this.ui.showTitle(
-            "👥 Joueurs disponibles"
-        );
-
-
-        const players =
-            game.players || [];
-
-
-        const availablePlayers =
-            players.filter(
-                player => {
-
-                    const key =
-                        tactics.getPlayerKey(
-                            player
-                        );
-
-
-                    const isStarter =
-                        tactics.lineup.some(
-                            starter =>
-                                tactics.getPlayerKey(
-                                    starter
-                                ) === key
-                        );
-
-
-                    const isSubstitute =
-                        tactics.substitutes.some(
-                            substitute =>
-                                tactics.getPlayerKey(
-                                    substitute
-                                ) === key
-                        );
-
-
-                    return (
-                        !isStarter &&
-                        !isSubstitute
-                    );
-
-                }
-            );
-
-
-        if (
-            availablePlayers.length === 0
-        ) {
-
-            this.ui.showMessage(
-                "Tous les joueurs sont affectés."
-            );
-
-            return;
-
-        }
-
-
-        availablePlayers.forEach(
-            player => {
-
-                const card =
-                    document.createElement(
-                        "div"
-                    );
-
-
-                card.className =
-                    "tactics-player-card";
-
-
-                card.innerHTML = `
-
-                    <strong>
-                        ${player.prenom}
-                        ${player.nom}
-                    </strong>
-
-                    <br>
-
-                    <span>
-                        ${player.poste}
-                    </span>
-
-                    ⭐ ${player.note}
-
-                `;
-
-
-                card.addEventListener(
-                    "click",
-                    () => {
-
-                        if (
-                            tactics.lineup.length < 11
-                        ) {
-
-                            tactics.addStarter(
-                                player
-                            );
-
-
-                            console.log(
-                                "✅ Titulaire ajouté :",
-                                player.nom
-                            );
-
-                        } else if (
-                            tactics.substitutes.length < 9
-                        ) {
-
-                            tactics.addSubstitute(
-                                player
-                            );
-
-
-                            console.log(
-                                "🪑 Remplaçant ajouté :",
-                                player.nom
-                            );
-
-                        } else {
-
-                            console.log(
-                                "⚠️ Équipe complète."
-                            );
-
-                        }
-
-
-                        this.show(
-                            tactics,
-                            manager
-                        );
-
-                    }
-                );
-
-
-                this.container.appendChild(
-                    card
-                );
-
-            }
-        );
-
-    }
-
+    /* ========================= */
+    /* FORMATIONS */
+    /* ========================= */
 
     drawFormationList(
         tactics,
@@ -797,6 +742,10 @@ class TacticsUI {
 
     }
 
+
+    /* ========================= */
+    /* STYLES TACTIQUES */
+    /* ========================= */
 
     drawTacticsList(
         tactics,
