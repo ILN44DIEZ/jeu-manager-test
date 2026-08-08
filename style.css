@@ -11,7 +11,6 @@ body {
 }
 
 
-
 button {
 
     padding: 15px;
@@ -27,7 +26,6 @@ button {
 }
 
 
-
 #game {
 
     margin-top: 50px;
@@ -35,11 +33,8 @@ button {
 }
 
 
-
 /* ========================= */
-
 /* Terrain tactique */
-
 /* ========================= */
 
 .pitch {
@@ -65,7 +60,6 @@ button {
 }
 
 
-
 /* Ligne du milieu */
 
 .pitch::before {
@@ -85,7 +79,6 @@ button {
     background: white;
 
 }
-
 
 
 /* Cercle central */
@@ -108,17 +101,26 @@ button {
 
     border-radius: 50%;
 
-    transform: translate(-50%, -50%);
+    transform: translate(
+        -50%,
+        -50%
+    );
 
 }
 
 
+/* ========================= */
+/* Joueurs */
+/* ========================= */
 
 .pitch-player {
 
     position: absolute;
 
-    transform: translate(-50%, -50%);
+    transform: translate(
+        -50%,
+        -50%
+    );
 
     width: 50px;
 
@@ -134,22 +136,96 @@ button {
 
     display: flex;
 
+    flex-direction: column;
+
     justify-content: center;
 
     align-items: center;
+
+    text-align: center;
 
     border: 2px solid black;
 
     cursor: pointer;
 
-    transition: transform 0.2s;
+    transition:
+        transform 0.2s;
+
+    box-sizing: border-box;
+
+    z-index: 2;
 
 }
 
 
+/* Nom du joueur */
+
+.pitch-player strong {
+
+    display: block;
+
+    width: 100%;
+
+    padding: 0 3px;
+
+    font-size: 9px;
+
+    line-height: 11px;
+
+    white-space: nowrap;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+}
+
+
+/* Note */
+
+.pitch-player small {
+
+    font-size: 9px;
+
+    line-height: 10px;
+
+}
+
+
+/* Poste sous le rond */
+
+.player-position {
+
+    position: absolute;
+
+    top: 100%;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    margin-top: 4px;
+
+    color: white;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+    white-space: nowrap;
+
+    text-shadow:
+        1px 1px 2px black;
+
+}
+
+
+/* Animation au survol */
 
 .pitch-player:hover {
 
-    transform: translate(-50%, -50%) scale(1.1);
+    transform:
+        translate(-50%, -50%)
+        scale(1.1);
 
 }
