@@ -12,8 +12,9 @@ function chooseClub(club) {
     );
 
 
-
-    // Création du club de carrière
+    // =========================
+    // Création du vrai club
+    // =========================
 
     game.club = {
 
@@ -34,8 +35,9 @@ function chooseClub(club) {
     };
 
 
-
+    // =========================
     // Création de la carrière
+    // =========================
 
     game.manager.startCareer(
 
@@ -46,8 +48,9 @@ function chooseClub(club) {
     );
 
 
-
+    // =========================
     // Chargement de l'effectif
+    // =========================
 
     game.players =
         game.data.getPlayersByClub(
@@ -61,8 +64,24 @@ function chooseClub(club) {
     );
 
 
+    // =========================
+    // Composition initiale
+    // =========================
 
+    game.tactics.initializeSquad(
+        game.players
+    );
+
+
+    console.log(
+        "Composition initiale :",
+        game.tactics.getData()
+    );
+
+
+    // =========================
     // Marché des transferts
+    // =========================
 
     game.market =
         new TransferMarket(
@@ -74,8 +93,9 @@ function chooseClub(club) {
         );
 
 
-
-    // Affichage de la carrière
+    // =========================
+    // Affichage fiche manager
+    // =========================
 
     game.ui.showManager({
 
@@ -112,7 +132,6 @@ function chooseClub(club) {
     });
 
 
-
     console.log(
         "Carrière créée avec :",
         game.club
@@ -131,23 +150,23 @@ async function startGame() {
     );
 
 
-
+    // =========================
     // Interface
+    // =========================
 
     game.ui =
         new UI();
 
 
-
-    // Données
+    // =========================
+    // Chargement des données
+    // =========================
 
     game.data =
         new DataManager();
 
 
-
     await game.data.loadAllData();
-
 
 
     console.log(
@@ -156,15 +175,17 @@ async function startGame() {
     );
 
 
-
-    // Manager
+    // =========================
+    // Création du manager
+    // =========================
 
     game.manager =
         new ManagerCareer();
 
 
-
+    // =========================
     // Effectif
+    // =========================
 
     game.squad =
         new Squad(
@@ -172,29 +193,38 @@ async function startGame() {
         );
 
 
-
-    // Tactiques
+    // =========================
+    // Tactique
+    // =========================
 
     game.tactics =
-        new Tactics(
-            game.data
-        );
+        new Tactics();
 
 
+    // Connexion du DataManager
+    // aux tactiques
 
+    game.tactics.setDataManager(
+        game.data
+    );
+
+
+    // =========================
     // Sauvegarde
+    // =========================
 
     game.save =
         new SaveManager();
 
 
-
-    // Sélection de la ligue
+    // =========================
+    // Première étape :
+    // choisir une ligue
+    // =========================
 
     game.ui.showLeagueSelection(
         game.data
     );
-
 
 
     console.log(
