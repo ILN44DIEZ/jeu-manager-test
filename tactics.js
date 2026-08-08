@@ -31,13 +31,11 @@ class Tactics {
     }
 
 
-
     setDataManager(dataManager) {
 
         this.dataManager = dataManager;
 
     }
-
 
 
     setFormation(formation) {
@@ -71,7 +69,6 @@ class Tactics {
     }
 
 
-
     getFormation() {
 
         return this.formation;
@@ -79,47 +76,20 @@ class Tactics {
     }
 
 
-
     getFormationData() {
 
-        console.log(
-            "DataManager :",
-            this.dataManager
-        );
-
-        console.log(
-            "Formation actuelle :",
-            this.formation
-        );
-
-
         if (!this.dataManager) {
-
-            console.error(
-                "❌ Aucun DataManager"
-            );
 
             return null;
 
         }
 
 
-        const formation =
-            this.dataManager.getFormation(
-                this.formation
-            );
-
-
-        console.log(
-            "Formation trouvée :",
-            formation
+        return this.dataManager.getFormation(
+            this.formation
         );
 
-
-        return formation;
-
     }
-
 
 
     getAvailableFormations() {
@@ -134,7 +104,6 @@ class Tactics {
         return this.dataManager.getAllFormations();
 
     }
-
 
 
     setTactic(name) {
@@ -181,13 +150,11 @@ class Tactics {
     }
 
 
-
     getCurrentTactic() {
 
         return this.currentTactic;
 
     }
-
 
 
     getAvailableTactics() {
@@ -204,22 +171,288 @@ class Tactics {
     }
 
 
+    /*
+     * =========================
+     * INITIALISATION EFFECTIF
+     * =========================
+     *
+     * 11 titulaires
+     * 9 remplaçants
+     * Le reste = réservistes
+     */
 
-    addStarter(player, position = null) {
+    initializeSquad(players) {
 
-        if (this.lineup.length >= 11) {
+        this.lineup = [];
+
+        this.substitutes = [];
+
+        this.positions = {};
+
+        this.roles = {};
+
+
+        if (!players || players.length === 0) {
+
+            return;
+
+        }
+
+
+        const formation =
+            this.getFormationData();
+
+
+        if (!formation) {
+
+            console.error(
+                "❌ Impossible d'initialiser l'effectif : formation introuvable."
+            );
+
+            return;
+
+        }
+
+
+        const availablePlayers =
+            [...players];
+
+
+        /*
+         * Sélection des 11 titulaires
+         */
+
+        formation.postes.forEach(
+            poste => {
+
+                if (
+                    this.lineup.length >= 11
+                ) {
+
+                    return;
+
+                }
+
+
+                let index =
+                    availablePlayers.findIndex(
+                        player =>
+                            player.poste ===
+                            poste.poste
+                    );
+
+
+                /*
+                 * Si aucun joueur ne correspond
+                 * exactement au poste, on prend
+                 * le meilleur joueur disponible.
+                 */
+
+                if (index === -1) {
+
+                    index =
+                        this.getBestPlayerIndex(
+                            availablePlayers
+                        );
+
+                }
+
+
+                if (index === -1) {
+
+                    return;
+
+                }
+
+
+                const player =
+                    availablePlayers[index];
+
+
+                this.lineup.push(
+                    player
+                );
+
+
+                this.positions[player.id] =
+                    poste.poste;
+
+
+                availablePlayers.splice(
+                    index,
+                    1
+                );
+
+            }
+        );
+
+
+        /*
+         * Si certaines positions n'ont pas
+         * trouvé de joueur, on complète
+         * avec les meilleurs joueurs restants.
+         */
+
+        while (
+            this.lineup.length < 11 &&
+            availablePlayers.length > 0
+        ) {
+
+            const player =
+                availablePlayers.shift();
+
+
+            this.lineup.push(
+                player
+            );
+
+
+            const poste =
+                formation.postes[
+                    this.lineup.length - 1
+                ];
+
+
+            if (poste) {
+
+                this.positions[player.id] =
+                    poste.poste;
+
+            }
+
+        }
+
+
+        /*
+         * 9 remplaçants
+         */
+
+        while (
+            this.substitutes.length < 9 &&
+            availablePlayers.length > 0
+        ) {
+
+            this.substitutes.push(
+                availablePlayers.shift()
+            );
+
+        }
+
+
+        console.log(
+            "⚽ Équipe initialisée :",
+            this.lineup.length,
+            "titulaires,",
+            this.substitutes.length,
+            "remplaçants,",
+            availablePlayers.length,
+            "réservistes."
+        );
+
+    }
+
+
+    getBestPlayerIndex(players) {
+
+        if (
+            !players ||
+            players.length === 0
+        ) {
+
+            return -1;
+
+        }
+
+
+        let bestIndex = 0;
+
+
+        for (
+            let i = 1;
+            i < players.length;
+            i++
+        ) {
+
+            const currentNote =
+                Number(
+                    players[i].note
+                ) || 0;
+
+
+            const bestNote =
+                Number(
+                    players[bestIndex].note
+                ) || 0;
+
+
+            if (
+                currentNote >
+                bestNote
+            ) {
+
+                bestIndex = i;
+
+            }
+
+        }
+
+
+        return bestIndex;
+
+    }
+
+
+    addStarter(
+        player,
+        position = null
+    ) {
+
+        if (
+            this.lineup.length >= 11
+        ) {
 
             return false;
 
         }
 
 
-        this.lineup.push(player);
+        const alreadyStarter =
+            this.lineup.some(
+                starter =>
+                    starter.id === player.id
+            );
+
+
+        if (alreadyStarter) {
+
+            return false;
+
+        }
+
+
+        const alreadySubstitute =
+            this.substitutes.some(
+                substitute =>
+                    substitute.id === player.id
+            );
+
+
+        if (alreadySubstitute) {
+
+            return false;
+
+        }
+
+
+        this.lineup.push(
+            player
+        );
 
 
         if (position) {
 
-            this.positions[player.id] = position;
+            this.positions[player.id] =
+                position;
 
         }
 
@@ -229,12 +462,12 @@ class Tactics {
     }
 
 
-
     removeStarter(playerId) {
 
         this.lineup =
             this.lineup.filter(
-                player => player.id !== playerId
+                player =>
+                    player.id !== playerId
             );
 
 
@@ -243,82 +476,124 @@ class Tactics {
     }
 
 
+    setPosition(
+        playerId,
+        position
+    ) {
 
-    setPosition(playerId, position) {
-
-        this.positions[playerId] = position;
+        this.positions[playerId] =
+            position;
 
     }
-
 
 
     getPosition(playerId) {
 
-    return this.positions[playerId] || "Libre";
-
-}
-
-
-
-addSubstitute(player) {
-
-    if (this.substitutes.length >= 12) {
-
-        return false;
+        return (
+            this.positions[playerId] ||
+            "Libre"
+        );
 
     }
 
 
-    this.substitutes.push(player);
+    addSubstitute(player) {
 
-    return true;
+        if (
+            this.substitutes.length >= 9
+        ) {
 
-}
+            return false;
 
+        }
+
+
+        const alreadyStarter =
+            this.lineup.some(
+                starter =>
+                    starter.id === player.id
+            );
+
+
+        if (alreadyStarter) {
+
+            return false;
+
+        }
+
+
+        const alreadySubstitute =
+            this.substitutes.some(
+                substitute =>
+                    substitute.id === player.id
+            );
+
+
+        if (alreadySubstitute) {
+
+            return false;
+
+        }
+
+
+        this.substitutes.push(
+            player
+        );
+
+
+        return true;
+
+    }
 
 
     removeSubstitute(playerId) {
 
         this.substitutes =
             this.substitutes.filter(
-                player => player.id !== playerId
+                player =>
+                    player.id !== playerId
             );
 
     }
 
 
-
     setRole(playerId, role) {
 
-        this.roles[playerId] = role;
+        this.roles[playerId] =
+            role;
 
     }
-
 
 
     getRole(playerId) {
 
-        return this.roles[playerId] || "";
+        return (
+            this.roles[playerId] ||
+            ""
+        );
 
     }
 
 
-
     setStyle(type, value) {
 
-        if (this.style[type] !== undefined) {
+        if (
+            this.style[type] !== undefined
+        ) {
 
-            this.style[type] = value;
+            this.style[type] =
+                value;
 
         }
 
     }
 
 
-
     getTeamStrength() {
 
-        if (this.lineup.length === 0) {
+        if (
+            this.lineup.length === 0
+        ) {
 
             return 0;
 
@@ -328,19 +603,24 @@ addSubstitute(player) {
         let total = 0;
 
 
-        this.lineup.forEach(player => {
+        this.lineup.forEach(
+            player => {
 
-            total += player.note;
+                total +=
+                    Number(
+                        player.note
+                    ) || 0;
 
-        });
+            }
+        );
 
 
         return Math.round(
-            total / this.lineup.length
+            total /
+            this.lineup.length
         );
 
     }
-
 
 
     getTacticalBonus() {
@@ -348,46 +628,63 @@ addSubstitute(player) {
         let bonus = 0;
 
 
-        switch (this.style.mentality) {
+        switch (
+            this.style.mentality
+        ) {
 
             case "Offensive":
+
                 bonus += 5;
+
                 break;
 
+
             case "Défensive":
+
                 bonus -= 2;
+
                 break;
 
         }
 
 
         bonus +=
-            (this.style.pressing - 50) / 10;
+            (
+                this.style.pressing - 50
+            ) / 10;
 
 
-        return Math.round(bonus);
+        return Math.round(
+            bonus
+        );
 
     }
-
 
 
     getData() {
 
         return {
 
-            formation: this.formation,
+            formation:
+                this.formation,
 
-            currentTactic: this.currentTactic,
+            currentTactic:
+                this.currentTactic,
 
-            lineup: this.lineup,
+            lineup:
+                this.lineup,
 
-            substitutes: this.substitutes,
+            substitutes:
+                this.substitutes,
 
-            roles: this.roles,
+            roles:
+                this.roles,
 
-            positions: this.positions,
+            positions:
+                this.positions,
 
-            style: this.style
+            style:
+                this.style
 
         };
 
