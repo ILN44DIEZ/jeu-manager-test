@@ -115,21 +115,22 @@ class UI {
 
         this.createButton(
 
-    "🆕 Nouvelle carrière",
+            "🆕 Nouvelle carrière",
 
-    () => {
+            () => {
 
-        game.currentSaveSlot = null;
+                game.currentSaveSlot = null;
 
-        game.club = null;
+                game.club = null;
 
-        this.showLeagueSelection(
-            game.data
+                this.showLeagueSelection(
+                    game.data
+                );
+
+            }
+
         );
 
-    }
-
-);
 
         this.createButton(
 
@@ -286,7 +287,70 @@ class UI {
 
 
         /* ========================= */
-        /* DATE */
+        /* DONNÉES DE LA CARRIÈRE */
+        /* ========================= */
+
+        const gameData =
+            save.game;
+
+
+        /* ========================= */
+        /* CLUB */
+        /* ========================= */
+
+        if (
+            gameData &&
+            gameData.club
+        ) {
+
+            const club =
+                document.createElement(
+                    "p"
+                );
+
+
+            club.textContent =
+                "🏟️ " +
+                gameData.club.name;
+
+
+            box.appendChild(
+                club
+            );
+
+        }
+
+
+        /* ========================= */
+        /* SAISON */
+        /* ========================= */
+
+        if (
+            gameData &&
+            gameData.manager &&
+            gameData.manager.season
+        ) {
+
+            const season =
+                document.createElement(
+                    "p"
+                );
+
+
+            season.textContent =
+                "📅 Saison " +
+                gameData.manager.season;
+
+
+            box.appendChild(
+                season
+            );
+
+        }
+
+
+        /* ========================= */
+        /* DATE DE SAUVEGARDE */
         /* ========================= */
 
         const date =
@@ -295,19 +359,27 @@ class UI {
             );
 
 
-        const info =
+        const saveDate =
             document.createElement(
                 "p"
             );
 
 
-        info.textContent =
-            "📅 " +
-            date.toLocaleString();
+        saveDate.textContent =
+            "💾 Sauvegardée le " +
+            date.toLocaleDateString() +
+            " à " +
+            date.toLocaleTimeString(
+                [],
+                {
+                    hour: "2-digit",
+                    minute: "2-digit"
+                }
+            );
 
 
         box.appendChild(
-            info
+            saveDate
         );
 
 
@@ -656,11 +728,6 @@ class UI {
 
     saveCurrentCareer(manager) {
 
-        /*
-         * Si la carrière possède déjà
-         * un slot, on sauvegarde directement.
-         */
-
         if (
             game.currentSaveSlot
         ) {
@@ -684,11 +751,6 @@ class UI {
 
         }
 
-
-        /*
-         * Nouvelle carrière :
-         * aucun slot associé.
-         */
 
         this.showSaveChoice(
             manager
