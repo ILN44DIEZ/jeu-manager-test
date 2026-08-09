@@ -206,6 +206,47 @@ class TacticsUI {
                         "starter";
 
 
+                    /*
+                     * =================================
+                     * POSITIONNEMENT
+                     * =================================
+                     */
+
+                    const positionStatus =
+                        tactics.getPositionStatus(
+                            selectedPlayer,
+                            poste.poste
+                        );
+
+
+                    const effectiveRating =
+                        tactics.getEffectiveRating(
+                            selectedPlayer,
+                            poste.poste
+                        );
+
+
+                    const positionPenalty =
+                        tactics.getPositionPenalty(
+                            selectedPlayer,
+                            poste.poste
+                        );
+
+
+                    player.dataset.positionStatus =
+                        positionStatus;
+
+
+                    player.dataset.position =
+                        poste.poste;
+
+
+                    /*
+                     * =================================
+                     * AFFICHAGE
+                     * =================================
+                     */
+
                     player.innerHTML =
 
                         "<strong>" +
@@ -215,12 +256,51 @@ class TacticsUI {
                         "<br>" +
 
                         "<small>⭐ " +
-                        selectedPlayer.note +
+                        effectiveRating +
                         "</small>" +
 
                         "<span class=\"player-position\">" +
                         poste.poste +
                         "</span>";
+
+
+                    /*
+                     * =================================
+                     * COULEUR
+                     * =================================
+                     */
+
+                    this.applyPositionColor(
+                        player,
+                        positionStatus
+                    );
+
+
+                    /*
+                     * =================================
+                     * INFO AU SURVOL
+                     * =================================
+                     */
+
+                    if (
+                        positionPenalty < 0
+                    ) {
+
+                        player.title =
+                            "Poste : " +
+                            poste.poste +
+                            " | Note : " +
+                            effectiveRating +
+                            " | Pénalité : " +
+                            positionPenalty;
+
+                    } else {
+
+                        player.title =
+                            "Poste naturel | Note : " +
+                            effectiveRating;
+
+                    }
 
 
                     player.style.touchAction =
@@ -298,6 +378,85 @@ class TacticsUI {
         this.container.appendChild(
             pitch
         );
+
+    }
+
+
+    /* ================================================= */
+    /* COULEUR POSITIONNEMENT */
+    /* ================================================= */
+
+    applyPositionColor(
+        element,
+        status
+    ) {
+
+        /*
+         * On ne modifie pas les classes
+         * utilisées par le drag & drop.
+         *
+         * On ajoute uniquement la couleur
+         * de positionnement.
+         */
+
+        switch (status) {
+
+            case "green":
+
+                element.style.backgroundColor =
+                    "#39d353";
+
+                element.style.borderColor =
+                    "#0b5d1e";
+
+                element.style.color =
+                    "#000000";
+
+                break;
+
+
+            case "yellow":
+
+                element.style.backgroundColor =
+                    "#ffd83d";
+
+                element.style.borderColor =
+                    "#9a7b00";
+
+                element.style.color =
+                    "#000000";
+
+                break;
+
+
+            case "red":
+
+                element.style.backgroundColor =
+                    "#ff4b4b";
+
+                element.style.borderColor =
+                    "#8b0000";
+
+                element.style.color =
+                    "#ffffff";
+
+                break;
+
+
+            default:
+
+                element.style.backgroundColor =
+                    "";
+
+                element.style.borderColor =
+                    "";
+
+                element.style.color =
+                    "";
+
+                break;
+
+        }
 
     }
 
@@ -1605,9 +1764,6 @@ class TacticsUI {
          *
          * On échange directement avec
          * le titulaire.
-         *
-         * Aucun besoin d'une place
-         * supplémentaire sur le banc.
          */
 
         if (
@@ -1987,9 +2143,6 @@ class TacticsUI {
         );
 
 
-        this.resetDrag();
-
-
         this.show(
             tactics,
             manager
@@ -2324,6 +2477,27 @@ class TacticsUI {
             "player-actions";
 
 
+        const positionStatus =
+            tactics.getPositionStatus(
+                player,
+                position
+            );
+
+
+        const effectiveRating =
+            tactics.getEffectiveRating(
+                player,
+                position
+            );
+
+
+        const positionPenalty =
+            tactics.getPositionPenalty(
+                player,
+                position
+            );
+
+
         box.innerHTML = `
 
             <h3>
@@ -2338,8 +2512,20 @@ class TacticsUI {
 
             <p>
                 ⭐ Note :
-                ${player.note}
+                ${effectiveRating}
             </p>
+
+            <p>
+                ${this.getPositionStatusLabel(
+                    positionStatus
+                )}
+            </p>
+
+            ${
+                positionPenalty < 0
+                ? `<p>⚠️ Pénalité : ${positionPenalty}</p>`
+                : ""
+            }
 
         `;
 
@@ -2412,6 +2598,40 @@ class TacticsUI {
         this.insertActionsBox(
             box
         );
+
+    }
+
+
+    /* ================================================= */
+    /* LABEL POSITION */
+    /* ================================================= */
+
+    getPositionStatusLabel(
+        status
+    ) {
+
+        switch (status) {
+
+            case "green":
+
+                return "🟢 Poste naturel";
+
+
+            case "yellow":
+
+                return "🟡 Mauvais poste dans la ligne";
+
+
+            case "red":
+
+                return "🔴 Mauvaise ligne";
+
+
+            default:
+
+                return "⚪ Position inconnue";
+
+        }
 
     }
 
@@ -2606,10 +2826,6 @@ class TacticsUI {
 
         /*
          * RÉSERVISTE → TITULAIRE
-         *
-         * On affiche les 11 titulaires
-         * pour permettre de choisir
-         * directement celui à remplacer.
          */
 
         const starterTitle =
@@ -2638,6 +2854,13 @@ class TacticsUI {
                     );
 
 
+                const effectiveRating =
+                    tactics.getEffectiveRating(
+                        starter,
+                        position
+                    );
+
+
                 const button =
                     document.createElement(
                         "button"
@@ -2649,7 +2872,9 @@ class TacticsUI {
                     "⚽ " +
                     starter.nom +
                     " — " +
-                    position;
+                    position +
+                    " ⭐ " +
+                    effectiveRating;
 
 
                 button.addEventListener(
@@ -2804,12 +3029,30 @@ class TacticsUI {
                     );
 
 
+                const effectiveRating =
+                    tactics.getEffectiveRating(
+                        substitute,
+                        position
+                    );
+
+
+                const positionStatus =
+                    tactics.getPositionStatus(
+                        substitute,
+                        position
+                    );
+
+
                 button.textContent =
                     substitute.prenom +
                     " " +
                     substitute.nom +
                     " ⭐ " +
-                    substitute.note;
+                    effectiveRating +
+                    " " +
+                    this.getPositionStatusLabel(
+                        positionStatus
+                    );
 
 
                 button.addEventListener(
