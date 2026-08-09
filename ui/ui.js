@@ -92,7 +92,9 @@ class UI {
         );
 
 
-        this.container.appendChild(button);
+        this.container.appendChild(
+            button
+        );
 
 
         return button;
@@ -129,6 +131,8 @@ class UI {
                 game.currentSaveSlot = null;
 
                 game.club = null;
+
+                game.currentMatchday = 0;
 
                 this.showLeagueSelection(
                     game.data
@@ -538,12 +542,17 @@ class UI {
             img.width = 120;
 
 
-            img.style.display = "block";
+            img.style.display =
+                "block";
 
-            img.style.margin = "auto";
+
+            img.style.margin =
+                "auto";
 
 
-            this.container.appendChild(img);
+            this.container.appendChild(
+                img
+            );
 
         }
 
@@ -742,7 +751,7 @@ class UI {
 
 
         /* ========================= */
-        /* RETOUR AU MENU */
+        /* RETOUR MENU */
         /* ========================= */
 
         this.createButton(
@@ -828,7 +837,7 @@ class UI {
                         game.manager.managerName,
 
                     clubName:
-                        game.manager.getClubName(),
+                        game.club.name,
 
                     logo:
                         game.club.logo,
@@ -909,9 +918,9 @@ class UI {
             game.standings.getTable();
 
 
-        /* ================================================= */
-        /* TABLEAU */
-        /* ================================================= */
+        /* ========================= */
+        /* TABLE */
+        /* ========================= */
 
         const tableElement =
             document.createElement(
@@ -927,9 +936,9 @@ class UI {
             "collapse";
 
 
-        /* ================================================= */
+        /* ========================= */
         /* EN-TÊTE */
-        /* ================================================= */
+        /* ========================= */
 
         const header =
             document.createElement(
@@ -988,9 +997,9 @@ class UI {
         );
 
 
-        /* ================================================= */
+        /* ========================= */
         /* ÉQUIPES */
-        /* ================================================= */
+        /* ========================= */
 
         table.forEach(
             (team, index) => {
@@ -1105,7 +1114,7 @@ class UI {
 
 
                 /* ========================= */
-                /* CLUB DU JOUEUR */
+                /* MON CLUB */
                 /* ========================= */
 
                 if (
@@ -1133,9 +1142,9 @@ class UI {
         );
 
 
-        /* ================================================= */
+        /* ========================= */
         /* RETOUR */
-        /* ================================================= */
+        /* ========================= */
 
         this.createButton(
 
@@ -1200,26 +1209,26 @@ class UI {
             game.calendar.matchdays;
 
 
-        /* ================================================= */
-        /* SÉCURITÉ INDEX */
-        /* ================================================= */
+        /* ========================= */
+        /* SÉCURITÉ */
+        /* ========================= */
 
         if (
-            this.currentLeagueMatchday < 0
+            game.currentMatchday < 0
         ) {
 
-            this.currentLeagueMatchday =
+            game.currentMatchday =
                 0;
 
         }
 
 
         if (
-            this.currentLeagueMatchday >=
+            game.currentMatchday >=
             matchdays.length
         ) {
 
-            this.currentLeagueMatchday =
+            game.currentMatchday =
                 matchdays.length - 1;
 
         }
@@ -1229,6 +1238,18 @@ class UI {
             matchdays[
                 this.currentLeagueMatchday
             ];
+
+
+        if (!currentDay) {
+
+            this.currentLeagueMatchday =
+                0;
+
+            this.showLeagueCalendar();
+
+            return;
+
+        }
 
 
         /* ================================================= */
@@ -1262,7 +1283,7 @@ class UI {
 
 
         /* ========================= */
-        /* JOURNÉE PRÉCÉDENTE */
+        /* PRÉCÉDENTE */
         /* ========================= */
 
         const previousButton =
@@ -1303,7 +1324,7 @@ class UI {
 
 
         /* ========================= */
-        /* TITRE JOURNÉE */
+        /* JOURNÉE */
         /* ========================= */
 
         const dayTitle =
@@ -1325,7 +1346,7 @@ class UI {
 
 
         /* ========================= */
-        /* JOURNÉE SUIVANTE */
+        /* SUIVANTE */
         /* ========================= */
 
         const nextButton =
@@ -1373,7 +1394,28 @@ class UI {
 
 
         /* ================================================= */
-        /* MATCHS DE LA JOURNÉE */
+        /* STATUT DE LA JOURNÉE */
+        /* ================================================= */
+
+        if (
+            currentDay.played
+        ) {
+
+            this.showMessage(
+                "✅ Journée terminée"
+            );
+
+        } else {
+
+            this.showMessage(
+                "⏳ Journée à jouer"
+            );
+
+        }
+
+
+        /* ================================================= */
+        /* MATCHS */
         /* ================================================= */
 
         if (
@@ -1417,10 +1459,87 @@ class UI {
                     "center";
 
 
-                matchBox.textContent =
-                    match.home +
-                    " - " +
-                    match.away;
+                /* ========================= */
+                /* DOMICILE / EXTÉRIEUR */
+                /* ========================= */
+
+                let icon = "";
+
+
+                if (
+                    game.club &&
+                    match.home ===
+                    game.club.name
+                ) {
+
+                    icon =
+                        "🏠 ";
+
+                } else if (
+                    game.club &&
+                    match.away ===
+                    game.club.name
+                ) {
+
+                    icon =
+                        "✈️ ";
+
+                }
+
+
+                /* ========================= */
+                /* SCORE */
+                /* ========================= */
+
+                if (
+                    match.played &&
+                    match.result
+                ) {
+
+                    matchBox.textContent =
+
+                        icon +
+
+                        match.home +
+                        " " +
+                        match.result.homeGoals +
+                        " - " +
+                        match.result.awayGoals +
+                        " " +
+                        match.away;
+
+                } else {
+
+                    matchBox.textContent =
+
+                        icon +
+
+                        match.home +
+                        " - " +
+                        match.away;
+
+                }
+
+
+                /* ========================= */
+                /* MON CLUB */
+                /* ========================= */
+
+                if (
+                    game.club &&
+                    (
+                        match.home ===
+                        game.club.name ||
+
+                        match.away ===
+                        game.club.name
+                    )
+                ) {
+
+                    matchBox.style.fontWeight =
+                        "bold";
+
+                }
 
 
                 this.container.appendChild(
@@ -1429,6 +1548,109 @@ class UI {
 
             }
         );
+
+
+        /* ================================================= */
+        /* BOUTON JOUER LA JOURNÉE */
+        /* ================================================= */
+
+        if (
+            !currentDay.played
+        ) {
+
+            const playButton =
+                document.createElement(
+                    "button"
+                );
+
+
+            playButton.textContent =
+                "▶️ Jouer la journée";
+
+
+            playButton.addEventListener(
+                "click",
+                () => {
+
+                    if (
+                        !game.matchEngine
+                    ) {
+
+                        alert(
+                            "❌ Moteur des matchs indisponible."
+                        );
+
+                        return;
+
+                    }
+
+
+                    const results =
+                        game.matchEngine.simulateMatchday(
+                            currentDay
+                        );
+
+
+                    if (
+                        !results ||
+                        results.length === 0
+                    ) {
+
+                        alert(
+                            "❌ Impossible de jouer cette journée."
+                        );
+
+                        return;
+
+                    }
+
+
+                    /*
+                     * La journée est maintenant jouée.
+                     */
+
+                    currentDay.played =
+                        true;
+
+
+                    /*
+                     * On actualise l'écran.
+                     */
+
+                    this.showLeagueCalendar();
+
+                }
+            );
+
+
+            this.container.appendChild(
+                playButton
+            );
+
+        }
+
+
+        /* ================================================= */
+        /* CLASSEMENT */
+        /* ================================================= */
+
+        if (
+            currentDay.played
+        ) {
+
+            this.createButton(
+
+                "📊 Voir le classement",
+
+                () => {
+
+                    this.showStandings();
+
+                }
+
+            );
+
+        }
 
 
         /* ================================================= */
@@ -1487,7 +1709,7 @@ class UI {
                             game.manager.managerName,
 
                         clubName:
-                            game.manager.getClubName(),
+                            game.club.name,
 
                         logo:
                             game.club.logo,
@@ -1526,7 +1748,7 @@ class UI {
 
 
         /* ================================================= */
-        /* MATCHS DU CLUB UNIQUEMENT */
+        /* MATCHS DU CLUB */
         /* ================================================= */
 
         game.calendar.matchdays.forEach(
@@ -1535,8 +1757,12 @@ class UI {
                 const clubMatches =
                     day.matches.filter(
                         match =>
-                            match.home === game.club.name ||
-                            match.away === game.club.name
+
+                            match.home ===
+                            game.club.name ||
+
+                            match.away ===
+                            game.club.name
                     );
 
 
@@ -1566,14 +1792,46 @@ class UI {
                         /* ========================= */
 
                         if (
-                            match.home === game.club.name
+                            match.home ===
+                            game.club.name
                         ) {
 
-                            matchText =
-                                "🏠 " +
-                                game.club.name +
-                                " - " +
-                                match.away;
+                            if (
+                                match.played &&
+                                match.result
+                            ) {
+
+                                matchText =
+
+                                    "🏠 " +
+
+                                    game.club.name +
+
+                                    " " +
+
+                                    match.result.homeGoals +
+
+                                    " - " +
+
+                                    match.result.awayGoals +
+
+                                    " " +
+
+                                    match.away;
+
+                            } else {
+
+                                matchText =
+
+                                    "🏠 " +
+
+                                    game.club.name +
+
+                                    " - " +
+
+                                    match.away;
+
+                            }
 
                         }
 
@@ -1584,11 +1842,42 @@ class UI {
 
                         else {
 
-                            matchText =
-                                "✈️ " +
-                                game.club.name +
-                                " - " +
-                                match.home;
+                            if (
+                                match.played &&
+                                match.result
+                            ) {
+
+                                matchText =
+
+                                    "✈️ " +
+
+                                    game.club.name +
+
+                                    " " +
+
+                                    match.result.awayGoals +
+
+                                    " - " +
+
+                                    match.result.homeGoals +
+
+                                    " " +
+
+                                    match.home;
+
+                            } else {
+
+                                matchText =
+
+                                    "✈️ " +
+
+                                    game.club.name +
+
+                                    " - " +
+
+                                    match.home;
+
+                            }
 
                         }
 
@@ -1604,9 +1893,9 @@ class UI {
         );
 
 
-        /* ========================= */
+        /* ================================================= */
         /* RETOUR */
-        /* ========================= */
+        /* ================================================= */
 
         this.createButton(
 
@@ -1620,7 +1909,7 @@ class UI {
                         game.manager.managerName,
 
                     clubName:
-                        game.manager.getClubName(),
+                        game.club.name,
 
                     logo:
                         game.club.logo,
@@ -1841,7 +2130,7 @@ class UI {
 
 
     /* ================================================= */
-    /* MENU SAUVEGARDES CARRIÈRE EXISTANT */
+    /* MENU SAUVEGARDES CARRIÈRE */
     /* ================================================= */
 
     showSaveMenu(manager) {
