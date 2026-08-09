@@ -115,18 +115,21 @@ class UI {
 
         this.createButton(
 
-            "🆕 Nouvelle carrière",
+    "🆕 Nouvelle carrière",
 
-            () => {
+    () => {
 
-                this.showLeagueSelection(
-                    game.data
-                );
+        game.currentSaveSlot = null;
 
-            }
+        game.club = null;
 
+        this.showLeagueSelection(
+            game.data
         );
 
+    }
+
+);
 
         this.createButton(
 
