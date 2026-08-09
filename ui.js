@@ -517,7 +517,6 @@ class UI {
         this.clear();
 
 
-
         if (manager.logo) {
 
             const img =
@@ -542,18 +541,15 @@ class UI {
         }
 
 
-
         this.showTitle(
             "🎴 Carrière Manager"
         );
-
 
 
         this.showMessage(
             "🏟️ Club : " +
             manager.clubName
         );
-
 
 
         if (manager.country) {
@@ -566,7 +562,6 @@ class UI {
         }
 
 
-
         if (manager.league) {
 
             this.showMessage(
@@ -575,7 +570,6 @@ class UI {
             );
 
         }
-
 
 
         if (manager.level) {
@@ -588,11 +582,9 @@ class UI {
         }
 
 
-
         this.showTitle(
             "👔 Manager"
         );
-
 
 
         this.showMessage(
@@ -601,18 +593,15 @@ class UI {
         );
 
 
-
         this.showMessage(
             "📅 Saison : " +
             manager.season
         );
 
 
-
         this.showTitle(
             "💰 Gestion"
         );
-
 
 
         this.showMessage(
@@ -623,18 +612,15 @@ class UI {
         );
 
 
-
         this.showMessage(
             "⭐ Réputation : " +
             manager.reputation
         );
 
 
-
         this.showTitle(
             "🎯 Objectifs"
         );
-
 
 
         manager.objectives.forEach(
@@ -647,7 +633,6 @@ class UI {
 
             }
         );
-
 
 
         /* ========================= */
@@ -673,7 +658,6 @@ class UI {
         );
 
 
-
         /* ========================= */
         /* TACTIQUES */
         /* ========================= */
@@ -697,7 +681,6 @@ class UI {
         );
 
 
-
         /* ========================= */
         /* CALENDRIER */
         /* ========================= */
@@ -713,7 +696,6 @@ class UI {
             }
 
         );
-
 
 
         /* ========================= */
@@ -733,7 +715,6 @@ class UI {
             }
 
         );
-
 
 
         /* ========================= */
@@ -757,7 +738,7 @@ class UI {
 
 
     /* ================================================= */
-    /* CALENDRIER */
+    /* CALENDRIER DU CLUB */
     /* ================================================= */
 
     showCalendar() {
@@ -830,8 +811,29 @@ class UI {
         }
 
 
+        /* ================================================= */
+        /* MATCHS DU CLUB UNIQUEMENT */
+        /* ================================================= */
+
         game.calendar.matchdays.forEach(
             day => {
+
+                const clubMatches =
+                    day.matches.filter(
+                        match =>
+                            match.home === game.club.name ||
+                            match.away === game.club.name
+                    );
+
+
+                if (
+                    clubMatches.length === 0
+                ) {
+
+                    return;
+
+                }
+
 
                 this.showTitle(
                     "Journée " +
@@ -839,15 +841,46 @@ class UI {
                 );
 
 
-                day.matches.forEach(
+                clubMatches.forEach(
                     match => {
 
+                        let matchText = "";
+
+
+                        /* ========================= */
+                        /* DOMICILE */
+                        /* ========================= */
+
+                        if (
+                            match.home === game.club.name
+                        ) {
+
+                            matchText =
+                                "🏠 " +
+                                game.club.name +
+                                " - " +
+                                match.away;
+
+                        }
+
+
+                        /* ========================= */
+                        /* EXTÉRIEUR */
+                        /* ========================= */
+
+                        else {
+
+                            matchText =
+                                "✈️ " +
+                                game.club.name +
+                                " - " +
+                                match.home;
+
+                        }
+
+
                         this.showMessage(
-
-                            match.home +
-                            " - " +
-                            match.away
-
+                            matchText
                         );
 
                     }
@@ -856,6 +889,10 @@ class UI {
             }
         );
 
+
+        /* ========================= */
+        /* RETOUR */
+        /* ========================= */
 
         this.createButton(
 
