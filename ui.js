@@ -95,6 +95,58 @@ class UI {
 
 
     /* ================================================= */
+    /* MENU PRINCIPAL */
+    /* ================================================= */
+
+    showMainMenu() {
+
+        this.clear();
+
+
+        this.showTitle(
+            "⚽ Manager Career"
+        );
+
+
+        this.showMessage(
+            "Bienvenue dans Manager Career !"
+        );
+
+
+        this.createButton(
+
+            "🆕 Nouvelle carrière",
+
+            () => {
+
+                this.showLeagueSelection(
+                    game.data
+                );
+
+            }
+
+        );
+
+
+        this.createButton(
+
+            "💾 Sauvegardes",
+
+            () => {
+
+                console.log(
+                    "Menu sauvegardes"
+                );
+
+            }
+
+        );
+
+    }
+
+
+
+    /* ================================================= */
     /* FICHE MANAGER */
     /* ================================================= */
 
