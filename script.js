@@ -132,6 +132,22 @@ function chooseClub(club) {
 
 
     // =========================
+    // Classement
+    // =========================
+
+    game.standings =
+        new Standings(
+            teams
+        );
+
+
+    console.log(
+        "🏆 Classement créé :",
+        game.standings.getTable()
+    );
+
+
+    // =========================
     // Marché des transferts
     // =========================
 
@@ -464,6 +480,22 @@ function loadCareer(slot = 1) {
         console.log(
             "📅 Calendrier restauré :",
             game.calendar.matchdays
+        );
+
+
+        // =========================
+        // Classement
+        // =========================
+
+        game.standings =
+            new Standings(
+                teams
+            );
+
+
+        console.log(
+            "🏆 Classement restauré :",
+            game.standings.getTable()
         );
 
     }
