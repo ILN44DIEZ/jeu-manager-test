@@ -47,8 +47,10 @@ class Tactics {
         }
 
 
-        if (player.id !== undefined &&
-            player.id !== null) {
+        if (
+            player.id !== undefined &&
+            player.id !== null
+        ) {
 
             return String(player.id);
 
@@ -199,9 +201,9 @@ class Tactics {
     }
 
 
-    /* ========================= */
+    /* ================================================= */
     /* INITIALISATION EFFECTIF */
-    /* ========================= */
+    /* ================================================= */
 
     initializeSquad(players) {
 
@@ -423,9 +425,9 @@ class Tactics {
     }
 
 
-    /* ========================= */
+    /* ================================================= */
     /* TITULAIRES */
-    /* ========================= */
+    /* ================================================= */
 
     addStarter(
         player,
@@ -551,9 +553,294 @@ class Tactics {
     }
 
 
-    /* ========================= */
+    /* ================================================= */
+    /* POSITIONNEMENT DES JOUEURS */
+    /* ================================================= */
+
+    getPositionLine(position) {
+
+        if (!position) {
+
+            return "unknown";
+
+        }
+
+
+        const poste =
+            String(position)
+                .toUpperCase()
+                .trim();
+
+
+        /* ========================= */
+        /* DÉFENSE */
+        /* ========================= */
+
+        const defense =
+            [
+                "DG",
+                "DD",
+                "DC",
+                "DCD",
+                "DCG",
+                "LIB",
+                "LATERAL",
+                "LAT"
+            ];
+
+
+        if (
+            defense.includes(poste)
+        ) {
+
+            return "defense";
+
+        }
+
+
+        /* ========================= */
+        /* MILIEU */
+        /* ========================= */
+
+        const midfield =
+            [
+                "MDC",
+                "MC",
+                "MOC",
+                "MG",
+                "MD",
+                "MO",
+                "MIL"
+            ];
+
+
+        if (
+            midfield.includes(poste)
+        ) {
+
+            return "midfield";
+
+        }
+
+
+        /* ========================= */
+        /* ATTAQUE */
+        /* ========================= */
+
+        const attack =
+            [
+                "AG",
+                "AD",
+                "BU",
+                "AC",
+                "ATT",
+                "SA",
+                "BT"
+            ];
+
+
+        if (
+            attack.includes(poste)
+        ) {
+
+            return "attack";
+
+        }
+
+
+        return "unknown";
+
+    }
+
+
+    getPositionStatus(
+        player,
+        position
+    ) {
+
+        if (
+            !player ||
+            !position
+        ) {
+
+            return "red";
+
+        }
+
+
+        const naturalPosition =
+            String(
+                player.poste || ""
+            )
+            .toUpperCase()
+            .trim();
+
+
+        const currentPosition =
+            String(position)
+            .toUpperCase()
+            .trim();
+
+
+        /*
+         * Poste naturel
+         */
+
+        if (
+            naturalPosition ===
+            currentPosition
+        ) {
+
+            return "green";
+
+        }
+
+
+        const naturalLine =
+            this.getPositionLine(
+                naturalPosition
+            );
+
+
+        const currentLine =
+            this.getPositionLine(
+                currentPosition
+            );
+
+
+        /*
+         * Même ligne,
+         * mais mauvais poste
+         */
+
+        if (
+            naturalLine !== "unknown" &&
+            naturalLine === currentLine
+        ) {
+
+            return "yellow";
+
+        }
+
+
+        /*
+         * Ligne différente
+         */
+
+        return "red";
+
+    }
+
+
+    getPositionPenalty(
+        player,
+        position
+    ) {
+
+        const status =
+            this.getPositionStatus(
+                player,
+                position
+            );
+
+
+        switch (status) {
+
+            case "green":
+
+                return 0;
+
+
+            case "yellow":
+
+                return -5;
+
+
+            case "red":
+
+                return -10;
+
+
+            default:
+
+                return -10;
+
+        }
+
+    }
+
+
+    getEffectiveRating(
+        player,
+        position = null
+    ) {
+
+        if (!player) {
+
+            return 0;
+
+        }
+
+
+        const baseRating =
+            Number(
+                player.note
+            ) || 0;
+
+
+        const currentPosition =
+            position ||
+            this.getPosition(
+                this.getPlayerKey(
+                    player
+                )
+            );
+
+
+        const penalty =
+            this.getPositionPenalty(
+                player,
+                currentPosition
+            );
+
+
+        return Math.max(
+            0,
+            baseRating + penalty
+        );
+
+    }
+
+
+    getPositionRating(
+        player,
+        position = null
+    ) {
+
+        return this.getEffectiveRating(
+            player,
+            position
+        );
+
+    }
+
+
+    getPositionColor(
+        player,
+        position = null
+    ) {
+
+        return this.getPositionStatus(
+            player,
+            position
+        );
+
+    }
+
+
+    /* ================================================= */
     /* REMPLAÇANTS */
-    /* ========================= */
+    /* ================================================= */
 
     addSubstitute(player) {
 
@@ -625,9 +912,9 @@ class Tactics {
     }
 
 
-    /* ========================= */
+    /* ================================================= */
     /* RÔLES */
-    /* ========================= */
+    /* ================================================= */
 
     setRole(
         playerId,
@@ -654,9 +941,9 @@ class Tactics {
     }
 
 
-    /* ========================= */
+    /* ================================================= */
     /* STYLE */
-    /* ========================= */
+    /* ================================================= */
 
     setStyle(
         type,
@@ -675,9 +962,9 @@ class Tactics {
     }
 
 
-    /* ========================= */
+    /* ================================================= */
     /* FORCE ÉQUIPE */
-    /* ========================= */
+    /* ================================================= */
 
     getTeamStrength() {
 
@@ -696,10 +983,19 @@ class Tactics {
         this.lineup.forEach(
             player => {
 
+                const position =
+                    this.getPosition(
+                        this.getPlayerKey(
+                            player
+                        )
+                    );
+
+
                 total +=
-                    Number(
-                        player.note
-                    ) || 0;
+                    this.getEffectiveRating(
+                        player,
+                        position
+                    );
 
             }
         );
@@ -713,9 +1009,9 @@ class Tactics {
     }
 
 
-    /* ========================= */
+    /* ================================================= */
     /* BONUS TACTIQUE */
-    /* ========================= */
+    /* ================================================= */
 
     getTacticalBonus() {
 
@@ -756,9 +1052,9 @@ class Tactics {
     }
 
 
-    /* ========================= */
+    /* ================================================= */
     /* DONNÉES */
-    /* ========================= */
+    /* ================================================= */
 
     getData() {
 
