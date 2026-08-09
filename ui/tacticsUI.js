@@ -3,27 +3,42 @@ class TacticsUI {
     constructor(ui) {
 
         this.ui = ui;
+
         this.container = ui.container;
+
         this.pitchElement = null;
 
         this.draggingElement = null;
+
         this.draggingPlayer = null;
+
         this.draggingType = null;
+
         this.dragStartX = 0;
+
         this.dragStartY = 0;
+
         this.isDragging = false;
 
     }
 
+
+    /* ================================================= */
+    /* INITIALISATION */
+    /* ================================================= */
 
     clear() {
 
         this.container.innerHTML = "";
 
         this.pitchElement = null;
+
         this.draggingElement = null;
+
         this.draggingPlayer = null;
+
         this.draggingType = null;
+
         this.isDragging = false;
 
     }
@@ -33,17 +48,23 @@ class TacticsUI {
 
         this.clear();
 
-        this.ui.showTitle("🧠 Tactiques");
+
+        this.ui.showTitle(
+            "🧠 Tactiques"
+        );
+
 
         this.ui.showMessage(
             "📐 Formation : " +
             tactics.getFormation()
         );
 
+
         this.ui.showMessage(
             "⚙️ Style : " +
             tactics.getCurrentTactic()
         );
+
 
         this.ui.showMessage(
             "⚽ Titulaires : " +
@@ -51,42 +72,76 @@ class TacticsUI {
             " / 11"
         );
 
+
         this.ui.showMessage(
             "🪑 Remplaçants : " +
             tactics.substitutes.length +
             " / 9"
         );
 
+
+        /* ========================= */
+        /* TERRAIN */
+        /* ========================= */
+
         this.drawPitch(
             tactics,
             manager
         );
+
+
+        /* ========================= */
+        /* REMPLAÇANTS */
+        /* ========================= */
 
         this.drawSubstitutes(
             tactics,
             manager
         );
 
+
+        /* ========================= */
+        /* RÉSERVISTES */
+        /* ========================= */
+
         this.drawReserves(
             tactics,
             manager
         );
+
+
+        /* ========================= */
+        /* FORMATIONS */
+        /* ========================= */
 
         this.drawFormationList(
             tactics,
             manager
         );
 
+
+        /* ========================= */
+        /* STYLES */
+        /* ========================= */
+
         this.drawTacticsList(
             tactics,
             manager
         );
 
+
         this.ui.createButton(
+
             "⬅️ Retour carrière",
+
             () => {
-                this.ui.showManager(manager);
+
+                this.ui.showManager(
+                    manager
+                );
+
             }
+
         );
 
     }
@@ -96,10 +151,14 @@ class TacticsUI {
     /* TERRAIN */
     /* ================================================= */
 
-    drawPitch(tactics, manager) {
+    drawPitch(
+        tactics,
+        manager
+    ) {
 
         const formation =
             tactics.getFormationData();
+
 
         if (!formation) {
 
@@ -111,126 +170,170 @@ class TacticsUI {
 
         }
 
+
         const pitch =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
-        pitch.className = "pitch";
 
-        this.pitchElement = pitch;
+        pitch.className =
+            "pitch";
 
-        formation.postes.forEach(poste => {
 
-            const player =
-                document.createElement("div");
+        this.pitchElement =
+            pitch;
 
-            player.className =
-                "pitch-player";
 
-            const selectedPlayer =
-                tactics.lineup.find(joueur => {
+        formation.postes.forEach(
+            poste => {
 
-                    const key =
-                        tactics.getPlayerKey(joueur);
-
-                    return (
-                        tactics.getPosition(key) ===
-                        poste.poste
+                const player =
+                    document.createElement(
+                        "div"
                     );
 
-                });
+
+                player.className =
+                    "pitch-player";
 
 
-            if (selectedPlayer) {
+                const selectedPlayer =
+                    tactics.lineup.find(
+                        joueur => {
 
-                player.innerHTML =
-                    "<strong>" +
-                    selectedPlayer.nom +
-                    "</strong>" +
-
-                    "<br>" +
-
-                    "<small>⭐ " +
-                    selectedPlayer.note +
-                    "</small>" +
-
-                    "<span class=\"player-position\">" +
-                    poste.poste +
-                    "</span>";
+                            const key =
+                                tactics.getPlayerKey(
+                                    joueur
+                                );
 
 
-                player.style.touchAction =
-                    "none";
-
-
-                this.enableDrag(
-                    player,
-                    selectedPlayer,
-                    "starter",
-                    poste,
-                    formation,
-                    tactics,
-                    manager
-                );
-
-
-                player.addEventListener(
-                    "click",
-                    () => {
-
-                        if (
-                            player.dataset.wasDragged ===
-                            "true"
-                        ) {
-
-                            player.dataset.wasDragged =
-                                "false";
-
-                            return;
+                            return (
+                                tactics.getPosition(
+                                    key
+                                ) ===
+                                poste.poste
+                            );
 
                         }
+                    );
 
-                        this.showPlayerActions(
-                            tactics,
-                            manager,
-                            selectedPlayer,
-                            poste.poste
+
+                if (selectedPlayer) {
+
+                    const playerKey =
+                        tactics.getPlayerKey(
+                            selectedPlayer
                         );
 
-                    }
+
+                    player.dataset.playerKey =
+                        playerKey;
+
+
+                    player.dataset.playerType =
+                        "starter";
+
+
+                    player.innerHTML =
+
+                        "<strong>" +
+                        selectedPlayer.nom +
+                        "</strong>" +
+
+                        "<br>" +
+
+                        "<small>⭐ " +
+                        selectedPlayer.note +
+                        "</small>" +
+
+                        "<span class=\"player-position\">" +
+                        poste.poste +
+                        "</span>";
+
+
+                    player.style.touchAction =
+                        "none";
+
+
+                    this.enableDrag(
+                        player,
+                        selectedPlayer,
+                        "starter",
+                        poste,
+                        formation,
+                        tactics,
+                        manager
+                    );
+
+
+                    player.addEventListener(
+                        "click",
+                        () => {
+
+                            if (
+                                player.dataset.wasDragged ===
+                                "true"
+                            ) {
+
+                                player.dataset.wasDragged =
+                                    "false";
+
+                                return;
+
+                            }
+
+
+                            this.showPlayerActions(
+                                tactics,
+                                manager,
+                                selectedPlayer,
+                                poste.poste
+                            );
+
+                        }
+                    );
+
+                } else {
+
+                    player.innerHTML =
+
+                        "<strong>" +
+                        poste.poste +
+                        "</strong>";
+
+                }
+
+
+                player.style.left =
+                    poste.x + "%";
+
+
+                player.style.top =
+                    poste.y + "%";
+
+
+                player.style.transform =
+                    "translate(-50%, -50%)";
+
+
+                pitch.appendChild(
+                    player
                 );
 
-            } else {
-
-                player.innerHTML =
-                    "<strong>" +
-                    poste.poste +
-                    "</strong>";
-
             }
+        );
 
 
-            player.style.left =
-                poste.x + "%";
-
-            player.style.top =
-                poste.y + "%";
-
-            player.style.transform =
-                "translate(-50%, -50%)";
-
-
-            pitch.appendChild(player);
-
-        });
-
-
-        this.container.appendChild(pitch);
+        this.container.appendChild(
+            pitch
+        );
 
     }
 
 
     /* ================================================= */
-    /* DRAG GENERAL */
+    /* DRAG DES JOUEURS */
     /* ================================================= */
 
     enableDrag(
@@ -253,23 +356,44 @@ class TacticsUI {
 
                 event.preventDefault();
 
+
                 this.draggingElement =
                     element;
+
 
                 this.draggingPlayer =
                     player;
 
+
                 this.draggingType =
                     type;
+
 
                 this.dragStartX =
                     event.clientX;
 
+
                 this.dragStartY =
                     event.clientY;
 
+
                 this.isDragging =
                     false;
+
+
+                try {
+
+                    element.setPointerCapture(
+                        event.pointerId
+                    );
+
+                } catch (error) {
+
+                    console.log(
+                        "Pointer capture non disponible."
+                    );
+
+                }
 
             }
         );
@@ -296,7 +420,9 @@ class TacticsUI {
                             event.clientX -
                             this.dragStartX,
                             2
-                        ) +
+                        )
+
+                        +
 
                         Math.pow(
                             event.clientY -
@@ -315,8 +441,10 @@ class TacticsUI {
                     this.isDragging =
                         true;
 
+
                     element.dataset.wasDragged =
                         "true";
+
 
                     element.classList.add(
                         "dragging"
@@ -325,7 +453,9 @@ class TacticsUI {
                 }
 
 
-                if (!this.isDragging) {
+                if (
+                    !this.isDragging
+                ) {
 
                     return;
 
@@ -333,55 +463,14 @@ class TacticsUI {
 
 
                 if (
-                    this.draggingType ===
+                    type ===
                     "starter"
                 ) {
 
-                    const rect =
-                        this.pitchElement
-                            .getBoundingClientRect();
-
-
-                    let x =
-                        (
-                            event.clientX -
-                            rect.left
-                        ) /
-                        rect.width *
-                        100;
-
-
-                    let y =
-                        (
-                            event.clientY -
-                            rect.top
-                        ) /
-                        rect.height *
-                        100;
-
-
-                    x =
-                        Math.max(
-                            2,
-                            Math.min(98, x)
-                        );
-
-
-                    y =
-                        Math.max(
-                            2,
-                            Math.min(98, y)
-                        );
-
-
-                    element.style.left =
-                        x + "%";
-
-                    element.style.top =
-                        y + "%";
-
-                    element.style.transform =
-                        "translate(-50%, -50%) scale(1.12)";
+                    this.movePitchPlayer(
+                        element,
+                        event
+                    );
 
                 }
 
@@ -403,11 +492,24 @@ class TacticsUI {
                 }
 
 
-                if (!this.isDragging) {
+                if (
+                    !this.isDragging
+                ) {
 
                     this.resetDrag();
 
                     return;
+
+                }
+
+
+                try {
+
+                    element.releasePointerCapture(
+                        event.pointerId
+                    );
+
+                } catch (error) {
 
                 }
 
@@ -436,7 +538,9 @@ class TacticsUI {
 
                 }
 
+
                 this.resetDrag();
+
 
                 this.show(
                     tactics,
@@ -450,7 +554,82 @@ class TacticsUI {
 
 
     /* ================================================= */
-    /* DROP */
+    /* DÉPLACEMENT VISUEL SUR LE TERRAIN */
+    /* ================================================= */
+
+    movePitchPlayer(
+        element,
+        event
+    ) {
+
+        if (
+            !this.pitchElement
+        ) {
+
+            return;
+
+        }
+
+
+        const rect =
+            this.pitchElement
+                .getBoundingClientRect();
+
+
+        let x =
+            (
+                event.clientX -
+                rect.left
+            ) /
+            rect.width *
+            100;
+
+
+        let y =
+            (
+                event.clientY -
+                rect.top
+            ) /
+            rect.height *
+            100;
+
+
+        x =
+            Math.max(
+                2,
+                Math.min(
+                    98,
+                    x
+                )
+            );
+
+
+        y =
+            Math.max(
+                2,
+                Math.min(
+                    98,
+                    y
+                )
+            );
+
+
+        element.style.left =
+            x + "%";
+
+
+        element.style.top =
+            y + "%";
+
+
+        element.style.transform =
+            "translate(-50%, -50%) scale(1.12)";
+
+    }
+
+
+    /* ================================================= */
+    /* FIN DU DROP */
     /* ================================================= */
 
     finishDrop(
@@ -462,6 +641,7 @@ class TacticsUI {
 
         const player =
             this.draggingPlayer;
+
 
         const type =
             this.draggingType;
@@ -486,12 +666,19 @@ class TacticsUI {
 
         if (!target) {
 
+            console.log(
+                "⚠️ Zone de dépôt inconnue."
+            );
+
+
             this.resetDrag();
+
 
             this.show(
                 tactics,
                 manager
             );
+
 
             return;
 
@@ -507,23 +694,26 @@ class TacticsUI {
 
 
         if (
-            type === "starter"
+            type ===
+            "starter"
         ) {
 
             this.handleStarterDrop(
                 player,
                 target,
-                formation,
                 tactics,
-                manager,
-                event
+                manager
             );
+
+
+            return;
 
         }
 
 
-        else if (
-            type === "substitute"
+        if (
+            type ===
+            "substitute"
         ) {
 
             this.handleSubstituteDrop(
@@ -533,11 +723,15 @@ class TacticsUI {
                 manager
             );
 
+
+            return;
+
         }
 
 
-        else if (
-            type === "reserve"
+        if (
+            type ===
+            "reserve"
         ) {
 
             this.handleReserveDrop(
@@ -547,13 +741,19 @@ class TacticsUI {
                 manager
             );
 
+
+            return;
+
         }
+
+
+        this.resetDrag();
 
     }
 
 
     /* ================================================= */
-    /* DÉTECTION DE LA ZONE */
+    /* DÉTECTION DE LA CIBLE */
     /* ================================================= */
 
     getDropTarget(
@@ -562,9 +762,131 @@ class TacticsUI {
         tactics
     ) {
 
-        /*
-         * Terrain
-         */
+        const elements =
+            document.elementsFromPoint(
+                x,
+                y
+            );
+
+
+        /* ========================= */
+        /* JOUEUR TITULAIRE */
+        /* ========================= */
+
+        for (
+            const element of elements
+        ) {
+
+            if (
+                element.classList.contains(
+                    "pitch-player"
+                )
+            ) {
+
+                const key =
+                    element.dataset.playerKey;
+
+
+                if (key) {
+
+                    const player =
+                        this.findPlayerByKey(
+                            key,
+                            tactics.lineup,
+                            tactics
+                        );
+
+
+                    if (player) {
+
+                        return {
+
+                            type:
+                                "starter-player",
+
+                            player:
+                                player,
+
+                            key:
+                                key,
+
+                            position:
+                                tactics.getPosition(
+                                    key
+                                )
+
+                        };
+
+                    }
+
+                }
+
+            }
+
+
+            /* ========================= */
+            /* CARTE JOUEUR */
+            /* ========================= */
+
+            if (
+                element.classList.contains(
+                    "tactics-player-card"
+                )
+            ) {
+
+                const type =
+                    element.dataset.playerType;
+
+
+                const key =
+                    element.dataset.playerKey;
+
+
+                if (
+                    type ===
+                    "substitute" &&
+                    key
+                ) {
+
+                    return {
+
+                        type:
+                            "substitute-player",
+
+                        key:
+                            key
+
+                    };
+
+                }
+
+
+                if (
+                    type ===
+                    "reserve" &&
+                    key
+                ) {
+
+                    return {
+
+                        type:
+                            "reserve-player",
+
+                        key:
+                            key
+
+                    };
+
+                }
+
+            }
+
+        }
+
+
+        /* ========================= */
+        /* ZONE TERRAIN */
+        /* ========================= */
 
         if (
             this.pitchElement
@@ -598,9 +920,11 @@ class TacticsUI {
 
                     return {
 
-                        type: "pitch",
+                        type:
+                            "pitch",
 
-                        poste: poste
+                        poste:
+                            poste
 
                     };
 
@@ -611,20 +935,22 @@ class TacticsUI {
         }
 
 
-        /*
-         * Remplaçants
-         */
+        /* ========================= */
+        /* ZONE REMPLAÇANTS */
+        /* ========================= */
 
-        const substitutes =
+        const substituteZone =
             document.querySelector(
                 ".tactics-substitutes-zone"
             );
 
 
-        if (substitutes) {
+        if (
+            substituteZone
+        ) {
 
             const rect =
-                substitutes
+                substituteZone
                     .getBoundingClientRect();
 
 
@@ -637,7 +963,8 @@ class TacticsUI {
 
                 return {
 
-                    type: "substitutes"
+                    type:
+                        "substitutes"
 
                 };
 
@@ -646,20 +973,22 @@ class TacticsUI {
         }
 
 
-        /*
-         * Réservistes
-         */
+        /* ========================= */
+        /* ZONE RÉSERVISTES */
+        /* ========================= */
 
-        const reserves =
+        const reserveZone =
             document.querySelector(
                 ".tactics-reserves-zone"
             );
 
 
-        if (reserves) {
+        if (
+            reserveZone
+        ) {
 
             const rect =
-                reserves
+                reserveZone
                     .getBoundingClientRect();
 
 
@@ -672,69 +1001,10 @@ class TacticsUI {
 
                 return {
 
-                    type: "reserves"
+                    type:
+                        "reserves"
 
                 };
-
-            }
-
-        }
-
-
-        /*
-         * Vérification directe
-         * des cartes
-         */
-
-        const cards =
-            document.elementsFromPoint(
-                x,
-                y
-            );
-
-
-        for (
-            const card of cards
-        ) {
-
-            if (
-                card.classList.contains(
-                    "tactics-player-card"
-                )
-            ) {
-
-                if (
-                    card.dataset.playerType ===
-                    "substitute"
-                ) {
-
-                    return {
-
-                        type: "substitute-player",
-
-                        key:
-                            card.dataset.playerKey
-
-                    };
-
-                }
-
-
-                if (
-                    card.dataset.playerType ===
-                    "reserve"
-                ) {
-
-                    return {
-
-                        type: "reserve-player",
-
-                        key:
-                            card.dataset.playerKey
-
-                    };
-
-                }
 
             }
 
@@ -747,13 +1017,12 @@ class TacticsUI {
 
 
     /* ================================================= */
-    /* TITULAIRE DROP */
+    /* TITULAIRE → ... */
     /* ================================================= */
 
     handleStarterDrop(
         player,
         target,
-        formation,
         tactics,
         manager
     ) {
@@ -770,11 +1039,69 @@ class TacticsUI {
             );
 
 
-        /*
-         * Titulaire → terrain
-         */
+        /* ========================= */
+        /* TITULAIRE → TITULAIRE */
+        /* ========================= */
 
         if (
+            target.type ===
+            "starter-player"
+        ) {
+
+            if (
+                target.key ===
+                playerKey
+            ) {
+
+                this.resetDrag();
+
+                this.show(
+                    tactics,
+                    manager
+                );
+
+                return;
+
+            }
+
+
+            const otherPlayer =
+                target.player;
+
+
+            const otherKey =
+                tactics.getPlayerKey(
+                    otherPlayer
+                );
+
+
+            tactics.setPosition(
+                playerKey,
+                target.position
+            );
+
+
+            tactics.setPosition(
+                otherKey,
+                oldPosition
+            );
+
+
+            console.log(
+                "🔄 Titulaires échangés :",
+                player.nom,
+                "↔",
+                otherPlayer.nom
+            );
+
+        }
+
+
+        /* ========================= */
+        /* TITULAIRE → POSITION VIDE */
+        /* ========================= */
+
+        else if (
             target.type ===
             "pitch"
         ) {
@@ -792,6 +1119,7 @@ class TacticsUI {
                                 other
                             );
 
+
                         if (
                             key ===
                             playerKey
@@ -801,8 +1129,11 @@ class TacticsUI {
 
                         }
 
+
                         return (
-                            tactics.getPosition(key) ===
+                            tactics.getPosition(
+                                key
+                            ) ===
                             targetPosition
                         );
 
@@ -829,14 +1160,6 @@ class TacticsUI {
                     oldPosition
                 );
 
-
-                console.log(
-                    "🔄 Échange :",
-                    player.nom,
-                    "↔",
-                    otherPlayer.nom
-                );
-
             } else {
 
                 tactics.setPosition(
@@ -844,86 +1167,22 @@ class TacticsUI {
                     targetPosition
                 );
 
-
-                console.log(
-                    "📍 Nouvelle position :",
-                    player.nom,
-                    "→",
-                    targetPosition
-                );
-
-            }
-
-        }
-
-
-        /*
-         * Titulaire → remplaçants
-         */
-
-        else if (
-            target.type ===
-            "substitutes"
-        ) {
-
-            if (
-                tactics.substitutes.length >= 9
-            ) {
-
-                this.showMessageTemporary(
-                    "⚠️ Les 9 places de remplaçants sont occupées."
-                );
-
-                this.resetDrag();
-
-                return;
-
             }
 
 
-            tactics.removeStarter(
-                playerKey
-            );
-
-
-            tactics.addSubstitute(
-                player
-            );
-
-
             console.log(
-                "🪑 Titulaire → remplaçant :",
-                player.nom
+                "📍 Nouvelle position :",
+                player.nom,
+                "→",
+                targetPosition
             );
 
         }
 
 
-        /*
-         * Titulaire → réservistes
-         */
-
-        else if (
-            target.type ===
-            "reserves"
-        ) {
-
-            tactics.removeStarter(
-                playerKey
-            );
-
-
-            console.log(
-                "📋 Titulaire → réserviste :",
-                player.nom
-            );
-
-        }
-
-
-        /*
-         * Titulaire → remplaçant précis
-         */
+        /* ========================= */
+        /* TITULAIRE → REMPLAÇANT */
+        /* ========================= */
 
         else if (
             target.type ===
@@ -948,6 +1207,7 @@ class TacticsUI {
                     oldPosition
                 );
 
+
                 return;
 
             }
@@ -955,7 +1215,75 @@ class TacticsUI {
         }
 
 
+        /* ========================= */
+        /* TITULAIRE → BANC */
+        /* ========================= */
+
+        else if (
+            target.type ===
+            "substitutes"
+        ) {
+
+            if (
+                tactics.substitutes.length >=
+                9
+            ) {
+
+                this.showMessageTemporary(
+                    "⚠️ Les 9 places du banc sont occupées."
+                );
+
+
+                this.resetDrag();
+
+
+                return;
+
+            }
+
+
+            tactics.removeStarter(
+                playerKey
+            );
+
+
+            tactics.addSubstitute(
+                player
+            );
+
+
+            console.log(
+                "🪑 Titulaire → remplaçant :",
+                player.nom
+            );
+
+        }
+
+
+        /* ========================= */
+        /* TITULAIRE → RÉSERVISTE */
+        /* ========================= */
+
+        else if (
+            target.type ===
+            "reserves"
+        ) {
+
+            tactics.removeStarter(
+                playerKey
+            );
+
+
+            console.log(
+                "📋 Titulaire → réserviste :",
+                player.nom
+            );
+
+        }
+
+
         this.resetDrag();
+
 
         this.show(
             tactics,
@@ -966,7 +1294,7 @@ class TacticsUI {
 
 
     /* ================================================= */
-    /* REMPLAÇANT DROP */
+    /* REMPLAÇANT → ... */
     /* ================================================= */
 
     handleSubstituteDrop(
@@ -982,63 +1310,9 @@ class TacticsUI {
             );
 
 
-        /*
-         * Remplaçant → terrain
-         */
-
-        if (
-            target.type ===
-            "pitch"
-        ) {
-
-            if (
-                tactics.lineup.length >= 11
-            ) {
-
-                const poste =
-                    target.poste.poste;
-
-
-                const starter =
-                    tactics.lineup.find(
-                        current => {
-
-                            const key =
-                                tactics.getPlayerKey(
-                                    current
-                                );
-
-                            return (
-                                tactics.getPosition(key) ===
-                                poste
-                            );
-
-                        }
-                    );
-
-
-                if (starter) {
-
-                    this.replacePlayer(
-                        tactics,
-                        manager,
-                        starter,
-                        player,
-                        poste
-                    );
-
-                    return;
-
-                }
-
-            }
-
-        }
-
-
-        /*
-         * Remplaçant → titulaire précis
-         */
+        /* ========================= */
+        /* REMPLAÇANT → TITULAIRE */
+        /* ========================= */
 
         if (
             target.type ===
@@ -1053,14 +1327,67 @@ class TacticsUI {
                 target.position
             );
 
+
             return;
 
         }
 
 
-        /*
-         * Remplaçant → réserviste
-         */
+        /* ========================= */
+        /* REMPLAÇANT → TERRAIN */
+        /* ========================= */
+
+        if (
+            target.type ===
+            "pitch"
+        ) {
+
+            const targetPosition =
+                target.poste.poste;
+
+
+            const starter =
+                tactics.lineup.find(
+                    current => {
+
+                        const key =
+                            tactics.getPlayerKey(
+                                current
+                            );
+
+
+                        return (
+                            tactics.getPosition(
+                                key
+                            ) ===
+                            targetPosition
+                        );
+
+                    }
+                );
+
+
+            if (starter) {
+
+                this.replacePlayer(
+                    tactics,
+                    manager,
+                    starter,
+                    player,
+                    targetPosition
+                );
+
+
+                return;
+
+            }
+
+        }
+
+
+        /* ========================= */
+        /* REMPLAÇANT → RÉSERVISTE */
+        /* ========================= */
 
         if (
             target.type ===
@@ -1080,7 +1407,63 @@ class TacticsUI {
         }
 
 
+        /* ========================= */
+        /* REMPLAÇANT → AUTRE REMPLAÇANT */
+        /* ========================= */
+
+        if (
+            target.type ===
+            "substitute-player"
+        ) {
+
+            const other =
+                this.findPlayerByKey(
+                    target.key,
+                    tactics.substitutes,
+                    tactics
+                );
+
+
+            if (
+                other &&
+                tactics.getPlayerKey(other) !==
+                playerKey
+            ) {
+
+                const index1 =
+                    tactics.substitutes.findIndex(
+                        p =>
+                            tactics.getPlayerKey(p) ===
+                            playerKey
+                    );
+
+
+                const index2 =
+                    tactics.substitutes.findIndex(
+                        p =>
+                            tactics.getPlayerKey(p) ===
+                            tactics.getPlayerKey(other)
+                    );
+
+
+                const temp =
+                    tactics.substitutes[index1];
+
+
+                tactics.substitutes[index1] =
+                    tactics.substitutes[index2];
+
+
+                tactics.substitutes[index2] =
+                    temp;
+
+            }
+
+        }
+
+
         this.resetDrag();
+
 
         this.show(
             tactics,
@@ -1091,7 +1474,7 @@ class TacticsUI {
 
 
     /* ================================================= */
-    /* RÉSERVISTE DROP */
+    /* RÉSERVISTE → ... */
     /* ================================================= */
 
     handleReserveDrop(
@@ -1101,15 +1484,9 @@ class TacticsUI {
         manager
     ) {
 
-        const playerKey =
-            tactics.getPlayerKey(
-                player
-            );
-
-
-        /*
-         * Réserviste → remplaçants
-         */
+        /* ========================= */
+        /* RÉSERVISTE → REMPLAÇANT */
+        /* ========================= */
 
         if (
             target.type ===
@@ -1117,14 +1494,17 @@ class TacticsUI {
         ) {
 
             if (
-                tactics.substitutes.length >= 9
+                tactics.substitutes.length >=
+                9
             ) {
 
                 this.showMessageTemporary(
-                    "⚠️ Les 9 places de remplaçants sont occupées."
+                    "⚠️ Les 9 places du banc sont occupées."
                 );
 
+
                 this.resetDrag();
+
 
                 return;
 
@@ -1144,91 +1524,62 @@ class TacticsUI {
         }
 
 
-        /*
-         * Réserviste → terrain
-         */
+        /* ========================= */
+        /* RÉSERVISTE → REMPLAÇANT PRÉCIS */
+        /* ========================= */
 
         else if (
             target.type ===
-            "pitch"
+            "substitute-player"
         ) {
 
             if (
-                tactics.lineup.length >= 11
+                tactics.substitutes.length >=
+                9
             ) {
 
-                const poste =
-                    target.poste.poste;
+                this.showMessageTemporary(
+                    "⚠️ Les 9 places du banc sont occupées."
+                );
 
 
-                const starter =
-                    tactics.lineup.find(
-                        current => {
-
-                            const key =
-                                tactics.getPlayerKey(
-                                    current
-                                );
-
-                            return (
-                                tactics.getPosition(key) ===
-                                poste
-                            );
-
-                        }
-                    );
+                this.resetDrag();
 
 
-                if (starter) {
+                return;
 
-                    if (
-                        tactics.substitutes.length >= 9
-                    ) {
-
-                        /*
-                         * On échange avec le
-                         * titulaire uniquement
-                         * si une place de banc
-                         * peut être libérée.
-                         */
-
-                        console.log(
-                            "⚠️ Banc complet."
-                        );
-
-                        this.resetDrag();
-
-                        return;
-
-                    }
+            }
 
 
-                    const starterKey =
-                        tactics.getPlayerKey(
-                            starter
-                        );
+            const index =
+                tactics.substitutes.findIndex(
+                    p =>
+                        tactics.getPlayerKey(p) ===
+                        target.key
+                );
 
 
-                    tactics.removeStarter(
-                        starterKey
-                    );
+            if (
+                index !== -1
+            ) {
 
+                tactics.substitutes.splice(
+                    index,
+                    0,
+                    player
+                );
 
-                    tactics.addStarter(
-                        player,
-                        poste
-                    );
+                /*
+                 * Le joueur qui était à cette
+                 * place est décalé.
+                 */
 
+                if (
+                    tactics.substitutes.length >
+                    9
+                ) {
 
-                    tactics.addSubstitute(
-                        starter
-                    );
-
-
-                    console.log(
-                        "🔄 Réserviste → titulaire :",
-                        player.nom
-                    );
+                    tactics.substitutes.pop();
 
                 }
 
@@ -1237,7 +1588,94 @@ class TacticsUI {
         }
 
 
+        /* ========================= */
+        /* RÉSERVISTE → TERRAIN */
+        /* ========================= */
+
+        else if (
+            target.type ===
+            "pitch"
+        ) {
+
+            const targetPosition =
+                target.poste.poste;
+
+
+            const starter =
+                tactics.lineup.find(
+                    current => {
+
+                        const key =
+                            tactics.getPlayerKey(
+                                current
+                            );
+
+
+                        return (
+                            tactics.getPosition(
+                                key
+                            ) ===
+                            targetPosition
+                        );
+
+                    }
+                );
+
+
+            if (starter) {
+
+                if (
+                    tactics.substitutes.length >=
+                    9
+                ) {
+
+                    this.showMessageTemporary(
+                        "⚠️ Le banc est déjà complet."
+                    );
+
+
+                    this.resetDrag();
+
+
+                    return;
+
+                }
+
+
+                const starterKey =
+                    tactics.getPlayerKey(
+                        starter
+                    );
+
+
+                tactics.removeStarter(
+                    starterKey
+                );
+
+
+                tactics.addStarter(
+                    player,
+                    targetPosition
+                );
+
+
+                tactics.addSubstitute(
+                    starter
+                );
+
+
+                console.log(
+                    "🔄 Réserviste → titulaire :",
+                    player.nom
+                );
+
+            }
+
+        }
+
+
         this.resetDrag();
+
 
         this.show(
             tactics,
@@ -1248,110 +1686,7 @@ class TacticsUI {
 
 
     /* ================================================= */
-    /* POSITION LA PLUS PROCHE */
-    /* ================================================= */
-
-    findNearestPosition(
-        clientX,
-        clientY,
-        formation
-    ) {
-
-        if (
-            !this.pitchElement ||
-            !formation
-        ) {
-
-            return null;
-
-        }
-
-
-        const rect =
-            this.pitchElement
-                .getBoundingClientRect();
-
-
-        const x =
-            (
-                clientX -
-                rect.left
-            ) /
-            rect.width *
-            100;
-
-
-        const y =
-            (
-                clientY -
-                rect.top
-            ) /
-            rect.height *
-            100;
-
-
-        let nearest =
-            null;
-
-
-        let smallestDistance =
-            Infinity;
-
-
-        formation.postes.forEach(
-            poste => {
-
-                const distance =
-                    Math.sqrt(
-
-                        Math.pow(
-                            x -
-                            poste.x,
-                            2
-                        ) +
-
-                        Math.pow(
-                            y -
-                            poste.y,
-                            2
-                        )
-
-                    );
-
-
-                if (
-                    distance <
-                    smallestDistance
-                ) {
-
-                    smallestDistance =
-                        distance;
-
-                    nearest =
-                        poste;
-
-                }
-
-            }
-        );
-
-
-        if (
-            smallestDistance > 18
-        ) {
-
-            return null;
-
-        }
-
-
-        return nearest;
-
-    }
-
-
-    /* ================================================= */
-    /* REMPLACEMENT */
+    /* REMPLACEMENT TITULAIRE ↔ REMPLAÇANT */
     /* ================================================= */
 
     replacePlayer(
@@ -1379,7 +1714,8 @@ class TacticsUI {
                 player =>
                     tactics.getPlayerKey(
                         player
-                    ) === starterKey
+                    ) ===
+                    starterKey
             );
 
 
@@ -1388,7 +1724,8 @@ class TacticsUI {
                 player =>
                     tactics.getPlayerKey(
                         player
-                    ) === substituteKey
+                    ) ===
+                    substituteKey
             );
 
 
@@ -1430,7 +1767,7 @@ class TacticsUI {
 
 
         console.log(
-            "🔄 Remplacement :",
+            "🔄 Remplacement effectué :",
             starter.nom,
             "→",
             substitute.nom
@@ -1439,176 +1776,10 @@ class TacticsUI {
 
         this.resetDrag();
 
+
         this.show(
             tactics,
             manager
-        );
-
-    }
-
-
-    /* ================================================= */
-    /* REMPLAÇANTS */
-    /* ================================================= */
-
-    drawSubstitutes(
-        tactics,
-        manager
-    ) {
-
-        this.ui.showTitle(
-            "🪑 Remplaçants"
-        );
-
-
-        const zone =
-            document.createElement("div");
-
-        zone.className =
-            "tactics-substitutes-zone";
-
-
-        if (
-            tactics.substitutes.length === 0
-        ) {
-
-            zone.innerHTML =
-                "<p>Aucun remplaçant.</p>";
-
-            this.container.appendChild(
-                zone
-            );
-
-            return;
-
-        }
-
-
-        tactics.substitutes.forEach(
-            player => {
-
-                const card =
-                    this.createPlayerCard(
-                        player,
-                        "substitute",
-                        tactics,
-                        manager
-                    );
-
-
-                zone.appendChild(
-                    card
-                );
-
-            }
-        );
-
-
-        this.container.appendChild(
-            zone
-        );
-
-    }
-
-
-    /* ================================================= */
-    /* RÉSERVISTES */
-    /* ================================================= */
-
-    drawReserves(
-        tactics,
-        manager
-    ) {
-
-        const players =
-            game.players || [];
-
-
-        const reserves =
-            players.filter(
-                player => {
-
-                    const key =
-                        tactics.getPlayerKey(
-                            player
-                        );
-
-
-                    const starter =
-                        tactics.lineup.some(
-                            p =>
-                                tactics.getPlayerKey(p) ===
-                                key
-                        );
-
-
-                    const substitute =
-                        tactics.substitutes.some(
-                            p =>
-                                tactics.getPlayerKey(p) ===
-                                key
-                        );
-
-
-                    return (
-                        !starter &&
-                        !substitute
-                    );
-
-                }
-            );
-
-
-        this.ui.showTitle(
-            "📋 Réservistes"
-        );
-
-
-        const zone =
-            document.createElement("div");
-
-        zone.className =
-            "tactics-reserves-zone";
-
-
-        if (
-            reserves.length === 0
-        ) {
-
-            zone.innerHTML =
-                "<p>Aucun réserviste.</p>";
-
-            this.container.appendChild(
-                zone
-            );
-
-            return;
-
-        }
-
-
-        reserves.forEach(
-            player => {
-
-                const card =
-                    this.createPlayerCard(
-                        player,
-                        "reserve",
-                        tactics,
-                        manager
-                    );
-
-
-                zone.appendChild(
-                    card
-                );
-
-            }
-        );
-
-
-        this.container.appendChild(
-            zone
         );
 
     }
@@ -1626,7 +1797,9 @@ class TacticsUI {
     ) {
 
         const card =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         card.className =
@@ -1744,8 +1917,14 @@ class TacticsUI {
     ) {
 
         let startX = 0;
+
         let startY = 0;
+
         let dragging = false;
+
+
+        element.dataset.wasDragged =
+            "false";
 
 
         element.addEventListener(
@@ -1754,11 +1933,14 @@ class TacticsUI {
 
                 event.preventDefault();
 
+
                 startX =
                     event.clientX;
 
+
                 startY =
                     event.clientY;
+
 
                 dragging =
                     false;
@@ -1767,11 +1949,24 @@ class TacticsUI {
                 this.draggingElement =
                     element;
 
+
                 this.draggingPlayer =
                     player;
 
+
                 this.draggingType =
                     type;
+
+
+                try {
+
+                    element.setPointerCapture(
+                        event.pointerId
+                    );
+
+                } catch (error) {
+
+                }
 
             }
         );
@@ -1798,7 +1993,9 @@ class TacticsUI {
                             event.clientX -
                             startX,
                             2
-                        ) +
+                        )
+
+                        +
 
                         Math.pow(
                             event.clientY -
@@ -1817,8 +2014,10 @@ class TacticsUI {
                     dragging =
                         true;
 
+
                     element.dataset.wasDragged =
                         "true";
+
 
                     element.classList.add(
                         "dragging"
@@ -1853,6 +2052,17 @@ class TacticsUI {
                 }
 
 
+                try {
+
+                    element.releasePointerCapture(
+                        event.pointerId
+                    );
+
+                } catch (error) {
+
+                }
+
+
                 this.finishDrop(
                     event,
                     tactics.getFormationData(),
@@ -1870,12 +2080,322 @@ class TacticsUI {
 
                 this.resetDrag();
 
+
                 this.show(
                     tactics,
                     manager
                 );
 
             }
+        );
+
+    }
+
+
+    /* ================================================= */
+    /* REMPLAÇANTS */
+    /* ================================================= */
+
+    drawSubstitutes(
+        tactics,
+        manager
+    ) {
+
+        this.ui.showTitle(
+            "🪑 Remplaçants"
+        );
+
+
+        const zone =
+            document.createElement(
+                "div"
+            );
+
+
+        zone.className =
+            "tactics-substitutes-zone";
+
+
+        if (
+            tactics.substitutes.length ===
+            0
+        ) {
+
+            zone.innerHTML =
+                "<p>Aucun remplaçant.</p>";
+
+
+            this.container.appendChild(
+                zone
+            );
+
+
+            return;
+
+        }
+
+
+        tactics.substitutes.forEach(
+            player => {
+
+                const card =
+                    this.createPlayerCard(
+                        player,
+                        "substitute",
+                        tactics,
+                        manager
+                    );
+
+
+                zone.appendChild(
+                    card
+                );
+
+            }
+        );
+
+
+        this.container.appendChild(
+            zone
+        );
+
+    }
+
+
+    /* ================================================= */
+    /* RÉSERVISTES */
+    /* ================================================= */
+
+    drawReserves(
+        tactics,
+        manager
+    ) {
+
+        const players =
+            game.players || [];
+
+
+        const reserves =
+            players.filter(
+                player => {
+
+                    const key =
+                        tactics.getPlayerKey(
+                            player
+                        );
+
+
+                    const starter =
+                        tactics.lineup.some(
+                            p =>
+                                tactics.getPlayerKey(
+                                    p
+                                ) ===
+                                key
+                        );
+
+
+                    const substitute =
+                        tactics.substitutes.some(
+                            p =>
+                                tactics.getPlayerKey(
+                                    p
+                                ) ===
+                                key
+                        );
+
+
+                    return (
+                        !starter &&
+                        !substitute
+                    );
+
+                }
+            );
+
+
+        this.ui.showTitle(
+            "📋 Réservistes"
+        );
+
+
+        const zone =
+            document.createElement(
+                "div"
+            );
+
+
+        zone.className =
+            "tactics-reserves-zone";
+
+
+        if (
+            reserves.length ===
+            0
+        ) {
+
+            zone.innerHTML =
+                "<p>Aucun réserviste.</p>";
+
+
+            this.container.appendChild(
+                zone
+            );
+
+
+            return;
+
+        }
+
+
+        reserves.forEach(
+            player => {
+
+                const card =
+                    this.createPlayerCard(
+                        player,
+                        "reserve",
+                        tactics,
+                        manager
+                    );
+
+
+                zone.appendChild(
+                    card
+                );
+
+            }
+        );
+
+
+        this.container.appendChild(
+            zone
+        );
+
+    }
+
+
+    /* ================================================= */
+    /* ACTIONS TITULAIRE */
+    /* ================================================= */
+
+    showPlayerActions(
+        tactics,
+        manager,
+        player,
+        position
+    ) {
+
+        const oldActions =
+            this.container.querySelector(
+                ".player-actions"
+            );
+
+
+        if (oldActions) {
+
+            oldActions.remove();
+
+        }
+
+
+        const box =
+            document.createElement(
+                "div"
+            );
+
+
+        box.className =
+            "player-actions";
+
+
+        box.innerHTML = `
+
+            <h3>
+                ⚽ ${player.prenom}
+                ${player.nom}
+            </h3>
+
+            <p>
+                📍 Poste :
+                ${position}
+            </p>
+
+            <p>
+                ⭐ Note :
+                ${player.note}
+            </p>
+
+        `;
+
+
+        const replaceButton =
+            document.createElement(
+                "button"
+            );
+
+
+        replaceButton.textContent =
+            "🔄 Remplacer";
+
+
+        replaceButton.addEventListener(
+            "click",
+            () => {
+
+                this.showReplacementList(
+                    tactics,
+                    manager,
+                    player,
+                    position
+                );
+
+            }
+        );
+
+
+        box.appendChild(
+            replaceButton
+        );
+
+
+        const removeButton =
+            document.createElement(
+                "button"
+            );
+
+
+        removeButton.textContent =
+            "❌ Retirer des titulaires";
+
+
+        removeButton.addEventListener(
+            "click",
+            () => {
+
+                tactics.removeStarter(
+                    tactics.getPlayerKey(
+                        player
+                    )
+                );
+
+
+                this.show(
+                    tactics,
+                    manager
+                );
+
+            }
+        );
+
+
+        box.appendChild(
+            removeButton
+        );
+
+
+        this.insertActionsBox(
+            box
         );
 
     }
@@ -1891,21 +2411,23 @@ class TacticsUI {
         player
     ) {
 
-        const old =
+        const oldActions =
             this.container.querySelector(
                 ".player-actions"
             );
 
 
-        if (old) {
+        if (oldActions) {
 
-            old.remove();
+            oldActions.remove();
 
         }
 
 
         const box =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         box.className =
@@ -1920,18 +2442,22 @@ class TacticsUI {
             </h3>
 
             <p>
-                📍 ${player.poste}
+                📍 Poste :
+                ${player.poste}
             </p>
 
             <p>
-                ⭐ ${player.note}
+                ⭐ Note :
+                ${player.note}
             </p>
 
         `;
 
 
         const reserveButton =
-            document.createElement("button");
+            document.createElement(
+                "button"
+            );
 
 
         reserveButton.textContent =
@@ -1943,7 +2469,9 @@ class TacticsUI {
             () => {
 
                 tactics.removeSubstitute(
-                    tactics.getPlayerKey(player)
+                    tactics.getPlayerKey(
+                        player
+                    )
                 );
 
 
@@ -1961,7 +2489,7 @@ class TacticsUI {
         );
 
 
-        this.container.appendChild(
+        this.insertActionsBox(
             box
         );
 
@@ -1978,21 +2506,23 @@ class TacticsUI {
         player
     ) {
 
-        const old =
+        const oldActions =
             this.container.querySelector(
                 ".player-actions"
             );
 
 
-        if (old) {
+        if (oldActions) {
 
-            old.remove();
+            oldActions.remove();
 
         }
 
 
         const box =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         box.className =
@@ -2007,29 +2537,34 @@ class TacticsUI {
             </h3>
 
             <p>
-                📍 ${player.poste}
+                📍 Poste :
+                ${player.poste}
             </p>
 
             <p>
-                ⭐ ${player.note}
+                ⭐ Note :
+                ${player.note}
             </p>
 
         `;
 
 
         if (
-            tactics.substitutes.length < 9
+            tactics.substitutes.length <
+            9
         ) {
 
-            const button =
-                document.createElement("button");
+            const substituteButton =
+                document.createElement(
+                    "button"
+                );
 
 
-            button.textContent =
+            substituteButton.textContent =
                 "🪑 Mettre remplaçant";
 
 
-            button.addEventListener(
+            substituteButton.addEventListener(
                 "click",
                 () => {
 
@@ -2048,13 +2583,13 @@ class TacticsUI {
 
 
             box.appendChild(
-                button
+                substituteButton
             );
 
         }
 
 
-        this.container.appendChild(
+        this.insertActionsBox(
             box
         );
 
@@ -2062,115 +2597,16 @@ class TacticsUI {
 
 
     /* ================================================= */
-    /* ACTIONS TITULAIRE */
+    /* ACTIONS SOUS LE TERRAIN */
     /* ================================================= */
 
-    showPlayerActions(
-        tactics,
-        manager,
-        player,
-        position
+    insertActionsBox(
+        box
     ) {
 
-        const old =
-            this.container.querySelector(
-                ".player-actions"
-            );
-
-
-        if (old) {
-
-            old.remove();
-
-        }
-
-
-        const box =
-            document.createElement("div");
-
-
-        box.className =
-            "player-actions";
-
-
-        box.innerHTML = `
-
-            <h3>
-                ⚽ ${player.prenom}
-                ${player.nom}
-            </h3>
-
-            <p>
-                📍 ${position}
-            </p>
-
-            <p>
-                ⭐ ${player.note}
-            </p>
-
-        `;
-
-
-        const replace =
-            document.createElement("button");
-
-
-        replace.textContent =
-            "🔄 Remplacer";
-
-
-        replace.addEventListener(
-            "click",
-            () => {
-
-                this.showReplacementList(
-                    tactics,
-                    manager,
-                    player,
-                    position
-                );
-
-            }
-        );
-
-
-        box.appendChild(
-            replace
-        );
-
-
-        const remove =
-            document.createElement("button");
-
-
-        remove.textContent =
-            "❌ Retirer des titulaires";
-
-
-        remove.addEventListener(
-            "click",
-            () => {
-
-                tactics.removeStarter(
-                    tactics.getPlayerKey(player)
-                );
-
-
-                this.show(
-                    tactics,
-                    manager
-                );
-
-            }
-        );
-
-
-        box.appendChild(
-            remove
-        );
-
-
-        if (this.pitchElement) {
+        if (
+            this.pitchElement
+        ) {
 
             this.pitchElement.insertAdjacentElement(
                 "afterend",
@@ -2187,8 +2623,12 @@ class TacticsUI {
 
 
         box.scrollIntoView({
-            behavior: "smooth",
-            block: "center"
+            behavior:
+                "smooth",
+
+            block:
+                "center"
+
         });
 
     }
@@ -2205,36 +2645,50 @@ class TacticsUI {
         position
     ) {
 
-        const old =
+        const oldActions =
             this.container.querySelector(
                 ".player-actions"
             );
 
 
-        if (old) {
+        if (oldActions) {
 
-            old.remove();
+            oldActions.remove();
 
         }
 
 
         const box =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         box.className =
             "player-actions";
 
 
-        box.innerHTML =
-            "<h3>🔄 Remplacer</h3>";
+        box.innerHTML = `
+
+            <h3>
+                🔄 Remplacer
+            </h3>
+
+            <p>
+                ${starter.prenom}
+                ${starter.nom}
+            </p>
+
+        `;
 
 
         tactics.substitutes.forEach(
             substitute => {
 
                 const button =
-                    document.createElement("button");
+                    document.createElement(
+                        "button"
+                    );
 
 
                 button.textContent =
@@ -2269,15 +2723,17 @@ class TacticsUI {
         );
 
 
-        const cancel =
-            document.createElement("button");
+        const cancelButton =
+            document.createElement(
+                "button"
+            );
 
 
-        cancel.textContent =
+        cancelButton.textContent =
             "⬅️ Annuler";
 
 
-        cancel.addEventListener(
+        cancelButton.addEventListener(
             "click",
             () => {
 
@@ -2291,11 +2747,11 @@ class TacticsUI {
 
 
         box.appendChild(
-            cancel
+            cancelButton
         );
 
 
-        this.container.appendChild(
+        this.insertActionsBox(
             box
         );
 
@@ -2312,12 +2768,129 @@ class TacticsUI {
         tactics
     ) {
 
+        if (
+            !players
+        ) {
+
+            return null;
+
+        }
+
+
         return players.find(
             player =>
                 tactics.getPlayerKey(
                     player
-                ) === String(key)
+                ) ===
+                String(key)
+        ) || null;
+
+    }
+
+
+    /* ================================================= */
+    /* POSITION LA PLUS PROCHE */
+    /* ================================================= */
+
+    findNearestPosition(
+        clientX,
+        clientY,
+        formation
+    ) {
+
+        if (
+            !this.pitchElement ||
+            !formation
+        ) {
+
+            return null;
+
+        }
+
+
+        const rect =
+            this.pitchElement
+                .getBoundingClientRect();
+
+
+        const x =
+            (
+                clientX -
+                rect.left
+            ) /
+            rect.width *
+            100;
+
+
+        const y =
+            (
+                clientY -
+                rect.top
+            ) /
+            rect.height *
+            100;
+
+
+        let nearest =
+            null;
+
+
+        let smallestDistance =
+            Infinity;
+
+
+        formation.postes.forEach(
+            poste => {
+
+                const distance =
+                    Math.sqrt(
+
+                        Math.pow(
+                            x -
+                            poste.x,
+                            2
+                        )
+
+                        +
+
+                        Math.pow(
+                            y -
+                            poste.y,
+                            2
+                        )
+
+                    );
+
+
+                if (
+                    distance <
+                    smallestDistance
+                ) {
+
+                    smallestDistance =
+                        distance;
+
+
+                    nearest =
+                        poste;
+
+                }
+
+            }
         );
+
+
+        if (
+            smallestDistance >
+            18
+        ) {
+
+            return null;
+
+        }
+
+
+        return nearest;
 
     }
 
@@ -2331,7 +2904,9 @@ class TacticsUI {
     ) {
 
         const box =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         box.className =
@@ -2344,7 +2919,7 @@ class TacticsUI {
             "</p>";
 
 
-        this.container.appendChild(
+        this.insertActionsBox(
             box
         );
 
@@ -2352,7 +2927,9 @@ class TacticsUI {
         setTimeout(
             () => {
 
-                if (box.parentNode) {
+                if (
+                    box.parentNode
+                ) {
 
                     box.remove();
 
@@ -2385,11 +2962,14 @@ class TacticsUI {
         this.draggingElement =
             null;
 
+
         this.draggingPlayer =
             null;
 
+
         this.draggingType =
             null;
+
 
         this.isDragging =
             false;
@@ -2417,7 +2997,9 @@ class TacticsUI {
                 formation => {
 
                     this.ui.createButton(
+
                         formation.nom,
+
                         () => {
 
                             if (
@@ -2434,6 +3016,7 @@ class TacticsUI {
                             }
 
                         }
+
                     );
 
                 }
@@ -2443,7 +3026,7 @@ class TacticsUI {
 
 
     /* ================================================= */
-    /* STYLES */
+    /* STYLES TACTIQUES */
     /* ================================================= */
 
     drawTacticsList(
@@ -2462,7 +3045,9 @@ class TacticsUI {
                 style => {
 
                     this.ui.createButton(
+
                         style.nom,
+
                         () => {
 
                             if (
@@ -2479,6 +3064,7 @@ class TacticsUI {
                             }
 
                         }
+
                     );
 
                 }
