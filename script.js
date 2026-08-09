@@ -115,9 +115,14 @@ function chooseClub(club) {
         );
 
 
-    game.calendar.generateCalendar();
+    /*
+     * Génération complète :
+     * - matchs aller
+     * - matchs retour
+     * - mélange aléatoire des journées
+     */
 
-    game.calendar.generateReturnMatches();
+    game.calendar.generateFullCalendar();
 
 
     console.log(
@@ -447,9 +452,13 @@ function loadCareer(slot = 1) {
             );
 
 
-        game.calendar.generateCalendar();
+        /*
+         * Régénération du même type
+         * de calendrier :
+         * aller + retour + mélange
+         */
 
-        game.calendar.generateReturnMatches();
+        game.calendar.generateFullCalendar();
 
 
         console.log(
