@@ -608,16 +608,16 @@ class UI {
 
 
         /* ========================= */
-        /* SAUVEGARDES */
+        /* SAUVEGARDER */
         /* ========================= */
 
         this.createButton(
 
-            "💾 Sauvegardes",
+            "💾 Sauvegarder",
 
             () => {
 
-                this.showSaveMenu(
+                this.saveCurrentCareer(
                     manager
                 );
 
@@ -628,17 +628,209 @@ class UI {
 
 
         /* ========================= */
-        /* MENU CARRIÈRE */
+        /* RETOUR AU MENU */
         /* ========================= */
 
         this.createButton(
 
-            "🏠 Menu carrière",
+            "🏠 Retour au menu",
 
             () => {
 
-                console.log(
-                    "Retour menu"
+                this.showMainMenu();
+
+            }
+
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* SAUVEGARDER LA CARRIÈRE */
+    /* ================================================= */
+
+    saveCurrentCareer(manager) {
+
+        /*
+         * Si la carrière possède déjà
+         * un slot, on sauvegarde directement.
+         */
+
+        if (
+            game.currentSaveSlot
+        ) {
+
+            const success =
+                saveCareer(
+                    game.currentSaveSlot
+                );
+
+
+            if (success) {
+
+                alert(
+                    "✅ Carrière sauvegardée !"
+                );
+
+            }
+
+
+            return;
+
+        }
+
+
+        /*
+         * Nouvelle carrière :
+         * aucun slot associé.
+         */
+
+        this.showSaveChoice(
+            manager
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* CHOIX DU SLOT */
+    /* ================================================= */
+
+    showSaveChoice(manager) {
+
+        this.clear();
+
+
+        this.showTitle(
+            "💾 Sauvegarder la carrière"
+        );
+
+
+        this.showMessage(
+            "Choisis un emplacement pour cette carrière."
+        );
+
+
+        const saves =
+            game.save.getSaveList();
+
+
+        for (
+            let slot = 1;
+            slot <= 3;
+            slot++
+        ) {
+
+            const save =
+                saves.find(
+                    item =>
+                        item.slot === slot
+                );
+
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+
+            if (save) {
+
+                const date =
+                    new Date(
+                        save.date
+                    );
+
+
+                button.textContent =
+                    "💾 Slot " +
+                    slot +
+                    " — " +
+                    date.toLocaleString();
+
+            } else {
+
+                button.textContent =
+                    "💾 Slot " +
+                    slot +
+                    " — Vide";
+
+            }
+
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    if (save) {
+
+                        const confirmed =
+                            confirm(
+
+                                "⚠️ Le slot " +
+                                slot +
+                                " contient déjà une carrière.\n\n" +
+                                "Veux-tu la remplacer ?"
+
+                            );
+
+
+                        if (!confirmed) {
+
+                            return;
+
+                        }
+
+                    }
+
+
+                    const success =
+                        saveCareer(
+                            slot
+                        );
+
+
+                    if (success) {
+
+                        game.currentSaveSlot =
+                            slot;
+
+
+                        alert(
+                            "✅ Carrière sauvegardée dans le slot " +
+                            slot +
+                            " !"
+                        );
+
+
+                        this.showManager(
+                            manager
+                        );
+
+                    }
+
+                }
+            );
+
+
+            this.container.appendChild(
+                button
+            );
+
+        }
+
+
+        this.createButton(
+
+            "⬅️ Retour",
+
+            () => {
+
+                this.showManager(
+                    manager
                 );
 
             }
@@ -650,7 +842,7 @@ class UI {
 
 
     /* ================================================= */
-    /* MENU SAUVEGARDES CARRIÈRE */
+    /* MENU SAUVEGARDES CARRIÈRE EXISTANT */
     /* ================================================= */
 
     showSaveMenu(manager) {
