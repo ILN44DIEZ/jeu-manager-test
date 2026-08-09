@@ -4,13 +4,18 @@ class SquadUI {
 
         this.ui = ui;
 
-        this.container = ui.container;
+        this.container =
+            ui.container;
 
         this.currentManager = null;
 
     }
 
 
+
+    /* ================================================= */
+    /* NETTOYAGE */
+    /* ================================================= */
 
     clear() {
 
@@ -19,6 +24,10 @@ class SquadUI {
     }
 
 
+
+    /* ================================================= */
+    /* AFFICHAGE EFFECTIF */
+    /* ================================================= */
 
     showClubPlayers(players, manager) {
 
@@ -35,21 +44,184 @@ class SquadUI {
         );
 
 
-        if (players.length === 0) {
+        if (
+            !players ||
+            players.length === 0
+        ) {
 
             this.ui.showMessage(
                 "Aucun joueur trouvé."
             );
 
+            return;
+
         }
 
 
-        players.forEach(player => {
+        /* ================================================= */
+        /* CATÉGORIES */
+        /* ================================================= */
 
-            this.showPlayerCard(player);
+        const goalkeepers = [];
 
-        });
+        const defenders = [];
 
+        const midfielders = [];
+
+        const attackers = [];
+
+        const others = [];
+
+
+        players.forEach(
+            player => {
+
+                const position =
+                    String(
+                        player.poste || ""
+                    ).toUpperCase();
+
+
+                /* ========================= */
+                /* GARDIENS */
+                /* ========================= */
+
+                if (
+                    position === "GB" ||
+                    position === "GK" ||
+                    position.includes("GARDIEN")
+                ) {
+
+                    goalkeepers.push(
+                        player
+                    );
+
+                    return;
+
+                }
+
+
+                /* ========================= */
+                /* DÉFENSEURS */
+                /* ========================= */
+
+                if (
+                    position.startsWith("D") ||
+                    position.includes("DC") ||
+                    position.includes("DD") ||
+                    position.includes("DG") ||
+                    position.includes("DLD") ||
+                    position.includes("DLG")
+                ) {
+
+                    defenders.push(
+                        player
+                    );
+
+                    return;
+
+                }
+
+
+                /* ========================= */
+                /* MILIEUX */
+                /* ========================= */
+
+                if (
+                    position.startsWith("M") ||
+                    position.includes("MC") ||
+                    position.includes("MD") ||
+                    position.includes("MG") ||
+                    position.includes("MOC") ||
+                    position.includes("MDC")
+                ) {
+
+                    midfielders.push(
+                        player
+                    );
+
+                    return;
+
+                }
+
+
+                /* ========================= */
+                /* ATTAQUANTS */
+                /* ========================= */
+
+                if (
+                    position.startsWith("A") ||
+                    position.includes("BU") ||
+                    position.includes("AC") ||
+                    position.includes("AD") ||
+                    position.includes("AG") ||
+                    position.includes("AT")
+                ) {
+
+                    attackers.push(
+                        player
+                    );
+
+                    return;
+
+                }
+
+
+                /* ========================= */
+                /* AUTRES */
+                /* ========================= */
+
+                others.push(
+                    player
+                );
+
+            }
+        );
+
+
+        /* ================================================= */
+        /* AFFICHAGE DES CATÉGORIES */
+        /* ================================================= */
+
+        this.showPlayerCategory(
+            "🧤 Gardiens",
+            goalkeepers
+        );
+
+
+        this.showPlayerCategory(
+            "🛡️ Défenseurs",
+            defenders
+        );
+
+
+        this.showPlayerCategory(
+            "⚙️ Milieux",
+            midfielders
+        );
+
+
+        this.showPlayerCategory(
+            "⚡ Attaquants",
+            attackers
+        );
+
+
+        if (
+            others.length > 0
+        ) {
+
+            this.showPlayerCategory(
+                "👤 Autres",
+                others
+            );
+
+        }
+
+
+        /* ================================================= */
+        /* RETOUR */
+        /* ================================================= */
 
         this.ui.createButton(
 
@@ -69,10 +241,98 @@ class SquadUI {
 
 
 
-    showPlayerCard(player) {
+    /* ================================================= */
+    /* CATÉGORIE DE JOUEURS */
+    /* ================================================= */
+
+    showPlayerCategory(
+        title,
+        players
+    ) {
+
+        if (
+            players.length === 0
+        ) {
+
+            return;
+
+        }
+
+
+        this.ui.showTitle(
+            title
+        );
+
+
+        /* ================================================= */
+        /* GRILLE */
+        /* ================================================= */
+
+        const grid =
+            document.createElement(
+                "div"
+            );
+
+
+        grid.className =
+            "players-grid";
+
+
+        grid.style.display =
+            "grid";
+
+
+        grid.style.gridTemplateColumns =
+            "repeat(4, minmax(0, 1fr))";
+
+
+        grid.style.gap =
+            "10px";
+
+
+        grid.style.width =
+            "100%";
+
+
+        grid.style.boxSizing =
+            "border-box";
+
+
+        players.forEach(
+            player => {
+
+                const card =
+                    this.createPlayerCard(
+                        player
+                    );
+
+
+                grid.appendChild(
+                    card
+                );
+
+            }
+        );
+
+
+        this.container.appendChild(
+            grid
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* CARTE JOUEUR */
+    /* ================================================= */
+
+    createPlayerCard(player) {
 
         const card =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         card.className =
@@ -82,31 +342,95 @@ class SquadUI {
         card.style.border =
             "1px solid #ccc";
 
+
         card.style.borderRadius =
             "10px";
 
+
         card.style.padding =
-            "12px";
+            "10px";
+
 
         card.style.margin =
-            "10px 0";
+            "0";
+
 
         card.style.cursor =
             "pointer";
 
 
+        card.style.textAlign =
+            "center";
+
+
+        card.style.boxSizing =
+            "border-box";
+
+
+        card.style.minWidth =
+            "0";
+
+
+        card.style.transition =
+            "transform 0.15s";
+
+
+        /* ================================================= */
+        /* CONTENU */
+        /* ================================================= */
+
         card.innerHTML = `
 
-            <strong>${player.prenom} ${player.nom}</strong><br>
+            <strong>
+                ${player.prenom}
+                ${player.nom}
+            </strong>
 
-            ${player.poste} • ⭐ ${player.note}<br>
+            <br>
 
-            🎂 ${player.age} ans<br>
+            ${player.poste}
+            • ⭐ ${player.note}
+
+            <br>
+
+            🎂 ${player.age} ans
+
+            <br>
 
             💶 ${player.valeur.toLocaleString()} €
 
         `;
 
+
+        /* ================================================= */
+        /* EFFET SOURIS */
+        /* ================================================= */
+
+        card.addEventListener(
+            "mouseenter",
+            () => {
+
+                card.style.transform =
+                    "scale(1.02)";
+
+            }
+        );
+
+
+        card.addEventListener(
+            "mouseleave",
+            () => {
+
+                card.style.transform =
+                    "scale(1)";
+
+            }
+        );
+
+
+        /* ================================================= */
+        /* CLIC */
+        /* ================================================= */
 
         card.addEventListener(
 
@@ -127,13 +451,20 @@ class SquadUI {
         );
 
 
-        this.container.appendChild(card);
+        return card;
 
     }
 
 
 
-    showPlayerProfile(player, manager) {
+    /* ================================================= */
+    /* FICHE JOUEUR */
+    /* ================================================= */
+
+    showPlayerProfile(
+        player,
+        manager
+    ) {
 
         this.clear();
 
@@ -150,20 +481,24 @@ class SquadUI {
             player.nationalite
         );
 
+
         this.ui.showMessage(
             "📍 Poste : " +
             player.poste
         );
+
 
         this.ui.showMessage(
             "⭐ Note : " +
             player.note
         );
 
+
         this.ui.showMessage(
             "📈 Potentiel : " +
             player.potentiel
         );
+
 
         this.ui.showMessage(
             "🎂 Âge : " +
@@ -171,11 +506,13 @@ class SquadUI {
             " ans"
         );
 
+
         this.ui.showMessage(
             "📏 Taille : " +
             player.taille +
             " cm"
         );
+
 
         this.ui.showMessage(
             "⚖️ Poids : " +
@@ -183,15 +520,18 @@ class SquadUI {
             " kg"
         );
 
+
         this.ui.showMessage(
             "👟 Pied : " +
             player.pied
         );
 
+
         this.ui.showMessage(
             "🔢 Numéro : " +
             player.numero
         );
+
 
         this.ui.showMessage(
             "💶 Valeur : " +
@@ -199,37 +539,51 @@ class SquadUI {
             " €"
         );
 
+
         this.ui.showMessage(
             "💰 Salaire : " +
             player.salaire.toLocaleString() +
             " €"
         );
 
+
         this.ui.showMessage(
             "📄 Contrat : " +
             player.contratFin
         );
+
 
         this.ui.showMessage(
             "😊 Forme : " +
             player.forme
         );
 
+
         this.ui.showMessage(
             "💪 Moral : " +
             player.moral
         );
+
 
         this.ui.showMessage(
             "😴 Fatigue : " +
             player.fatigue
         );
 
+
         this.ui.showMessage(
             "🏥 Blessure : " +
-            (player.blessure ? "Oui" : "Non")
+            (
+                player.blessure
+                    ? "Oui"
+                    : "Non"
+            )
         );
 
+
+        /* ================================================= */
+        /* RETOUR */
+        /* ================================================= */
 
         this.ui.createButton(
 
