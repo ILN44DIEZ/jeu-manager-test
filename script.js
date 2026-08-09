@@ -12,6 +12,14 @@ game.currentSaveSlot = null;
 
 function chooseClub(club) {
 
+    /*
+     * Nouvelle carrière :
+     * aucun slot de sauvegarde associé.
+     */
+
+    game.currentSaveSlot = null;
+
+
     console.log(
         "Club sélectionné :",
         club.nom
