@@ -206,7 +206,7 @@ class UI {
             game.save.getSaveList();
 
 
-        const save =
+        const saveInfo =
             saves.find(
                 item =>
                     item.slot === slot
@@ -259,7 +259,7 @@ class UI {
         /* SLOT VIDE */
         /* ========================= */
 
-        if (!save) {
+        if (!saveInfo) {
 
             const empty =
                 document.createElement(
@@ -287,64 +287,80 @@ class UI {
 
 
         /* ========================= */
+        /* CHARGEMENT COMPLET */
+        /* ========================= */
+
+        const save =
+            game.save.loadGame(
+                slot
+            );
+
+
+        /* ========================= */
         /* DONNÉES DE LA CARRIÈRE */
         /* ========================= */
 
-        const gameData =
-            save.game;
-
-
-        /* ========================= */
-        /* CLUB */
-        /* ========================= */
-
         if (
-            gameData &&
-            gameData.club
+            save &&
+            save.game
         ) {
 
-            const club =
-                document.createElement(
-                    "p"
+            const gameData =
+                save.game;
+
+
+            /* ========================= */
+            /* CLUB */
+            /* ========================= */
+
+            if (
+                gameData.club &&
+                gameData.club.name
+            ) {
+
+                const club =
+                    document.createElement(
+                        "p"
+                    );
+
+
+                club.textContent =
+                    "🏟️ " +
+                    gameData.club.name;
+
+
+                box.appendChild(
+                    club
                 );
 
-
-            club.textContent =
-                "🏟️ " +
-                gameData.club.name;
+            }
 
 
-            box.appendChild(
-                club
-            );
+            /* ========================= */
+            /* SAISON */
+            /* ========================= */
 
-        }
+            if (
+                gameData.manager &&
+                gameData.manager.season
+            ) {
+
+                const season =
+                    document.createElement(
+                        "p"
+                    );
 
 
-        /* ========================= */
-        /* SAISON */
-        /* ========================= */
+                season.textContent =
+                    "📅 Saison " +
+                    gameData.manager.season;
 
-        if (
-            gameData &&
-            gameData.manager &&
-            gameData.manager.season
-        ) {
 
-            const season =
-                document.createElement(
-                    "p"
+                box.appendChild(
+                    season
                 );
 
-
-            season.textContent =
-                "📅 Saison " +
-                gameData.manager.season;
-
-
-            box.appendChild(
-                season
-            );
+            }
 
         }
 
@@ -355,7 +371,7 @@ class UI {
 
         const date =
             new Date(
-                save.date
+                saveInfo.date
             );
 
 
