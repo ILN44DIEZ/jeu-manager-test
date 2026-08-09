@@ -128,11 +128,14 @@ class UI {
 
             () => {
 
-                game.currentSaveSlot = null;
+                game.currentSaveSlot =
+                    null;
 
-                game.club = null;
+                game.club =
+                    null;
 
-                game.currentMatchday = 0;
+                game.currentMatchday =
+                    0;
 
                 this.showLeagueSelection(
                     game.data
@@ -246,10 +249,6 @@ class UI {
             "1px solid #ccc";
 
 
-        /* ========================= */
-        /* TITRE */
-        /* ========================= */
-
         const title =
             document.createElement(
                 "h3"
@@ -265,10 +264,6 @@ class UI {
             title
         );
 
-
-        /* ========================= */
-        /* SLOT VIDE */
-        /* ========================= */
 
         if (!saveInfo) {
 
@@ -297,19 +292,11 @@ class UI {
         }
 
 
-        /* ========================= */
-        /* CHARGEMENT COMPLET */
-        /* ========================= */
-
         const save =
             game.save.loadGame(
                 slot
             );
 
-
-        /* ========================= */
-        /* DONNÉES DE LA CARRIÈRE */
-        /* ========================= */
 
         if (
             save &&
@@ -319,10 +306,6 @@ class UI {
             const gameData =
                 save.game;
 
-
-            /* ========================= */
-            /* CLUB */
-            /* ========================= */
 
             if (
                 gameData.club &&
@@ -346,10 +329,6 @@ class UI {
 
             }
 
-
-            /* ========================= */
-            /* SAISON */
-            /* ========================= */
 
             if (
                 gameData.manager &&
@@ -375,10 +354,6 @@ class UI {
 
         }
 
-
-        /* ========================= */
-        /* DATE DE SAUVEGARDE */
-        /* ========================= */
 
         const date =
             new Date(
@@ -410,10 +385,6 @@ class UI {
         );
 
 
-        /* ========================= */
-        /* CHARGER */
-        /* ========================= */
-
         const loadButton =
             document.createElement(
                 "button"
@@ -430,12 +401,9 @@ class UI {
 
                 const confirmed =
                     confirm(
-
-                        "📂 Charger la carrière " +
-                        "du slot " +
+                        "📂 Charger la carrière du slot " +
                         slot +
                         " ?"
-
                     );
 
 
@@ -459,10 +427,6 @@ class UI {
         );
 
 
-        /* ========================= */
-        /* SUPPRIMER */
-        /* ========================= */
-
         const deleteButton =
             document.createElement(
                 "button"
@@ -479,12 +443,9 @@ class UI {
 
                 const confirmed =
                     confirm(
-
-                        "⚠️ Supprimer définitivement " +
-                        "la sauvegarde du slot " +
+                        "⚠️ Supprimer définitivement la sauvegarde du slot " +
                         slot +
                         " ?"
-
                     );
 
 
@@ -539,7 +500,8 @@ class UI {
                 manager.logo;
 
 
-            img.width = 120;
+            img.width =
+                120;
 
 
             img.style.display =
@@ -622,8 +584,7 @@ class UI {
 
         this.showMessage(
             "Budget : " +
-            manager.budget.toLocaleString()
-            +
+            manager.budget.toLocaleString() +
             " €"
         );
 
@@ -651,9 +612,26 @@ class UI {
         );
 
 
-        /* ========================= */
+        /* ================================================= */
+        /* PROCHAIN MATCH */
+        /* ================================================= */
+
+        this.createButton(
+
+            "▶️ Jouer le prochain match",
+
+            () => {
+
+                this.playNextMatch();
+
+            }
+
+        );
+
+
+        /* ================================================= */
         /* EFFECTIF */
-        /* ========================= */
+        /* ================================================= */
 
         this.createButton(
 
@@ -674,9 +652,9 @@ class UI {
         );
 
 
-        /* ========================= */
+        /* ================================================= */
         /* TACTIQUES */
-        /* ========================= */
+        /* ================================================= */
 
         this.createButton(
 
@@ -697,9 +675,9 @@ class UI {
         );
 
 
-        /* ========================= */
+        /* ================================================= */
         /* CHAMPIONNAT */
-        /* ========================= */
+        /* ================================================= */
 
         this.createButton(
 
@@ -714,9 +692,9 @@ class UI {
         );
 
 
-        /* ========================= */
-        /* CALENDRIER DU CLUB */
-        /* ========================= */
+        /* ================================================= */
+        /* CALENDRIER */
+        /* ================================================= */
 
         this.createButton(
 
@@ -731,9 +709,9 @@ class UI {
         );
 
 
-        /* ========================= */
+        /* ================================================= */
         /* SAUVEGARDER */
-        /* ========================= */
+        /* ================================================= */
 
         this.createButton(
 
@@ -750,9 +728,9 @@ class UI {
         );
 
 
-        /* ========================= */
+        /* ================================================= */
         /* RETOUR MENU */
-        /* ========================= */
+        /* ================================================= */
 
         this.createButton(
 
@@ -761,6 +739,389 @@ class UI {
             () => {
 
                 this.showMainMenu();
+
+            }
+
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* JOUER LE PROCHAIN MATCH */
+    /* ================================================= */
+
+    playNextMatch() {
+
+        if (
+            !game.calendar ||
+            !game.calendar.matchdays
+        ) {
+
+            alert(
+                "❌ Calendrier indisponible."
+            );
+
+            return;
+
+        }
+
+
+        if (
+            !game.matchEngine
+        ) {
+
+            alert(
+                "❌ Moteur des matchs indisponible."
+            );
+
+            return;
+
+        }
+
+
+        /* ========================= */
+        /* RECHERCHE PROCHAINE JOURNÉE */
+        /* ========================= */
+
+        let matchdayIndex =
+            -1;
+
+
+        for (
+            let i = 0;
+            i < game.calendar.matchdays.length;
+            i++
+        ) {
+
+            const day =
+                game.calendar.matchdays[i];
+
+
+            if (
+                !day.played
+            ) {
+
+                matchdayIndex =
+                    i;
+
+                break;
+
+            }
+
+        }
+
+
+        /* ========================= */
+        /* FIN DE SAISON */
+        /* ========================= */
+
+        if (
+            matchdayIndex === -1
+        ) {
+
+            this.clear();
+
+
+            this.showTitle(
+                "🏆 Saison terminée"
+            );
+
+
+            this.showMessage(
+                "Félicitations ! Tu as terminé la saison."
+            );
+
+
+            this.createButton(
+
+                "📊 Voir le classement",
+
+                () => {
+
+                    this.showStandings();
+
+                }
+
+            );
+
+
+            this.createButton(
+
+                "📅 Voir le calendrier",
+
+                () => {
+
+                    this.showCalendar();
+
+                }
+
+            );
+
+
+            this.createButton(
+
+                "⬅️ Retour carrière",
+
+                () => {
+
+                    this.showManager({
+
+                        managerName:
+                            game.manager.managerName,
+
+                        clubName:
+                            game.club.name,
+
+                        logo:
+                            game.club.logo,
+
+                        budget:
+                            game.manager.budget,
+
+                        country:
+                            game.club.country,
+
+                        league:
+                            game.club.league,
+
+                        level:
+                            game.club.level,
+
+                        reputation:
+                            game.manager.reputation,
+
+                        season:
+                            game.manager.season,
+
+                        objectives:
+                            game.manager.objectives
+
+                    });
+
+                }
+
+            );
+
+
+            return;
+
+        }
+
+
+        const matchday =
+            game.calendar.matchdays[
+                matchdayIndex
+            ];
+
+
+        /* ========================= */
+        /* SIMULATION */
+        /* ========================= */
+
+        const results =
+            game.matchEngine.simulateMatchday(
+                matchday
+            );
+
+
+        if (
+            !results ||
+            results.length === 0
+        ) {
+
+            alert(
+                "❌ Impossible de jouer cette journée."
+            );
+
+            return;
+
+        }
+
+
+        /* ========================= */
+        /* PROGRESSION */
+        /* ========================= */
+
+        game.currentMatchday =
+            matchdayIndex + 1;
+
+
+        /* ========================= */
+        /* MATCH DU CLUB */
+        /* ========================= */
+
+        const clubResult =
+            results.find(
+                match =>
+
+                    match.homeTeam ===
+                    game.club.name ||
+
+                    match.awayTeam ===
+                    game.club.name
+            );
+
+
+        /* ========================= */
+        /* AFFICHAGE */
+        /* ========================= */
+
+        this.clear();
+
+
+        this.showTitle(
+            "⚽ Journée " +
+            matchday.day
+        );
+
+
+        if (
+            clubResult
+        ) {
+
+            let resultText;
+
+
+            if (
+                clubResult.homeTeam ===
+                game.club.name
+            ) {
+
+                resultText =
+
+                    "🏠 " +
+                    clubResult.homeTeam +
+                    " " +
+                    clubResult.homeGoals +
+                    " - " +
+                    clubResult.awayGoals +
+                    " " +
+                    clubResult.awayTeam;
+
+            } else {
+
+                resultText =
+
+                    "✈️ " +
+                    clubResult.homeTeam +
+                    " " +
+                    clubResult.homeGoals +
+                    " - " +
+                    clubResult.awayGoals +
+                    " " +
+                    clubResult.awayTeam;
+
+            }
+
+
+            this.showTitle(
+                resultText
+            );
+
+        }
+
+
+        this.showMessage(
+            "✅ Journée terminée"
+        );
+
+
+        /* ========================= */
+        /* VOIR LES AUTRES RÉSULTATS */
+        /* ========================= */
+
+        this.createButton(
+
+            "📋 Résultats de la journée",
+
+            () => {
+
+                this.showLeagueCalendar();
+
+            }
+
+        );
+
+
+        /* ========================= */
+        /* CLASSEMENT */
+        /* ========================= */
+
+        this.createButton(
+
+            "📊 Voir le classement",
+
+            () => {
+
+                this.showStandings();
+
+            }
+
+        );
+
+
+        /* ========================= */
+        /* CALENDRIER */
+        /* ========================= */
+
+        this.createButton(
+
+            "📅 Voir le calendrier",
+
+            () => {
+
+                this.showCalendar();
+
+            }
+
+        );
+
+
+        /* ========================= */
+        /* RETOUR CARRIÈRE */
+        /* ========================= */
+
+        this.createButton(
+
+            "⬅️ Retour carrière",
+
+            () => {
+
+                this.showManager({
+
+                    managerName:
+                        game.manager.managerName,
+
+                    clubName:
+                        game.club.name,
+
+                    logo:
+                        game.club.logo,
+
+                    budget:
+                        game.manager.budget,
+
+                    country:
+                        game.club.country,
+
+                    league:
+                        game.club.league,
+
+                    level:
+                        game.club.level,
+
+                    reputation:
+                        game.manager.reputation,
+
+                    season:
+                        game.manager.season,
+
+                    objectives:
+                        game.manager.objectives
+
+                });
 
             }
 
@@ -784,10 +1145,6 @@ class UI {
         );
 
 
-        /* ========================= */
-        /* CLASSEMENT */
-        /* ========================= */
-
         this.createButton(
 
             "📊 Classement",
@@ -800,10 +1157,6 @@ class UI {
 
         );
 
-
-        /* ========================= */
-        /* CALENDRIER DE LA LIGUE */
-        /* ========================= */
 
         this.createButton(
 
@@ -820,10 +1173,6 @@ class UI {
 
         );
 
-
-        /* ========================= */
-        /* RETOUR */
-        /* ========================= */
 
         this.createButton(
 
@@ -918,10 +1267,6 @@ class UI {
             game.standings.getTable();
 
 
-        /* ========================= */
-        /* TABLE */
-        /* ========================= */
-
         const tableElement =
             document.createElement(
                 "table"
@@ -935,10 +1280,6 @@ class UI {
         tableElement.style.borderCollapse =
             "collapse";
 
-
-        /* ========================= */
-        /* EN-TÊTE */
-        /* ========================= */
 
         const header =
             document.createElement(
@@ -996,10 +1337,6 @@ class UI {
             header
         );
 
-
-        /* ========================= */
-        /* ÉQUIPES */
-        /* ========================= */
 
         table.forEach(
             (team, index) => {
@@ -1068,10 +1405,6 @@ class UI {
                 );
 
 
-                /* ========================= */
-                /* FORME */
-                /* ========================= */
-
                 const formCell =
                     document.createElement(
                         "td"
@@ -1096,9 +1429,7 @@ class UI {
                 ) {
 
                     formCell.textContent =
-                        team.form.join(
-                            " "
-                        );
+                        team.form.join(" ");
 
                 } else {
 
@@ -1112,10 +1443,6 @@ class UI {
                     formCell
                 );
 
-
-                /* ========================= */
-                /* MON CLUB */
-                /* ========================= */
 
                 if (
                     game.club &&
@@ -1142,10 +1469,6 @@ class UI {
         );
 
 
-        /* ========================= */
-        /* RETOUR */
-        /* ========================= */
-
         this.createButton(
 
             "⬅️ Retour championnat",
@@ -1163,7 +1486,7 @@ class UI {
 
 
     /* ================================================= */
-    /* CALENDRIER COMPLET DE LA LIGUE */
+    /* CALENDRIER DE LA LIGUE */
     /* ================================================= */
 
     showLeagueCalendar() {
@@ -1209,26 +1532,22 @@ class UI {
             game.calendar.matchdays;
 
 
-        /* ========================= */
-        /* SÉCURITÉ */
-        /* ========================= */
-
         if (
-            game.currentMatchday < 0
+            this.currentLeagueMatchday < 0
         ) {
 
-            game.currentMatchday =
+            this.currentLeagueMatchday =
                 0;
 
         }
 
 
         if (
-            game.currentMatchday >=
+            this.currentLeagueMatchday >=
             matchdays.length
         ) {
 
-            game.currentMatchday =
+            this.currentLeagueMatchday =
                 matchdays.length - 1;
 
         }
@@ -1282,10 +1601,6 @@ class UI {
             "15px 0";
 
 
-        /* ========================= */
-        /* PRÉCÉDENTE */
-        /* ========================= */
-
         const previousButton =
             document.createElement(
                 "button"
@@ -1323,10 +1638,6 @@ class UI {
         );
 
 
-        /* ========================= */
-        /* JOURNÉE */
-        /* ========================= */
-
         const dayTitle =
             document.createElement(
                 "strong"
@@ -1344,10 +1655,6 @@ class UI {
             dayTitle
         );
 
-
-        /* ========================= */
-        /* SUIVANTE */
-        /* ========================= */
 
         const nextButton =
             document.createElement(
@@ -1394,7 +1701,7 @@ class UI {
 
 
         /* ================================================= */
-        /* STATUT DE LA JOURNÉE */
+        /* STATUT */
         /* ================================================= */
 
         if (
@@ -1417,18 +1724,6 @@ class UI {
         /* ================================================= */
         /* MATCHS */
         /* ================================================= */
-
-        if (
-            !currentDay.matches ||
-            currentDay.matches.length === 0
-        ) {
-
-            this.showMessage(
-                "Aucun match pour cette journée."
-            );
-
-        }
-
 
         currentDay.matches.forEach(
             match => {
@@ -1459,10 +1754,6 @@ class UI {
                     "center";
 
 
-                /* ========================= */
-                /* DOMICILE / EXTÉRIEUR */
-                /* ========================= */
-
                 let icon = "";
 
 
@@ -1487,10 +1778,6 @@ class UI {
                 }
 
 
-                /* ========================= */
-                /* SCORE */
-                /* ========================= */
-
                 if (
                     match.played &&
                     match.result
@@ -1501,11 +1788,17 @@ class UI {
                         icon +
 
                         match.home +
+
                         " " +
+
                         match.result.homeGoals +
+
                         " - " +
+
                         match.result.awayGoals +
+
                         " " +
+
                         match.away;
 
                 } else {
@@ -1515,15 +1808,13 @@ class UI {
                         icon +
 
                         match.home +
+
                         " - " +
+
                         match.away;
 
                 }
 
-
-                /* ========================= */
-                /* MON CLUB */
-                /* ========================= */
 
                 if (
                     game.club &&
@@ -1549,86 +1840,7 @@ class UI {
             }
         );
 
-
-        /* ================================================= */
-        /* BOUTON JOUER LA JOURNÉE */
-        /* ================================================= */
-
-        if (
-            !currentDay.played
-        ) {
-
-            const playButton =
-                document.createElement(
-                    "button"
-                );
-
-
-            playButton.textContent =
-                "▶️ Jouer la journée";
-
-
-            playButton.addEventListener(
-                "click",
-                () => {
-
-                    if (
-                        !game.matchEngine
-                    ) {
-
-                        alert(
-                            "❌ Moteur des matchs indisponible."
-                        );
-
-                        return;
-
-                    }
-
-
-                    const results =
-                        game.matchEngine.simulateMatchday(
-                            currentDay
-                        );
-
-
-                    if (
-                        !results ||
-                        results.length === 0
-                    ) {
-
-                        alert(
-                            "❌ Impossible de jouer cette journée."
-                        );
-
-                        return;
-
-                    }
-
-
-                    /*
-                     * La journée est maintenant jouée.
-                     */
-
-                    currentDay.played =
-                        true;
-
-
-                    /*
-                     * On actualise l'écran.
-                     */
-
-                    this.showLeagueCalendar();
-
-                }
-            );
-
-
-            this.container.appendChild(
-                playButton
-            );
-
-        }
-
+        
 
         /* ================================================= */
         /* CLASSEMENT */
@@ -1703,39 +1915,7 @@ class UI {
 
                 () => {
 
-                    this.showManager({
-
-                        managerName:
-                            game.manager.managerName,
-
-                        clubName:
-                            game.club.name,
-
-                        logo:
-                            game.club.logo,
-
-                        budget:
-                            game.manager.budget,
-
-                        country:
-                            game.club.country,
-
-                        league:
-                            game.club.league,
-
-                        level:
-                            game.club.level,
-
-                        reputation:
-                            game.manager.reputation,
-
-                        season:
-                            game.manager.season,
-
-                        objectives:
-                            game.manager.objectives
-
-                    });
+                    this.returnToManager();
 
                 }
 
@@ -1746,10 +1926,6 @@ class UI {
 
         }
 
-
-        /* ================================================= */
-        /* MATCHS DU CLUB */
-        /* ================================================= */
 
         game.calendar.matchdays.forEach(
             day => {
@@ -1784,12 +1960,8 @@ class UI {
                 clubMatches.forEach(
                     match => {
 
-                        let matchText = "";
+                        let matchText;
 
-
-                        /* ========================= */
-                        /* DOMICILE */
-                        /* ========================= */
 
                         if (
                             match.home ===
@@ -1833,14 +2005,7 @@ class UI {
 
                             }
 
-                        }
-
-
-                        /* ========================= */
-                        /* EXTÉRIEUR */
-                        /* ========================= */
-
-                        else {
+                        } else {
 
                             if (
                                 match.played &&
@@ -1893,53 +2058,61 @@ class UI {
         );
 
 
-        /* ================================================= */
-        /* RETOUR */
-        /* ================================================= */
-
         this.createButton(
 
             "⬅️ Retour carrière",
 
             () => {
 
-                this.showManager({
-
-                    managerName:
-                        game.manager.managerName,
-
-                    clubName:
-                        game.club.name,
-
-                    logo:
-                        game.club.logo,
-
-                    budget:
-                        game.manager.budget,
-
-                    country:
-                        game.club.country,
-
-                    league:
-                        game.club.league,
-
-                    level:
-                        game.club.level,
-
-                    reputation:
-                        game.manager.reputation,
-
-                    season:
-                        game.manager.season,
-
-                    objectives:
-                        game.manager.objectives
-
-                });
+                this.returnToManager();
 
             }
 
         );
+
+    }
+
+
+
+    /* ================================================= */
+    /* RETOUR FICHE MANAGER */
+    /* ================================================= */
+
+    returnToManager() {
+
+        this.showManager({
+
+            managerName:
+                game.manager.managerName,
+
+            clubName:
+                game.club.name,
+
+            logo:
+                game.club.logo,
+
+            budget:
+                game.manager.budget,
+
+            country:
+                game.club.country,
+
+            league:
+                game.club.league,
+
+            level:
+                game.club.level,
+
+            reputation:
+                game.manager.reputation,
+
+            season:
+                game.manager.season,
+
+            objectives:
+                game.manager.objectives
+
+        });
 
     }
 
@@ -2057,12 +2230,10 @@ class UI {
 
                         const confirmed =
                             confirm(
-
                                 "⚠️ Le slot " +
                                 slot +
                                 " contient déjà une carrière.\n\n" +
                                 "Veux-tu la remplacer ?"
-
                             );
 
 
@@ -2467,14 +2638,10 @@ class UI {
 
                 this.showMessage(
 
-                    player.getFullName()
-                    +
-                    " - "
-                    +
-                    player.position
-                    +
-                    " - "
-                    +
+                    player.getFullName() +
+                    " - " +
+                    player.position +
+                    " - " +
                     player.overall
 
                 );
@@ -2509,10 +2676,8 @@ class UI {
 
                 this.createButton(
 
-                    this.flags[league]
-                    +
-                    " "
-                    +
+                    this.flags[league] +
+                    " " +
                     league,
 
                     () => {
@@ -2615,8 +2780,7 @@ class UI {
 
         this.showMessage(
             "💰 Budget : " +
-            club.budget.toLocaleString()
-            +
+            club.budget.toLocaleString() +
             " €"
         );
 
