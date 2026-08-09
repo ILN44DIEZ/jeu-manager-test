@@ -31,19 +31,26 @@ function chooseClub(club) {
 
     game.club = {
 
-        name: club.nom,
+        name:
+            club.nom,
 
-        country: club.pays,
+        country:
+            club.pays,
 
-        league: club.ligue,
+        league:
+            club.ligue,
 
-        level: club.niveau,
+        level:
+            club.niveau,
 
-        reputation: club.niveau,
+        reputation:
+            club.niveau,
 
-        budget: club.budget,
+        budget:
+            club.budget,
 
-        logo: club.logo
+        logo:
+            club.logo
 
     };
 
@@ -218,10 +225,6 @@ function saveCareer(slot = 1) {
     }
 
 
-    /* ================================================= */
-    /* DONNÉES DE LA PARTIE */
-    /* ================================================= */
-
     const gameData = {
 
         /* ========================= */
@@ -313,10 +316,6 @@ function saveCareer(slot = 1) {
 
     };
 
-
-    /* ================================================= */
-    /* SAUVEGARDE */
-    /* ================================================= */
 
     const success =
         game.save.saveGame(
@@ -410,12 +409,17 @@ function loadCareer(slot = 1) {
     /* CLUB */
     /* ================================================= */
 
-    if (
-        data.club
-    ) {
+    game.club =
+        data.club || null;
 
-        game.club =
-            data.club;
+
+    if (!game.club) {
+
+        console.error(
+            "❌ Club absent de la sauvegarde."
+        );
+
+        return false;
 
     }
 
@@ -454,10 +458,31 @@ function loadCareer(slot = 1) {
 
     }
 
+    else {
+
+        game.players = [];
+
+    }
+
 
     /* ================================================= */
     /* TACTIQUES */
-    /* ================================================= */
+/* ================================================= */
+
+    /*
+     * On réinitialise d'abord les tactiques
+     * avec l'effectif sauvegardé.
+     */
+
+    game.tactics.initializeSquad(
+        game.players
+    );
+
+
+    /*
+     * Puis on restaure les données
+     * tactiques sauvegardées.
+     */
 
     if (
         data.tactics
@@ -475,59 +500,45 @@ function loadCareer(slot = 1) {
 
 
     /* ================================================= */
-    /* CALENDRIER */
+    /* RÉCUPÉRER LES CLUBS DE LA LIGUE */
+/* ================================================= */
+
+    const leagueClubs =
+        game.data.getClubsByLeague(
+            game.club.league
+        );
+
+
+    const teams =
+        leagueClubs.map(
+            club => club.nom
+        );
+
+
     /* ================================================= */
+    /* CALENDRIER */
+/* ================================================= */
+
+    game.calendar =
+        new ChampionshipCalendar(
+            teams
+        );
+
+
+    /*
+     * IMPORTANT :
+     * On ne génère PAS un nouveau calendrier
+     * si la sauvegarde en contient déjà un.
+     */
 
     if (
-        game.club
+        Array.isArray(
+            data.calendar
+        )
     ) {
 
-        const leagueClubs =
-            game.data.getClubsByLeague(
-                game.club.league
-            );
-
-
-        const teams =
-            leagueClubs.map(
-                club => club.nom
-            );
-
-
-        /*
-         * On recrée seulement
-         * l'objet calendrier.
-         *
-         * On NE génère PAS
-         * un nouveau calendrier.
-         */
-
-        game.calendar =
-            new ChampionshipCalendar(
-                teams
-            );
-
-
-        if (
-            Array.isArray(
-                data.calendar
-            )
-        ) {
-
-            game.calendar.matchdays =
-                data.calendar;
-
-        } else {
-
-            /*
-             * Ancienne sauvegarde
-             * sans calendrier.
-             */
-
-            game.calendar.generateFullCalendar();
-
-        }
-
+        game.calendar.matchdays =
+            data.calendar;
 
         console.log(
             "📅 Calendrier restauré."
@@ -535,10 +546,26 @@ function loadCareer(slot = 1) {
 
     }
 
+    else {
+
+        /*
+         * Compatibilité avec une ancienne
+         * sauvegarde ne contenant pas
+         * encore de calendrier.
+         */
+
+        game.calendar.generateFullCalendar();
+
+        console.log(
+            "📅 Nouveau calendrier généré pour ancienne sauvegarde."
+        );
+
+    }
+
 
     /* ================================================= */
     /* JOURNÉE ACTUELLE */
-    /* ================================================= */
+/* ================================================= */
 
     if (
         typeof data.currentMatchday ===
@@ -548,7 +575,9 @@ function loadCareer(slot = 1) {
         game.currentMatchday =
             data.currentMatchday;
 
-    } else {
+    }
+
+    else {
 
         game.currentMatchday =
             0;
@@ -558,58 +587,39 @@ function loadCareer(slot = 1) {
 
     /* ================================================= */
     /* CLASSEMENT */
-    /* ================================================= */
+/* ================================================= */
+
+    game.standings =
+        new Standings(
+            teams
+        );
+
+
+    /*
+     * Restauration exacte du classement.
+     */
 
     if (
-        game.club
+        Array.isArray(
+            data.standings
+        )
     ) {
 
-        const leagueClubs =
-            game.data.getClubsByLeague(
-                game.club.league
-            );
-
-
-        const teams =
-            leagueClubs.map(
-                club => club.nom
-            );
-
-
-        game.standings =
-            new Standings(
-                teams
-            );
-
-
-        /*
-         * On restaure le classement
-         * exactement comme il était.
-         */
-
-        if (
-            Array.isArray(
-                data.standings
-            )
-        ) {
-
-            game.standings.table =
-                data.standings;
-
-        }
-
-
-        console.log(
-            "🏆 Classement restauré :",
-            game.standings.getTable()
-        );
+        game.standings.table =
+            data.standings;
 
     }
 
 
+    console.log(
+        "🏆 Classement restauré :",
+        game.standings.getTable()
+    );
+
+
     /* ================================================= */
     /* MATCH ENGINE */
-    /* ================================================= */
+/* ================================================= */
 
     game.matchEngine =
         new MatchEngine(
@@ -618,8 +628,8 @@ function loadCareer(slot = 1) {
 
 
     /* ================================================= */
-    /* HISTORIQUE MATCHS */
-    /* ================================================= */
+    /* HISTORIQUE DES MATCHS */
+/* ================================================= */
 
     if (
         Array.isArray(
@@ -635,27 +645,21 @@ function loadCareer(slot = 1) {
 
     /* ================================================= */
     /* MARCHÉ DES TRANSFERTS */
-    /* ================================================= */
+/* ================================================= */
 
-    if (
-        game.club
-    ) {
+    game.market =
+        new TransferMarket(
 
-        game.market =
-            new TransferMarket(
+            game.club.name,
 
-                game.club.name,
+            game.club.budget
 
-                game.club.budget
-
-            );
-
-    }
+        );
 
 
     /* ================================================= */
     /* AFFICHAGE */
-    /* ================================================= */
+/* ================================================= */
 
     game.ui.showManager({
 
@@ -692,6 +696,10 @@ function loadCareer(slot = 1) {
     });
 
 
+    /* ================================================= */
+    /* LOGS DE CONTRÔLE */
+/* ================================================= */
+
     console.log(
         "📂 Carrière chargée.",
         "Slot :",
@@ -714,6 +722,18 @@ function loadCareer(slot = 1) {
     console.log(
         "⚽ Matchs joués :",
         game.matchEngine.getHistory().length
+    );
+
+
+    console.log(
+        "📅 Journées dans le calendrier :",
+        game.calendar.matchdays.length
+    );
+
+
+    console.log(
+        "🏆 Équipes dans le classement :",
+        game.standings.table.length
     );
 
 
