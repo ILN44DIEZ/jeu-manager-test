@@ -134,12 +134,283 @@ class UI {
 
             () => {
 
-                console.log(
-                    "Menu sauvegardes"
-                );
+                this.showMainSaveMenu();
 
             }
 
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* SAUVEGARDES DU MENU PRINCIPAL */
+    /* ================================================= */
+
+    showMainSaveMenu() {
+
+        this.clear();
+
+
+        this.showTitle(
+            "💾 Sauvegardes"
+        );
+
+
+        this.showMessage(
+            "Choisis une sauvegarde à charger."
+        );
+
+
+        for (
+            let slot = 1;
+            slot <= 3;
+            slot++
+        ) {
+
+            this.createMainSaveSlot(
+                slot
+            );
+
+        }
+
+
+        this.createButton(
+
+            "⬅️ Retour",
+
+            () => {
+
+                this.showMainMenu();
+
+            }
+
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* SLOT DU MENU PRINCIPAL */
+    /* ================================================= */
+
+    createMainSaveSlot(slot) {
+
+        const saves =
+            game.save.getSaveList();
+
+
+        const save =
+            saves.find(
+                item =>
+                    item.slot === slot
+            );
+
+
+        const box =
+            document.createElement(
+                "div"
+            );
+
+
+        box.className =
+            "save-slot";
+
+
+        box.style.margin =
+            "15px 0";
+
+
+        box.style.padding =
+            "10px";
+
+
+        box.style.border =
+            "1px solid #ccc";
+
+
+        /* ========================= */
+        /* TITRE */
+        /* ========================= */
+
+        const title =
+            document.createElement(
+                "h3"
+            );
+
+
+        title.textContent =
+            "💾 Slot " +
+            slot;
+
+
+        box.appendChild(
+            title
+        );
+
+
+        /* ========================= */
+        /* SLOT VIDE */
+        /* ========================= */
+
+        if (!save) {
+
+            const empty =
+                document.createElement(
+                    "p"
+                );
+
+
+            empty.textContent =
+                "🟢 Emplacement vide";
+
+
+            box.appendChild(
+                empty
+            );
+
+
+            this.container.appendChild(
+                box
+            );
+
+
+            return;
+
+        }
+
+
+        /* ========================= */
+        /* DATE */
+        /* ========================= */
+
+        const date =
+            new Date(
+                save.date
+            );
+
+
+        const info =
+            document.createElement(
+                "p"
+            );
+
+
+        info.textContent =
+            "📅 " +
+            date.toLocaleString();
+
+
+        box.appendChild(
+            info
+        );
+
+
+        /* ========================= */
+        /* CHARGER */
+        /* ========================= */
+
+        const loadButton =
+            document.createElement(
+                "button"
+            );
+
+
+        loadButton.textContent =
+            "📂 Charger";
+
+
+        loadButton.addEventListener(
+            "click",
+            () => {
+
+                const confirmed =
+                    confirm(
+
+                        "📂 Charger la carrière " +
+                        "du slot " +
+                        slot +
+                        " ?"
+
+                    );
+
+
+                if (!confirmed) {
+
+                    return;
+
+                }
+
+
+                loadCareer(
+                    slot
+                );
+
+            }
+        );
+
+
+        box.appendChild(
+            loadButton
+        );
+
+
+        /* ========================= */
+        /* SUPPRIMER */
+        /* ========================= */
+
+        const deleteButton =
+            document.createElement(
+                "button"
+            );
+
+
+        deleteButton.textContent =
+            "🗑️ Supprimer";
+
+
+        deleteButton.addEventListener(
+            "click",
+            () => {
+
+                const confirmed =
+                    confirm(
+
+                        "⚠️ Supprimer définitivement " +
+                        "la sauvegarde du slot " +
+                        slot +
+                        " ?"
+
+                    );
+
+
+                if (!confirmed) {
+
+                    return;
+
+                }
+
+
+                deleteCareer(
+                    slot
+                );
+
+
+                this.showMainSaveMenu();
+
+            }
+        );
+
+
+        box.appendChild(
+            deleteButton
+        );
+
+
+        this.container.appendChild(
+            box
         );
 
     }
@@ -379,7 +650,7 @@ class UI {
 
 
     /* ================================================= */
-    /* MENU SAUVEGARDES */
+    /* MENU SAUVEGARDES CARRIÈRE */
     /* ================================================= */
 
     showSaveMenu(manager) {
@@ -397,12 +668,6 @@ class UI {
         );
 
 
-        /*
-         * =========================
-         * 3 SLOTS
-         * =========================
-         */
-
         for (
             let slot = 1;
             slot <= 3;
@@ -416,12 +681,6 @@ class UI {
 
         }
 
-
-        /*
-         * =========================
-         * RETOUR
-         * =========================
-         */
 
         this.createButton(
 
@@ -483,12 +742,6 @@ class UI {
             "1px solid #ccc";
 
 
-        /*
-         * =========================
-         * TITRE
-         * =========================
-         */
-
         const title =
             document.createElement(
                 "h3"
@@ -504,12 +757,6 @@ class UI {
             title
         );
 
-
-        /*
-         * =========================
-         * INFORMATIONS
-         * =========================
-         */
 
         const info =
             document.createElement(
@@ -541,12 +788,6 @@ class UI {
             info
         );
 
-
-        /*
-         * =========================
-         * SAUVEGARDER
-         * =========================
-         */
 
         const saveButton =
             document.createElement(
@@ -607,12 +848,6 @@ class UI {
         );
 
 
-        /*
-         * =========================
-         * CHARGER
-         * =========================
-         */
-
         const loadButton =
             document.createElement(
                 "button"
@@ -654,19 +889,9 @@ class UI {
                 }
 
 
-                const success =
-                    loadCareer(
-                        slot
-                    );
-
-
-                if (success) {
-
-                    alert(
-                        "✅ Partie chargée !"
-                    );
-
-                }
+                loadCareer(
+                    slot
+                );
 
             }
         );
@@ -676,12 +901,6 @@ class UI {
             loadButton
         );
 
-
-        /*
-         * =========================
-         * SUPPRIMER
-         * =========================
-         */
 
         const deleteButton =
             document.createElement(
@@ -723,24 +942,14 @@ class UI {
                 }
 
 
-                const success =
-                    deleteCareer(
-                        slot
-                    );
+                deleteCareer(
+                    slot
+                );
 
 
-                if (success) {
-
-                    alert(
-                        "🗑️ Sauvegarde supprimée."
-                    );
-
-
-                    this.showSaveMenu(
-                        manager
-                    );
-
-                }
+                this.showSaveMenu(
+                    manager
+                );
 
             }
         );
@@ -815,7 +1024,6 @@ class UI {
             dataManager.getLeagues();
 
 
-
         leagues.forEach(
             league => {
 
@@ -869,7 +1077,6 @@ class UI {
             );
 
 
-
         clubs.forEach(
             club => {
 
@@ -920,12 +1127,10 @@ class UI {
         );
 
 
-
         this.showMessage(
             "⭐ Niveau : " +
             club.niveau
         );
-
 
 
         this.showMessage(
@@ -934,7 +1139,6 @@ class UI {
             +
             " €"
         );
-
 
 
         this.createButton(
@@ -950,7 +1154,6 @@ class UI {
             }
 
         );
-
 
 
         this.createButton(
