@@ -699,6 +699,24 @@ class UI {
 
 
         /* ========================= */
+        /* CALENDRIER */
+        /* ========================= */
+
+        this.createButton(
+
+            "📅 Calendrier",
+
+            () => {
+
+                this.showCalendar();
+
+            }
+
+        );
+
+
+
+        /* ========================= */
         /* SAUVEGARDER */
         /* ========================= */
 
@@ -729,6 +747,155 @@ class UI {
             () => {
 
                 this.showMainMenu();
+
+            }
+
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* CALENDRIER */
+    /* ================================================= */
+
+    showCalendar() {
+
+        this.clear();
+
+
+        this.showTitle(
+            "📅 Calendrier"
+        );
+
+
+        if (
+            !game.calendar ||
+            !game.calendar.matchdays
+        ) {
+
+            this.showMessage(
+                "❌ Calendrier indisponible."
+            );
+
+
+            this.createButton(
+
+                "⬅️ Retour carrière",
+
+                () => {
+
+                    this.showManager({
+
+                        managerName:
+                            game.manager.managerName,
+
+                        clubName:
+                            game.manager.getClubName(),
+
+                        logo:
+                            game.club.logo,
+
+                        budget:
+                            game.manager.budget,
+
+                        country:
+                            game.club.country,
+
+                        league:
+                            game.club.league,
+
+                        level:
+                            game.club.level,
+
+                        reputation:
+                            game.manager.reputation,
+
+                        season:
+                            game.manager.season,
+
+                        objectives:
+                            game.manager.objectives
+
+                    });
+
+                }
+
+            );
+
+
+            return;
+
+        }
+
+
+        game.calendar.matchdays.forEach(
+            day => {
+
+                this.showTitle(
+                    "Journée " +
+                    day.day
+                );
+
+
+                day.matches.forEach(
+                    match => {
+
+                        this.showMessage(
+
+                            match.home +
+                            " - " +
+                            match.away
+
+                        );
+
+                    }
+                );
+
+            }
+        );
+
+
+        this.createButton(
+
+            "⬅️ Retour carrière",
+
+            () => {
+
+                this.showManager({
+
+                    managerName:
+                        game.manager.managerName,
+
+                    clubName:
+                        game.manager.getClubName(),
+
+                    logo:
+                        game.club.logo,
+
+                    budget:
+                        game.manager.budget,
+
+                    country:
+                        game.club.country,
+
+                    league:
+                        game.club.league,
+
+                    level:
+                        game.club.level,
+
+                    reputation:
+                        game.manager.reputation,
+
+                    season:
+                        game.manager.season,
+
+                    objectives:
+                        game.manager.objectives
+
+                });
 
             }
 
