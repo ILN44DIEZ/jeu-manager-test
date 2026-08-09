@@ -181,7 +181,7 @@ function chooseClub(club) {
             game.manager.managerName,
 
         clubName:
-            game.manager.getClubName(),
+            game.club.name,
 
         logo:
             game.club.logo,
@@ -415,7 +415,8 @@ function loadCareer(slot = 1) {
     /*
      * =========================
      * JOUEURS
-     * ========================= */
+     * =========================
+     */
 
     if (
         Array.isArray(
@@ -554,8 +555,20 @@ function loadCareer(slot = 1) {
         managerName:
             game.manager.managerName,
 
+        /*
+         * IMPORTANT :
+         * On utilise le club réellement
+         * chargé depuis la sauvegarde.
+         *
+         * Ne pas utiliser :
+         * game.manager.getClubName()
+         *
+         * car le manager peut encore
+         * contenir l'ancien club.
+         */
+
         clubName:
-            game.manager.getClubName(),
+            game.club.name,
 
         logo:
             game.club.logo,
@@ -588,6 +601,12 @@ function loadCareer(slot = 1) {
         "📂 Carrière chargée.",
         "Slot :",
         slot
+    );
+
+
+    console.log(
+        "🏟️ Club chargé :",
+        game.club.name
     );
 
 
