@@ -2,6 +2,8 @@ let game = {};
 
 game.club = null;
 
+game.currentSaveSlot = null;
+
 
 
 /* ================================================= */
@@ -220,6 +222,10 @@ function saveCareer(slot = 1) {
 
     if (success) {
 
+        game.currentSaveSlot =
+            slot;
+
+
         console.log(
             "💾 Carrière sauvegardée.",
             "Slot :",
@@ -289,6 +295,16 @@ function loadCareer(slot = 1) {
 
     /*
      * =========================
+     * SLOT ACTUEL
+     * =========================
+     */
+
+    game.currentSaveSlot =
+        slot;
+
+
+    /*
+     * =========================
      * CLUB
      * =========================
      */
@@ -327,8 +343,7 @@ function loadCareer(slot = 1) {
     /*
      * =========================
      * JOUEURS
-     * =========================
-     */
+     * ========================= */
 
     if (
         Array.isArray(
@@ -568,13 +583,10 @@ async function startGame() {
 
 
     // =========================
-    // Première étape :
-    // choisir une ligue
+    // MENU PRINCIPAL
     // =========================
 
-    game.ui.showLeagueSelection(
-        game.data
-    );
+    game.ui.showMainMenu();
 
 
     console.log(
