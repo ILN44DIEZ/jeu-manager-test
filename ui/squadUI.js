@@ -59,124 +59,127 @@ class SquadUI {
 
 
         /* ================================================= */
-        /* CATÉGORIES */
-        /* ================================================= */
+/* CATÉGORIES */
+/* ================================================= */
 
-        const goalkeepers = [];
+const goalkeepers = [];
 
-        const defenders = [];
+const defenders = [];
 
-        const midfielders = [];
+const midfielders = [];
 
-        const attackers = [];
+const attackers = [];
 
-        const others = [];
-
-
-        players.forEach(
-            player => {
-
-                const position =
-                    String(
-                        player.poste || ""
-                    ).toUpperCase();
+const others = [];
 
 
-                /* ========================= */
-                /* GARDIENS */
-                /* ========================= */
+players.forEach(
+    player => {
 
-                if (
-                    position === "GB" ||
-                    position === "GK" ||
-                    position.includes("GARDIEN")
-                ) {
-
-                    goalkeepers.push(
-                        player
-                    );
-
-                    return;
-
-                }
+        const position =
+            String(
+                player.poste || ""
+            ).toUpperCase();
 
 
-                /* ========================= */
-                /* DÉFENSEURS */
-                /* ========================= */
+        /* ========================= */
+        /* GARDIENS */
+        /* ========================= */
 
-                if (
-                    position.startsWith("D") ||
-                    position.includes("DC") ||
-                    position.includes("DD") ||
-                    position.includes("DG") ||
-                    position.includes("DLD") ||
-                    position.includes("DLG")
-                ) {
+        if (
+            position === "GB" ||
+            position === "GK"
+        ) {
 
-                    defenders.push(
-                        player
-                    );
+            goalkeepers.push(
+                player
+            );
 
-                    return;
+            return;
 
-                }
+        }
 
 
-                /* ========================= */
-                /* MILIEUX */
-                /* ========================= */
+        /* ========================= */
+        /* DÉFENSEURS */
+        /* ========================= */
 
-                if (
-                    position.includes("MDC") ||
-                    position.includes("MC") ||
-                    position.includes("MD") ||
-                    position.includes("MG") ||
-                    position.includes("MOC") ||
-                    position.includes("MDC")
-                ) {
+        if (
+            position === "DC" ||
+            position === "DCD" ||
+            position === "DCG" ||
+            position === "DD" ||
+            position === "DG" ||
+            position === "DLD" ||
+            position === "DLG" ||
+            position === "DDG"
+        ) {
 
-                    midfielders.push(
-                        player
-                    );
+            defenders.push(
+                player
+            );
 
-                    return;
+            return;
 
-                }
-
-
-                /* ========================= */
-                /* ATTAQUANTS */
-                /* ========================= */
-
-                if (
-                    position.startsWith("A") ||
-                    position.includes("BU") ||
-                    position.includes("AC") ||
-                    position.includes("AD") ||
-                    position.includes("AG") ||
-                    position.includes("AT")
-                ) {
-
-                    attackers.push(
-                        player
-                    );
-
-                    return;
-
-                }
+        }
 
 
-                /* ========================= */
-                /* AUTRES */
-                /* ========================= */
+        /* ========================= */
+        /* MILIEUX */
+        /* ========================= */
 
-                others.push(
-                    player
-                );
+        if (
+            position === "MDC" ||
+            position === "MC" ||
+            position === "MCD" ||
+            position === "MCG" ||
+            position === "MD" ||
+            position === "MG" ||
+            position === "MOC" ||
+            position === "MOCD" ||
+            position === "MOCG"
+        ) {
 
-            }
+            midfielders.push(
+                player
+            );
+
+            return;
+
+        }
+
+
+        /* ========================= */
+        /* ATTAQUANTS */
+        /* ========================= */
+
+        if (
+            position === "BU" ||
+            position === "AC" ||
+            position === "AD" ||
+            position === "AG" ||
+            position === "AT"
+        ) {
+
+            attackers.push(
+                player
+            );
+
+            return;
+
+        }
+
+
+        /* ========================= */
+        /* AUTRES */
+        /* ========================= */
+
+        others.push(
+            player
         );
+
+    }
+);
 
 
         /* ================================================= */
