@@ -94,6 +94,39 @@ function chooseClub(club) {
 
 
     // =========================
+    // Calendrier du championnat
+    // =========================
+
+    const leagueClubs =
+        game.data.getClubsByLeague(
+            game.club.league
+        );
+
+
+    const teams =
+        leagueClubs.map(
+            club => club.nom
+        );
+
+
+    game.calendar =
+        new ChampionshipCalendar(
+            teams
+        );
+
+
+    game.calendar.generateCalendar();
+
+    game.calendar.generateReturnMatches();
+
+
+    console.log(
+        "📅 Calendrier généré :",
+        game.calendar.matchdays
+    );
+
+
+    // =========================
     // Marché des transferts
     // =========================
 
@@ -381,6 +414,47 @@ function loadCareer(slot = 1) {
 
             data.tactics
 
+        );
+
+    }
+
+
+    /*
+     * =========================
+     * CALENDRIER
+     * =========================
+     */
+
+    if (
+        game.club
+    ) {
+
+        const leagueClubs =
+            game.data.getClubsByLeague(
+                game.club.league
+            );
+
+
+        const teams =
+            leagueClubs.map(
+                club => club.nom
+            );
+
+
+        game.calendar =
+            new ChampionshipCalendar(
+                teams
+            );
+
+
+        game.calendar.generateCalendar();
+
+        game.calendar.generateReturnMatches();
+
+
+        console.log(
+            "📅 Calendrier restauré :",
+            game.calendar.matchdays
         );
 
     }
