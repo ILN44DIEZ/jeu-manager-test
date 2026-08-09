@@ -2,7 +2,9 @@ class ChampionshipCalendar {
 
     constructor(teams) {
 
-        this.teams = teams;
+        this.teams = [
+            ...teams
+        ];
 
         this.matchdays = [];
 
@@ -24,6 +26,10 @@ class ChampionshipCalendar {
         ];
 
 
+        /* ========================= */
+        /* NOMBRE IMPAIR */
+        /* ========================= */
+
         if (
             teams.length % 2 !== 0
         ) {
@@ -35,11 +41,11 @@ class ChampionshipCalendar {
         }
 
 
-        let totalRounds =
+        const totalRounds =
             teams.length - 1;
 
 
-        let matchesPerRound =
+        const matchesPerRound =
             teams.length / 2;
 
 
@@ -55,7 +61,7 @@ class ChampionshipCalendar {
             round++
         ) {
 
-            let matches = [];
+            const matches = [];
 
 
             for (
@@ -74,22 +80,35 @@ class ChampionshipCalendar {
                     ];
 
 
+                /* ========================= */
+                /* EXEMPT */
+                /* ========================= */
+
                 if (
-                    home !== "Exempt" &&
-                    away !== "Exempt"
+                    home === "Exempt" ||
+                    away === "Exempt"
                 ) {
 
-                    matches.push({
-
-                        home:
-                            home,
-
-                        away:
-                            away
-
-                    });
+                    continue;
 
                 }
+
+
+                matches.push({
+
+                    home:
+                        home,
+
+                    away:
+                        away,
+
+                    played:
+                        false,
+
+                    result:
+                        null
+
+                });
 
             }
 
@@ -100,10 +119,20 @@ class ChampionshipCalendar {
                     round + 1,
 
                 matches:
-                    matches
+                    matches,
+
+                played:
+                    false,
+
+                results:
+                    []
 
             });
 
+
+            /* ========================= */
+            /* ROTATION */
+            /* ========================= */
 
             rotation.splice(
 
@@ -133,6 +162,7 @@ class ChampionshipCalendar {
         const firstHalf =
             this.matchdays.map(
                 day => ({
+
                     day:
                         day.day,
 
@@ -144,25 +174,48 @@ class ChampionshipCalendar {
                                     match.away,
 
                                 away:
-                                    match.home
+                                    match.home,
+
+                                played:
+                                    false,
+
+                                result:
+                                    null
 
                             })
-                        )
+                        ),
+
+                    played:
+                        false,
+
+                    results:
+                        []
 
                 })
             );
 
 
+        const firstHalfLength =
+            this.matchdays.length;
+
+
         const returnMatches =
             firstHalf.map(
-                day => ({
+                (day, index) => ({
 
                     day:
-                        day.day +
-                        this.matchdays.length,
+                        index +
+                        firstHalfLength +
+                        1,
 
                     matches:
-                        day.matches
+                        day.matches,
+
+                    played:
+                        false,
+
+                    results:
+                        []
 
                 })
             );
@@ -184,52 +237,234 @@ class ChampionshipCalendar {
 
 
     /* ================================================= */
-    /* MÉLANGE DES JOURNÉES */
+    /* MÉLANGE DOMICILE / EXTÉRIEUR */
     /* ================================================= */
 
-    shuffleMatchdays() {
+    balanceHomeAway() {
 
         /*
-         * Mélange les journées sans modifier
-         * les matchs qui se trouvent à l'intérieur.
+         * Pour chaque équipe, on essaie d'éviter
+         * une longue série de matchs à domicile
+         * ou à l'extérieur.
+         *
+         * On échange les domiciles des affiches
+         * lorsque cela permet d'améliorer
+         * l'équilibre.
          */
 
-        for (
-            let i =
-                this.matchdays.length - 1;
 
-            i > 0;
+        const maxConsecutive =
+            2;
 
-            i--
-        ) {
 
-            const randomIndex =
-                Math.floor(
-                    Math.random() *
-                    (i + 1)
+        const teamState = {};
+
+
+        this.teams.forEach(
+            team => {
+
+                teamState[team] = {
+
+                    last:
+                        null,
+
+                    consecutive:
+                        0
+
+                };
+
+            }
+        );
+
+
+        this.matchdays.forEach(
+            day => {
+
+                day.matches.forEach(
+                    match => {
+
+                        const home =
+                            match.home;
+
+                        const away =
+                            match.away;
+
+
+                        const homeState =
+                            teamState[home];
+
+                        const awayState =
+                            teamState[away];
+
+
+                        /*
+                         * Si les deux équipes ont déjà
+                         * trop souvent la même position,
+                         * on inverse domicile/extérieur.
+                         */
+
+                        if (
+                            homeState &&
+                            awayState
+                        ) {
+
+                            if (
+                                homeState.last === "home" &&
+                                homeState.consecutive >= maxConsecutive
+                            ) {
+
+                                this.swapMatch(
+                                    match
+                                );
+
+                            } else if (
+                                awayState.last === "away" &&
+                                awayState.consecutive >= maxConsecutive
+                            ) {
+
+                                this.swapMatch(
+                                    match
+                                );
+
+                            }
+
+                        }
+
+
+                        /* ========================= */
+                        /* MISE À JOUR */
+                        /* ========================= */
+
+                        const finalHome =
+                            match.home;
+
+                        const finalAway =
+                            match.away;
+
+
+                        this.updateTeamState(
+                            teamState[finalHome],
+                            "home"
+                        );
+
+
+                        this.updateTeamState(
+                            teamState[finalAway],
+                            "away"
+                        );
+
+                    }
                 );
 
-
-            const temp =
-                this.matchdays[i];
-
-
-            this.matchdays[i] =
-                this.matchdays[
-                    randomIndex
-                ];
+            }
+        );
 
 
-            this.matchdays[
-                randomIndex
-            ] =
-                temp;
+        return this.matchdays;
+
+    }
+
+
+
+    /* ================================================= */
+    /* INVERSER UN MATCH */
+    /* ================================================= */
+
+    swapMatch(match) {
+
+        const oldHome =
+            match.home;
+
+
+        match.home =
+            match.away;
+
+
+        match.away =
+            oldHome;
+
+    }
+
+
+
+    /* ================================================= */
+    /* ÉTAT D'UNE ÉQUIPE */
+    /* ================================================= */
+
+    updateTeamState(
+        state,
+        location
+    ) {
+
+        if (!state) {
+
+            return;
 
         }
 
 
+        if (
+            state.last ===
+            location
+        ) {
+
+            state.consecutive++;
+
+        } else {
+
+            state.last =
+                location;
+
+            state.consecutive =
+                1;
+
+        }
+
+    }
+
+
+
+    /* ================================================= */
+    /* RÉINITIALISER LES ÉTATS */
+    /* ================================================= */
+
+    resetBalanceState() {
+
         /*
-         * Renumérotation des journées
+         * Cette fonction est volontairement
+         * disponible si le calendrier doit
+         * être recalculé.
+         */
+
+        return true;
+
+    }
+
+
+
+    /* ================================================= */
+    /* CALENDRIER COMPLET */
+    /* ================================================= */
+
+    generateFullCalendar() {
+
+        this.generateCalendar();
+
+
+        this.generateReturnMatches();
+
+
+        /*
+         * Mélange intelligent des domiciles
+         * et extérieurs.
+         */
+
+        this.balanceHomeAway();
+
+
+        /*
+         * On renumérote toujours les journées
+         * dans l'ordre.
          */
 
         this.matchdays.forEach(
@@ -249,19 +484,100 @@ class ChampionshipCalendar {
 
 
     /* ================================================= */
-    /* CALENDRIER COMPLET */
+    /* OBTENIR UNE JOURNÉE */
     /* ================================================= */
 
-    generateFullCalendar() {
+    getMatchday(dayNumber) {
 
-        this.generateCalendar();
+        return this.matchdays.find(
+            day =>
+                day.day ===
+                dayNumber
+        );
 
-        this.generateReturnMatches();
-
-        this.shuffleMatchdays();
+    }
 
 
-        return this.matchdays;
+
+    /* ================================================= */
+    /* PROCHAINE JOURNÉE NON JOUÉE */
+    /* ================================================= */
+
+    getNextMatchday() {
+
+        return this.matchdays.find(
+            day =>
+                day.played !== true
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* MATCHS D'UN CLUB */
+    /* ================================================= */
+
+    getClubMatches(clubName) {
+
+        const matches = [];
+
+
+        this.matchdays.forEach(
+            day => {
+
+                day.matches.forEach(
+                    match => {
+
+                        if (
+                            match.home ===
+                            clubName ||
+
+                            match.away ===
+                            clubName
+                        ) {
+
+                            matches.push({
+
+                                day:
+                                    day.day,
+
+                                home:
+                                    match.home,
+
+                                away:
+                                    match.away,
+
+                                played:
+                                    match.played,
+
+                                result:
+                                    match.result
+
+                            });
+
+                        }
+
+                    }
+                );
+
+            }
+        );
+
+
+        return matches;
+
+    }
+
+
+
+    /* ================================================= */
+    /* NOMBRE DE JOURNÉES */
+    /* ================================================= */
+
+    getTotalMatchdays() {
+
+        return this.matchdays.length;
 
     }
 
@@ -290,13 +606,34 @@ class ChampionshipCalendar {
                 day.matches.forEach(
                     match => {
 
-                        console.log(
+                        if (
+                            match.played &&
+                            match.result
+                        ) {
 
-                            match.home +
-                            " - " +
-                            match.away
+                            console.log(
 
-                        );
+                                match.home +
+                                " " +
+                                match.result.homeGoals +
+                                " - " +
+                                match.result.awayGoals +
+                                " " +
+                                match.away
+
+                            );
+
+                        } else {
+
+                            console.log(
+
+                                match.home +
+                                " - " +
+                                match.away
+
+                            );
+
+                        }
 
                     }
                 );
