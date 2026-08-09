@@ -141,6 +141,16 @@ function chooseClub(club) {
         );
 
 
+    // =========================
+    // Moteur des matchs
+    // =========================
+
+    game.matchEngine =
+        new MatchEngine(
+            game.standings
+        );
+
+
     console.log(
         "🏆 Classement créé :",
         game.standings.getTable()
@@ -490,6 +500,16 @@ function loadCareer(slot = 1) {
         game.standings =
             new Standings(
                 teams
+            );
+
+
+        // =========================
+        // Moteur des matchs
+        // =========================
+
+        game.matchEngine =
+            new MatchEngine(
+                game.standings
             );
 
 
