@@ -28,6 +28,10 @@ class UI {
 
 
 
+    /* ================================================= */
+    /* BASE UI */
+    /* ================================================= */
+
     clear() {
 
         this.container.innerHTML = "";
@@ -89,6 +93,10 @@ class UI {
     }
 
 
+
+    /* ================================================= */
+    /* FICHE MANAGER */
+    /* ================================================= */
 
     showManager(manager) {
 
@@ -215,16 +223,22 @@ class UI {
 
 
 
-        manager.objectives.forEach(objective => {
+        manager.objectives.forEach(
+            objective => {
 
-            this.showMessage(
-                "• " +
-                objective
-            );
+                this.showMessage(
+                    "• " +
+                    objective
+                );
 
-        });
+            }
+        );
 
 
+
+        /* ========================= */
+        /* EFFECTIF */
+        /* ========================= */
 
         this.createButton(
 
@@ -246,6 +260,10 @@ class UI {
 
 
 
+        /* ========================= */
+        /* TACTIQUES */
+        /* ========================= */
+
         this.createButton(
 
             "🧠 Tactiques",
@@ -266,6 +284,30 @@ class UI {
 
 
 
+        /* ========================= */
+        /* SAUVEGARDES */
+        /* ========================= */
+
+        this.createButton(
+
+            "💾 Sauvegardes",
+
+            () => {
+
+                this.showSaveMenu(
+                    manager
+                );
+
+            }
+
+        );
+
+
+
+        /* ========================= */
+        /* MENU CARRIÈRE */
+        /* ========================= */
+
         this.createButton(
 
             "🏠 Menu carrière",
@@ -284,6 +326,391 @@ class UI {
 
 
 
+    /* ================================================= */
+    /* MENU SAUVEGARDES */
+    /* ================================================= */
+
+    showSaveMenu(manager) {
+
+        this.clear();
+
+
+        this.showTitle(
+            "💾 Sauvegardes"
+        );
+
+
+        this.showMessage(
+            "Choisis un emplacement de sauvegarde."
+        );
+
+
+        /*
+         * =========================
+         * 3 SLOTS
+         * =========================
+         */
+
+        for (
+            let slot = 1;
+            slot <= 3;
+            slot++
+        ) {
+
+            this.createSaveSlot(
+                slot,
+                manager
+            );
+
+        }
+
+
+        /*
+         * =========================
+         * RETOUR
+         * =========================
+         */
+
+        this.createButton(
+
+            "⬅️ Retour carrière",
+
+            () => {
+
+                this.showManager(
+                    manager
+                );
+
+            }
+
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* CRÉATION D'UN SLOT */
+    /* ================================================= */
+
+    createSaveSlot(
+        slot,
+        manager
+    ) {
+
+        const saves =
+            game.save.getSaveList();
+
+
+        const save =
+            saves.find(
+                item =>
+                    item.slot === slot
+            );
+
+
+        const box =
+            document.createElement(
+                "div"
+            );
+
+
+        box.className =
+            "save-slot";
+
+
+        box.style.margin =
+            "15px 0";
+
+
+        box.style.padding =
+            "10px";
+
+
+        box.style.border =
+            "1px solid #ccc";
+
+
+        /*
+         * =========================
+         * TITRE
+         * =========================
+         */
+
+        const title =
+            document.createElement(
+                "h3"
+            );
+
+
+        title.textContent =
+            "💾 Slot " +
+            slot;
+
+
+        box.appendChild(
+            title
+        );
+
+
+        /*
+         * =========================
+         * INFORMATIONS
+         * =========================
+         */
+
+        const info =
+            document.createElement(
+                "p"
+            );
+
+
+        if (save) {
+
+            const date =
+                new Date(
+                    save.date
+                );
+
+
+            info.textContent =
+                "📅 " +
+                date.toLocaleString();
+
+        } else {
+
+            info.textContent =
+                "🟢 Emplacement vide";
+
+        }
+
+
+        box.appendChild(
+            info
+        );
+
+
+        /*
+         * =========================
+         * SAUVEGARDER
+         * =========================
+         */
+
+        const saveButton =
+            document.createElement(
+                "button"
+            );
+
+
+        saveButton.textContent =
+            "💾 Sauvegarder";
+
+
+        saveButton.addEventListener(
+            "click",
+            () => {
+
+                const confirmed =
+                    !save ||
+                    confirm(
+                        "⚠️ Ce slot contient déjà une sauvegarde.\n\n" +
+                        "Veux-tu la remplacer ?"
+                    );
+
+
+                if (!confirmed) {
+
+                    return;
+
+                }
+
+
+                const success =
+                    saveCareer(
+                        slot
+                    );
+
+
+                if (success) {
+
+                    alert(
+                        "✅ Partie sauvegardée dans le slot " +
+                        slot +
+                        " !"
+                    );
+
+
+                    this.showSaveMenu(
+                        manager
+                    );
+
+                }
+
+            }
+        );
+
+
+        box.appendChild(
+            saveButton
+        );
+
+
+        /*
+         * =========================
+         * CHARGER
+         * =========================
+         */
+
+        const loadButton =
+            document.createElement(
+                "button"
+            );
+
+
+        loadButton.textContent =
+            "📂 Charger";
+
+
+        loadButton.disabled =
+            !save;
+
+
+        loadButton.addEventListener(
+            "click",
+            () => {
+
+                if (!save) {
+
+                    return;
+
+                }
+
+
+                const confirmed =
+                    confirm(
+                        "📂 Charger la sauvegarde du slot " +
+                        slot +
+                        " ?\n\n" +
+                        "La carrière actuelle sera remplacée."
+                    );
+
+
+                if (!confirmed) {
+
+                    return;
+
+                }
+
+
+                const success =
+                    loadCareer(
+                        slot
+                    );
+
+
+                if (success) {
+
+                    alert(
+                        "✅ Partie chargée !"
+                    );
+
+                }
+
+            }
+        );
+
+
+        box.appendChild(
+            loadButton
+        );
+
+
+        /*
+         * =========================
+         * SUPPRIMER
+         * =========================
+         */
+
+        const deleteButton =
+            document.createElement(
+                "button"
+            );
+
+
+        deleteButton.textContent =
+            "🗑️ Supprimer";
+
+
+        deleteButton.disabled =
+            !save;
+
+
+        deleteButton.addEventListener(
+            "click",
+            () => {
+
+                if (!save) {
+
+                    return;
+
+                }
+
+
+                const confirmed =
+                    confirm(
+                        "⚠️ Supprimer définitivement la sauvegarde du slot " +
+                        slot +
+                        " ?"
+                    );
+
+
+                if (!confirmed) {
+
+                    return;
+
+                }
+
+
+                const success =
+                    deleteCareer(
+                        slot
+                    );
+
+
+                if (success) {
+
+                    alert(
+                        "🗑️ Sauvegarde supprimée."
+                    );
+
+
+                    this.showSaveMenu(
+                        manager
+                    );
+
+                }
+
+            }
+        );
+
+
+        box.appendChild(
+            deleteButton
+        );
+
+
+        this.container.appendChild(
+            box
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* EFFECTIF */
+    /* ================================================= */
+
     showPlayers(squad) {
 
         this.clear();
@@ -294,27 +721,33 @@ class UI {
         );
 
 
-        squad.players.forEach(player => {
+        squad.players.forEach(
+            player => {
 
-            this.showMessage(
+                this.showMessage(
 
-                player.getFullName()
-                +
-                " - "
-                +
-                player.position
-                +
-                " - "
-                +
-                player.overall
+                    player.getFullName()
+                    +
+                    " - "
+                    +
+                    player.position
+                    +
+                    " - "
+                    +
+                    player.overall
 
-            );
+                );
 
-        });
+            }
+        );
 
     }
 
 
+
+    /* ================================================= */
+    /* CHOIX LIGUE */
+    /* ================================================= */
 
     showLeagueSelection(dataManager) {
 
@@ -331,34 +764,43 @@ class UI {
 
 
 
-        leagues.forEach(league => {
+        leagues.forEach(
+            league => {
 
-            this.createButton(
+                this.createButton(
 
-                this.flags[league]
-                +
-                " "
-                +
-                league,
+                    this.flags[league]
+                    +
+                    " "
+                    +
+                    league,
 
-                () => {
+                    () => {
 
-                    this.showClubSelection(
-                        dataManager,
-                        league
-                    );
+                        this.showClubSelection(
+                            dataManager,
+                            league
+                        );
 
-                }
+                    }
 
-            );
+                );
 
-        });
+            }
+        );
 
     }
 
 
 
-    showClubSelection(dataManager, league) {
+    /* ================================================= */
+    /* CHOIX CLUB */
+    /* ================================================= */
+
+    showClubSelection(
+        dataManager,
+        league
+    ) {
 
         this.clear();
 
@@ -376,36 +818,46 @@ class UI {
 
 
 
-        clubs.forEach(club => {
+        clubs.forEach(
+            club => {
 
-            this.createButton(
+                this.createButton(
 
-                "🏟️ " +
-                club.nom,
+                    "🏟️ " +
+                    club.nom,
 
-                () => {
+                    () => {
 
-                    this.showClubDetails(
+                        this.showClubDetails(
 
-                        club,
+                            club,
 
-                        dataManager,
+                            dataManager,
 
-                        league
+                            league
 
-                    );
+                        );
 
-                }
+                    }
 
-            );
+                );
 
-        });
+            }
+        );
 
     }
 
 
 
-    showClubDetails(club, dataManager, league) {
+    /* ================================================= */
+    /* DÉTAIL CLUB */
+    /* ================================================= */
+
+    showClubDetails(
+        club,
+        dataManager,
+        league
+    ) {
 
         this.clear();
 
@@ -439,7 +891,9 @@ class UI {
 
             () => {
 
-                chooseClub(club);
+                chooseClub(
+                    club
+                );
 
             }
 
