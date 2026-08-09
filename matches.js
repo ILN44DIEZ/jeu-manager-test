@@ -116,6 +116,30 @@ class MatchEngine {
         }
 
 
+        /* ========================= */
+        /* JOURNÉE DÉJÀ JOUÉE */
+        /* ========================= */
+
+        if (
+            matchday.played === true
+        ) {
+
+            console.log(
+                "⚠️ Cette journée a déjà été jouée."
+            );
+
+
+            return (
+                matchday.results || []
+            );
+
+        }
+
+
+        /* ========================= */
+        /* SIMULATION */
+        /* ========================= */
+
         matchday.matches.forEach(
             match => {
 
@@ -129,12 +153,47 @@ class MatchEngine {
                     );
 
 
+                /*
+                 * On conserve le résultat
+                 * directement dans le calendrier.
+                 */
+
+                match.result = {
+
+                    homeGoals:
+                        result.homeGoals,
+
+                    awayGoals:
+                        result.awayGoals,
+
+                    date:
+                        result.date
+
+                };
+
+
+                match.played =
+                    true;
+
+
                 results.push(
                     result
                 );
 
             }
         );
+
+
+        /* ========================= */
+        /* JOURNÉE TERMINÉE */
+        /* ========================= */
+
+        matchday.results =
+            results;
+
+
+        matchday.played =
+            true;
 
 
         return results;
