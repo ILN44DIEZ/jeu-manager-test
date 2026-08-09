@@ -1424,20 +1424,114 @@ class UI {
 
 
                 if (
-                    team.form &&
-                    team.form.length > 0
-                ) {
+    team.form &&
+    team.form.length > 0
+) {
 
-                    formCell.textContent =
-                        team.form.join(" ");
+    team.form.forEach(
+        result => {
 
-                } else {
+            const badge =
+                document.createElement(
+                    "span"
+                );
 
-                    formCell.textContent =
-                        "-";
 
-                }
+            badge.textContent =
+                result;
 
+
+            badge.style.display =
+                "inline-flex";
+
+
+            badge.style.alignItems =
+                "center";
+
+
+            badge.style.justifyContent =
+                "center";
+
+
+            badge.style.width =
+                "24px";
+
+
+            badge.style.height =
+                "24px";
+
+
+            badge.style.margin =
+                "2px";
+
+
+            badge.style.borderRadius =
+                "50%";
+
+
+            badge.style.fontWeight =
+                "bold";
+
+
+            badge.style.fontSize =
+                "12px";
+
+
+            if (
+                result === "V"
+            ) {
+
+                badge.style.backgroundColor =
+                    "#4CAF50";
+
+
+                badge.style.color =
+                    "white";
+
+            }
+
+            else if (
+                result === "N"
+            ) {
+
+                badge.style.backgroundColor =
+                    "#FFC107";
+
+
+                badge.style.color =
+                    "black";
+
+            }
+
+            else if (
+                result === "D"
+            ) {
+
+                badge.style.backgroundColor =
+                    "#F44336";
+
+
+                badge.style.color =
+                    "white";
+
+            }
+
+
+            formCell.appendChild(
+                badge
+            );
+
+        }
+    );
+
+}
+
+else {
+
+    formCell.textContent =
+        "-";
+
+}
 
                 row.appendChild(
                     formCell
