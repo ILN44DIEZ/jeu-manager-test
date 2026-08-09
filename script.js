@@ -4,6 +4,8 @@ game.club = null;
 
 game.currentSaveSlot = null;
 
+game.currentMatchday = 0;
+
 
 
 /* ================================================= */
@@ -12,12 +14,9 @@ game.currentSaveSlot = null;
 
 function chooseClub(club) {
 
-    /*
-     * Nouvelle carrière :
-     * aucun slot de sauvegarde associé.
-     */
-
     game.currentSaveSlot = null;
+
+    game.currentMatchday = 0;
 
 
     console.log(
@@ -27,7 +26,7 @@ function chooseClub(club) {
 
 
     // =========================
-    // Création du vrai club
+    // CLUB
     // =========================
 
     game.club = {
@@ -50,7 +49,7 @@ function chooseClub(club) {
 
 
     // =========================
-    // Création de la carrière
+    // MANAGER
     // =========================
 
     game.manager.startCareer(
@@ -63,7 +62,7 @@ function chooseClub(club) {
 
 
     // =========================
-    // Chargement de l'effectif
+    // EFFECTIF
     // =========================
 
     game.players =
@@ -79,7 +78,7 @@ function chooseClub(club) {
 
 
     // =========================
-    // Composition initiale
+    // TACTIQUES
     // =========================
 
     game.tactics.initializeSquad(
@@ -87,14 +86,8 @@ function chooseClub(club) {
     );
 
 
-    console.log(
-        "Composition initiale :",
-        game.tactics.getData()
-    );
-
-
     // =========================
-    // Calendrier du championnat
+    // CALENDRIER
     // =========================
 
     const leagueClubs =
@@ -115,13 +108,6 @@ function chooseClub(club) {
         );
 
 
-    /*
-     * Génération complète :
-     * - matchs aller
-     * - matchs retour
-     * - mélange aléatoire des journées
-     */
-
     game.calendar.generateFullCalendar();
 
 
@@ -132,7 +118,7 @@ function chooseClub(club) {
 
 
     // =========================
-    // Classement
+    // CLASSEMENT
     // =========================
 
     game.standings =
@@ -142,7 +128,7 @@ function chooseClub(club) {
 
 
     // =========================
-    // Moteur des matchs
+    // MATCH ENGINE
     // =========================
 
     game.matchEngine =
@@ -151,14 +137,8 @@ function chooseClub(club) {
         );
 
 
-    console.log(
-        "🏆 Classement créé :",
-        game.standings.getTable()
-    );
-
-
     // =========================
-    // Marché des transferts
+    // TRANSFERTS
     // =========================
 
     game.market =
@@ -172,7 +152,7 @@ function chooseClub(club) {
 
 
     // =========================
-    // Affichage fiche manager
+    // AFFICHAGE
     // =========================
 
     game.ui.showManager({
@@ -238,16 +218,23 @@ function saveCareer(slot = 1) {
     }
 
 
-    /*
-     * =========================
-     * Données de la partie
-     * =========================
-     */
+    /* ================================================= */
+    /* DONNÉES DE LA PARTIE */
+    /* ================================================= */
 
     const gameData = {
 
+        /* ========================= */
+        /* CLUB */
+        /* ========================= */
+
         club:
             game.club,
+
+
+        /* ========================= */
+        /* MANAGER */
+        /* ========================= */
 
         manager: {
 
@@ -268,22 +255,68 @@ function saveCareer(slot = 1) {
 
         },
 
+
+        /* ========================= */
+        /* JOUEURS */
+        /* ========================= */
+
         players:
             game.players,
+
+
+        /* ========================= */
+        /* TACTIQUES */
+        /* ========================= */
 
         tactics:
             game.save.getTacticsData(
                 game.tactics
-            )
+            ),
+
+
+        /* ========================= */
+        /* CALENDRIER */
+        /* ========================= */
+
+        calendar:
+            game.calendar
+                ? game.calendar.matchdays
+                : null,
+
+
+        /* ========================= */
+        /* JOURNÉE ACTUELLE */
+        /* ========================= */
+
+        currentMatchday:
+            game.currentMatchday,
+
+
+        /* ========================= */
+        /* CLASSEMENT */
+        /* ========================= */
+
+        standings:
+            game.standings
+                ? game.standings.table
+                : null,
+
+
+        /* ========================= */
+        /* HISTORIQUE DES MATCHS */
+        /* ========================= */
+
+        matchHistory:
+            game.matchEngine
+                ? game.matchEngine.getHistory()
+                : []
 
     };
 
 
-    /*
-     * =========================
-     * Sauvegarde
-     * =========================
-     */
+    /* ================================================= */
+    /* SAUVEGARDE */
+    /* ================================================= */
 
     const success =
         game.save.saveGame(
@@ -365,21 +398,17 @@ function loadCareer(slot = 1) {
     }
 
 
-    /*
-     * =========================
-     * SLOT ACTUEL
-     * =========================
-     */
+    /* ================================================= */
+    /* SLOT */
+    /* ================================================= */
 
     game.currentSaveSlot =
         slot;
 
 
-    /*
-     * =========================
-     * CLUB
-     * =========================
-     */
+    /* ================================================= */
+    /* CLUB */
+    /* ================================================= */
 
     if (
         data.club
@@ -391,11 +420,9 @@ function loadCareer(slot = 1) {
     }
 
 
-    /*
-     * =========================
-     * MANAGER
-     * =========================
-     */
+    /* ================================================= */
+    /* MANAGER */
+    /* ================================================= */
 
     if (
         data.manager
@@ -412,11 +439,9 @@ function loadCareer(slot = 1) {
     }
 
 
-    /*
-     * =========================
-     * JOUEURS
-     * =========================
-     */
+    /* ================================================= */
+    /* JOUEURS */
+    /* ================================================= */
 
     if (
         Array.isArray(
@@ -430,11 +455,9 @@ function loadCareer(slot = 1) {
     }
 
 
-    /*
-     * =========================
-     * TACTIQUES
-     * =========================
-     */
+    /* ================================================= */
+    /* TACTIQUES */
+    /* ================================================= */
 
     if (
         data.tactics
@@ -451,11 +474,9 @@ function loadCareer(slot = 1) {
     }
 
 
-    /*
-     * =========================
-     * CALENDRIER
-     * =========================
-     */
+    /* ================================================= */
+    /* CALENDRIER */
+    /* ================================================= */
 
     if (
         game.club
@@ -473,30 +494,87 @@ function loadCareer(slot = 1) {
             );
 
 
+        /*
+         * On recrée seulement
+         * l'objet calendrier.
+         *
+         * On NE génère PAS
+         * un nouveau calendrier.
+         */
+
         game.calendar =
             new ChampionshipCalendar(
                 teams
             );
 
 
-        /*
-         * Régénération du même type
-         * de calendrier :
-         * aller + retour + mélange
-         */
+        if (
+            Array.isArray(
+                data.calendar
+            )
+        ) {
 
-        game.calendar.generateFullCalendar();
+            game.calendar.matchdays =
+                data.calendar;
+
+        } else {
+
+            /*
+             * Ancienne sauvegarde
+             * sans calendrier.
+             */
+
+            game.calendar.generateFullCalendar();
+
+        }
 
 
         console.log(
-            "📅 Calendrier restauré :",
-            game.calendar.matchdays
+            "📅 Calendrier restauré."
         );
 
+    }
 
-        // =========================
-        // Classement
-        // =========================
+
+    /* ================================================= */
+    /* JOURNÉE ACTUELLE */
+    /* ================================================= */
+
+    if (
+        typeof data.currentMatchday ===
+        "number"
+    ) {
+
+        game.currentMatchday =
+            data.currentMatchday;
+
+    } else {
+
+        game.currentMatchday =
+            0;
+
+    }
+
+
+    /* ================================================= */
+    /* CLASSEMENT */
+    /* ================================================= */
+
+    if (
+        game.club
+    ) {
+
+        const leagueClubs =
+            game.data.getClubsByLeague(
+                game.club.league
+            );
+
+
+        const teams =
+            leagueClubs.map(
+                club => club.nom
+            );
+
 
         game.standings =
             new Standings(
@@ -504,14 +582,21 @@ function loadCareer(slot = 1) {
             );
 
 
-        // =========================
-        // Moteur des matchs
-        // =========================
+        /*
+         * On restaure le classement
+         * exactement comme il était.
+         */
 
-        game.matchEngine =
-            new MatchEngine(
-                game.standings
-            );
+        if (
+            Array.isArray(
+                data.standings
+            )
+        ) {
+
+            game.standings.table =
+                data.standings;
+
+        }
 
 
         console.log(
@@ -522,11 +607,35 @@ function loadCareer(slot = 1) {
     }
 
 
-    /*
-     * =========================
-     * MARCHÉ DES TRANSFERTS
-     * =========================
-     */
+    /* ================================================= */
+    /* MATCH ENGINE */
+    /* ================================================= */
+
+    game.matchEngine =
+        new MatchEngine(
+            game.standings
+        );
+
+
+    /* ================================================= */
+    /* HISTORIQUE MATCHS */
+    /* ================================================= */
+
+    if (
+        Array.isArray(
+            data.matchHistory
+        )
+    ) {
+
+        game.matchEngine.history =
+            data.matchHistory;
+
+    }
+
+
+    /* ================================================= */
+    /* MARCHÉ DES TRANSFERTS */
+    /* ================================================= */
 
     if (
         game.club
@@ -544,28 +653,14 @@ function loadCareer(slot = 1) {
     }
 
 
-    /*
-     * =========================
-     * AFFICHAGE
-     * =========================
-     */
+    /* ================================================= */
+    /* AFFICHAGE */
+    /* ================================================= */
 
     game.ui.showManager({
 
         managerName:
             game.manager.managerName,
-
-        /*
-         * IMPORTANT :
-         * On utilise le club réellement
-         * chargé depuis la sauvegarde.
-         *
-         * Ne pas utiliser :
-         * game.manager.getClubName()
-         *
-         * car le manager peut encore
-         * contenir l'ancien club.
-         */
 
         clubName:
             game.club.name,
@@ -611,8 +706,14 @@ function loadCareer(slot = 1) {
 
 
     console.log(
-        "⚽ Tactiques restaurées :",
-        game.tactics.getData()
+        "📅 Journée actuelle :",
+        game.currentMatchday
+    );
+
+
+    console.log(
+        "⚽ Matchs joués :",
+        game.matchEngine.getHistory().length
     );
 
 
@@ -686,7 +787,7 @@ async function startGame() {
 
 
     // =========================
-    // Chargement des données
+    // Données
     // =========================
 
     game.data =
@@ -703,7 +804,7 @@ async function startGame() {
 
 
     // =========================
-    // Création du manager
+    // Manager
     // =========================
 
     game.manager =
@@ -721,15 +822,12 @@ async function startGame() {
 
 
     // =========================
-    // Tactique
+    // Tactiques
     // =========================
 
     game.tactics =
         new Tactics();
 
-
-    // Connexion du DataManager
-    // aux tactiques
 
     game.tactics.setDataManager(
         game.data
@@ -745,7 +843,7 @@ async function startGame() {
 
 
     // =========================
-    // MENU PRINCIPAL
+    // MENU
     // =========================
 
     game.ui.showMainMenu();
