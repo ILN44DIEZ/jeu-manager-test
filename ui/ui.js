@@ -24,6 +24,10 @@ class UI {
         this.tacticsUI =
             new TacticsUI(this);
 
+
+        this.currentLeagueMatchday =
+            0;
+
     }
 
 
@@ -46,7 +50,8 @@ class UI {
             document.createElement("h2");
 
 
-        h2.textContent = title;
+        h2.textContent =
+            title;
 
 
         this.container.appendChild(h2);
@@ -61,7 +66,8 @@ class UI {
             document.createElement("p");
 
 
-        p.textContent = message;
+        p.textContent =
+            message;
 
 
         this.container.appendChild(p);
@@ -76,7 +82,8 @@ class UI {
             document.createElement("button");
 
 
-        button.textContent = text;
+        button.textContent =
+            text;
 
 
         button.addEventListener(
@@ -699,7 +706,7 @@ class UI {
 
 
         /* ========================= */
-        /* CALENDRIER */
+        /* CALENDRIER DU CLUB */
         /* ========================= */
 
         this.createButton(
@@ -755,7 +762,7 @@ class UI {
 
 
     /* ================================================= */
-    /* CHAMPIONNAT */
+    /* MENU CHAMPIONNAT */
     /* ================================================= */
 
     showChampionship() {
@@ -767,6 +774,10 @@ class UI {
             "🏆 Championnat"
         );
 
+
+        /* ========================= */
+        /* CLASSEMENT */
+        /* ========================= */
 
         this.createButton(
 
@@ -780,6 +791,30 @@ class UI {
 
         );
 
+
+        /* ========================= */
+        /* CALENDRIER DE LA LIGUE */
+        /* ========================= */
+
+        this.createButton(
+
+            "📅 Calendrier de la ligue",
+
+            () => {
+
+                this.currentLeagueMatchday =
+                    0;
+
+                this.showLeagueCalendar();
+
+            }
+
+        );
+
+
+        /* ========================= */
+        /* RETOUR */
+        /* ========================= */
 
         this.createButton(
 
@@ -1095,6 +1130,304 @@ class UI {
 
         this.container.appendChild(
             tableElement
+        );
+
+
+        /* ================================================= */
+        /* RETOUR */
+        /* ================================================= */
+
+        this.createButton(
+
+            "⬅️ Retour championnat",
+
+            () => {
+
+                this.showChampionship();
+
+            }
+
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* CALENDRIER COMPLET DE LA LIGUE */
+    /* ================================================= */
+
+    showLeagueCalendar() {
+
+        this.clear();
+
+
+        this.showTitle(
+            "📅 Calendrier de la ligue"
+        );
+
+
+        if (
+            !game.calendar ||
+            !game.calendar.matchdays ||
+            game.calendar.matchdays.length === 0
+        ) {
+
+            this.showMessage(
+                "❌ Calendrier de la ligue indisponible."
+            );
+
+
+            this.createButton(
+
+                "⬅️ Retour championnat",
+
+                () => {
+
+                    this.showChampionship();
+
+                }
+
+            );
+
+
+            return;
+
+        }
+
+
+        const matchdays =
+            game.calendar.matchdays;
+
+
+        /* ================================================= */
+        /* SÉCURITÉ INDEX */
+        /* ================================================= */
+
+        if (
+            this.currentLeagueMatchday < 0
+        ) {
+
+            this.currentLeagueMatchday =
+                0;
+
+        }
+
+
+        if (
+            this.currentLeagueMatchday >=
+            matchdays.length
+        ) {
+
+            this.currentLeagueMatchday =
+                matchdays.length - 1;
+
+        }
+
+
+        const currentDay =
+            matchdays[
+                this.currentLeagueMatchday
+            ];
+
+
+        /* ================================================= */
+        /* NAVIGATION */
+        /* ================================================= */
+
+        const navigation =
+            document.createElement(
+                "div"
+            );
+
+
+        navigation.style.display =
+            "flex";
+
+
+        navigation.style.justifyContent =
+            "center";
+
+
+        navigation.style.alignItems =
+            "center";
+
+
+        navigation.style.gap =
+            "15px";
+
+
+        navigation.style.margin =
+            "15px 0";
+
+
+        /* ========================= */
+        /* JOURNÉE PRÉCÉDENTE */
+        /* ========================= */
+
+        const previousButton =
+            document.createElement(
+                "button"
+            );
+
+
+        previousButton.textContent =
+            "◀️";
+
+
+        previousButton.disabled =
+            this.currentLeagueMatchday === 0;
+
+
+        previousButton.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    this.currentLeagueMatchday > 0
+                ) {
+
+                    this.currentLeagueMatchday--;
+
+                    this.showLeagueCalendar();
+
+                }
+
+            }
+        );
+
+
+        navigation.appendChild(
+            previousButton
+        );
+
+
+        /* ========================= */
+        /* TITRE JOURNÉE */
+        /* ========================= */
+
+        const dayTitle =
+            document.createElement(
+                "strong"
+            );
+
+
+        dayTitle.textContent =
+            "Journée " +
+            currentDay.day +
+            " / " +
+            matchdays.length;
+
+
+        navigation.appendChild(
+            dayTitle
+        );
+
+
+        /* ========================= */
+        /* JOURNÉE SUIVANTE */
+        /* ========================= */
+
+        const nextButton =
+            document.createElement(
+                "button"
+            );
+
+
+        nextButton.textContent =
+            "▶️";
+
+
+        nextButton.disabled =
+            this.currentLeagueMatchday ===
+            matchdays.length - 1;
+
+
+        nextButton.addEventListener(
+            "click",
+            () => {
+
+                if (
+                    this.currentLeagueMatchday <
+                    matchdays.length - 1
+                ) {
+
+                    this.currentLeagueMatchday++;
+
+                    this.showLeagueCalendar();
+
+                }
+
+            }
+        );
+
+
+        navigation.appendChild(
+            nextButton
+        );
+
+
+        this.container.appendChild(
+            navigation
+        );
+
+
+        /* ================================================= */
+        /* MATCHS DE LA JOURNÉE */
+        /* ================================================= */
+
+        if (
+            !currentDay.matches ||
+            currentDay.matches.length === 0
+        ) {
+
+            this.showMessage(
+                "Aucun match pour cette journée."
+            );
+
+        }
+
+
+        currentDay.matches.forEach(
+            match => {
+
+                const matchBox =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                matchBox.style.border =
+                    "1px solid #ccc";
+
+
+                matchBox.style.borderRadius =
+                    "8px";
+
+
+                matchBox.style.padding =
+                    "10px";
+
+
+                matchBox.style.margin =
+                    "8px 0";
+
+
+                matchBox.style.textAlign =
+                    "center";
+
+
+                matchBox.textContent =
+                    match.home +
+                    " - " +
+                    match.away;
+
+
+                this.container.appendChild(
+                    matchBox
+                );
+
+            }
         );
 
 
