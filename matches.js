@@ -1,8 +1,24 @@
 class MatchEngine {
 
-    constructor() {
+    constructor(standings = null) {
 
         this.history = [];
+
+        this.standings =
+            standings;
+
+    }
+
+
+
+    /* ================================================= */
+    /* CONNECTER LE CLASSEMENT */
+    /* ================================================= */
+
+    setStandings(standings) {
+
+        this.standings =
+            standings;
 
     }
 
@@ -58,6 +74,21 @@ class MatchEngine {
         );
 
 
+        /* ========================= */
+        /* CLASSEMENT */
+        /* ========================= */
+
+        if (
+            this.standings
+        ) {
+
+            this.standings.update(
+                result
+            );
+
+        }
+
+
         return result;
 
     }
@@ -100,6 +131,51 @@ class MatchEngine {
 
                 results.push(
                     result
+                );
+
+            }
+        );
+
+
+        return results;
+
+    }
+
+
+
+    /* ================================================= */
+    /* SIMULER PLUSIEURS JOURNÉES */
+    /* ================================================= */
+
+    simulateMatchdays(
+        matchdays
+    ) {
+
+        const results = [];
+
+
+        if (
+            !Array.isArray(
+                matchdays
+            )
+        ) {
+
+            return results;
+
+        }
+
+
+        matchdays.forEach(
+            matchday => {
+
+                const dayResults =
+                    this.simulateMatchday(
+                        matchday
+                    );
+
+
+                results.push(
+                    ...dayResults
                 );
 
             }
