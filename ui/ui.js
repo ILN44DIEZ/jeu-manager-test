@@ -682,6 +682,23 @@ class UI {
 
 
         /* ========================= */
+        /* CHAMPIONNAT */
+        /* ========================= */
+
+        this.createButton(
+
+            "🏆 Championnat",
+
+            () => {
+
+                this.showChampionship();
+
+            }
+
+        );
+
+
+        /* ========================= */
         /* CALENDRIER */
         /* ========================= */
 
@@ -728,6 +745,370 @@ class UI {
             () => {
 
                 this.showMainMenu();
+
+            }
+
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* CHAMPIONNAT */
+    /* ================================================= */
+
+    showChampionship() {
+
+        this.clear();
+
+
+        this.showTitle(
+            "🏆 Championnat"
+        );
+
+
+        this.createButton(
+
+            "📊 Classement",
+
+            () => {
+
+                this.showStandings();
+
+            }
+
+        );
+
+
+        this.createButton(
+
+            "⬅️ Retour carrière",
+
+            () => {
+
+                this.showManager({
+
+                    managerName:
+                        game.manager.managerName,
+
+                    clubName:
+                        game.manager.getClubName(),
+
+                    logo:
+                        game.club.logo,
+
+                    budget:
+                        game.manager.budget,
+
+                    country:
+                        game.club.country,
+
+                    league:
+                        game.club.league,
+
+                    level:
+                        game.club.level,
+
+                    reputation:
+                        game.manager.reputation,
+
+                    season:
+                        game.manager.season,
+
+                    objectives:
+                        game.manager.objectives
+
+                });
+
+            }
+
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* CLASSEMENT */
+    /* ================================================= */
+
+    showStandings() {
+
+        this.clear();
+
+
+        this.showTitle(
+            "📊 Classement"
+        );
+
+
+        if (
+            !game.standings
+        ) {
+
+            this.showMessage(
+                "❌ Classement indisponible."
+            );
+
+
+            this.createButton(
+
+                "⬅️ Retour championnat",
+
+                () => {
+
+                    this.showChampionship();
+
+                }
+
+            );
+
+
+            return;
+
+        }
+
+
+        const table =
+            game.standings.getTable();
+
+
+        /* ================================================= */
+        /* TABLEAU */
+        /* ================================================= */
+
+        const tableElement =
+            document.createElement(
+                "table"
+            );
+
+
+        tableElement.style.width =
+            "100%";
+
+
+        tableElement.style.borderCollapse =
+            "collapse";
+
+
+        /* ================================================= */
+        /* EN-TÊTE */
+        /* ================================================= */
+
+        const header =
+            document.createElement(
+                "tr"
+            );
+
+
+        const headers = [
+
+            "Pos",
+            "Club",
+            "MJ",
+            "V",
+            "N",
+            "D",
+            "BP",
+            "BC",
+            "Diff",
+            "Pts",
+            "Forme"
+
+        ];
+
+
+        headers.forEach(
+            text => {
+
+                const th =
+                    document.createElement(
+                        "th"
+                    );
+
+
+                th.textContent =
+                    text;
+
+
+                th.style.border =
+                    "1px solid #ccc";
+
+
+                th.style.padding =
+                    "6px";
+
+
+                header.appendChild(
+                    th
+                );
+
+            }
+        );
+
+
+        tableElement.appendChild(
+            header
+        );
+
+
+        /* ================================================= */
+        /* ÉQUIPES */
+        /* ================================================= */
+
+        table.forEach(
+            (team, index) => {
+
+                const row =
+                    document.createElement(
+                        "tr"
+                    );
+
+
+                const values = [
+
+                    index + 1,
+
+                    team.team,
+
+                    team.played,
+
+                    team.wins,
+
+                    team.draws,
+
+                    team.losses,
+
+                    team.goalsFor,
+
+                    team.goalsAgainst,
+
+                    team.goalDifference,
+
+                    team.points
+
+                ];
+
+
+                values.forEach(
+                    value => {
+
+                        const td =
+                            document.createElement(
+                                "td"
+                            );
+
+
+                        td.textContent =
+                            value;
+
+
+                        td.style.border =
+                            "1px solid #ccc";
+
+
+                        td.style.padding =
+                            "6px";
+
+
+                        td.style.textAlign =
+                            "center";
+
+
+                        row.appendChild(
+                            td
+                        );
+
+                    }
+                );
+
+
+                /* ========================= */
+                /* FORME */
+                /* ========================= */
+
+                const formCell =
+                    document.createElement(
+                        "td"
+                    );
+
+
+                formCell.style.border =
+                    "1px solid #ccc";
+
+
+                formCell.style.padding =
+                    "6px";
+
+
+                formCell.style.textAlign =
+                    "center";
+
+
+                if (
+                    team.form &&
+                    team.form.length > 0
+                ) {
+
+                    formCell.textContent =
+                        team.form.join(
+                            " "
+                        );
+
+                } else {
+
+                    formCell.textContent =
+                        "-";
+
+                }
+
+
+                row.appendChild(
+                    formCell
+                );
+
+
+                /* ========================= */
+                /* CLUB DU JOUEUR */
+                /* ========================= */
+
+                if (
+                    game.club &&
+                    team.team ===
+                    game.club.name
+                ) {
+
+                    row.style.fontWeight =
+                        "bold";
+
+                }
+
+
+                tableElement.appendChild(
+                    row
+                );
+
+            }
+        );
+
+
+        this.container.appendChild(
+            tableElement
+        );
+
+
+        /* ================================================= */
+        /* RETOUR */
+        /* ================================================= */
+
+        this.createButton(
+
+            "⬅️ Retour championnat",
+
+            () => {
+
+                this.showChampionship();
 
             }
 
