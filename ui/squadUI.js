@@ -128,7 +128,7 @@ class SquadUI {
                 /* ========================= */
 
                 if (
-                    position.startsWith("M") ||
+                    position.includes("MDC") ||
                     position.includes("MC") ||
                     position.includes("MD") ||
                     position.includes("MG") ||
