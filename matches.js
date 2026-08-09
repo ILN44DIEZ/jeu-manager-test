@@ -108,7 +108,9 @@ class MatchEngine {
 
         if (
             !matchday ||
-            !matchday.matches
+            !Array.isArray(
+                matchday.matches
+            )
         ) {
 
             return results;
@@ -129,19 +131,73 @@ class MatchEngine {
             );
 
 
-            return (
-                matchday.results || []
-            );
+            /*
+             * On retourne les résultats
+             * déjà enregistrés.
+             */
+
+            if (
+                Array.isArray(
+                    matchday.results
+                )
+            ) {
+
+                return matchday.results;
+
+            }
+
+
+            return [];
 
         }
 
 
         /* ========================= */
-        /* SIMULATION */
+        /* SIMULATION DES MATCHS */
         /* ========================= */
 
         matchday.matches.forEach(
             match => {
+
+                /*
+                 * Sécurité supplémentaire :
+                 * un match déjà joué ne doit
+                 * jamais être resimulé.
+                 */
+
+                if (
+                    match.played === true &&
+                    match.result
+                ) {
+
+                    results.push({
+
+                        homeTeam:
+                            match.home,
+
+                        awayTeam:
+                            match.away,
+
+                        homeGoals:
+                            match.result.homeGoals,
+
+                        awayGoals:
+                            match.result.awayGoals,
+
+                        date:
+                            match.result.date
+
+                    });
+
+
+                    return;
+
+                }
+
+
+                /* ========================= */
+                /* NOUVEAU MATCH */
+                /* ========================= */
 
                 const result =
                     this.simulateMatch(
@@ -153,10 +209,9 @@ class MatchEngine {
                     );
 
 
-                /*
-                 * On conserve le résultat
-                 * directement dans le calendrier.
-                 */
+                /* ========================= */
+                /* ENREGISTREMENT CALENDRIER */
+                /* ========================= */
 
                 match.result = {
 
@@ -227,6 +282,21 @@ class MatchEngine {
         matchdays.forEach(
             matchday => {
 
+                /*
+                 * Une journée déjà jouée
+                 * n'est pas resimulée.
+                 */
+
+                if (
+                    matchday &&
+                    matchday.played === true
+                ) {
+
+                    return;
+
+                }
+
+
                 const dayResults =
                     this.simulateMatchday(
                         matchday
@@ -253,6 +323,13 @@ class MatchEngine {
 
     displayResult(match) {
 
+        if (!match) {
+
+            return;
+
+        }
+
+
         console.log(
 
             `${match.homeTeam} ` +
@@ -275,7 +352,9 @@ class MatchEngine {
     ) {
 
         if (
-            !results ||
+            !Array.isArray(
+                results
+            ) ||
             results.length === 0
         ) {
 
