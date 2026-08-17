@@ -2,41 +2,79 @@ class Tactics {
 
     constructor(dataManager = null) {
 
-        this.dataManager = dataManager;
+        this.dataManager =
+            dataManager;
 
-        this.formation = "4-3-3";
 
-        this.currentTactic = "Équilibrée";
+        this.formation =
+            "4-3-3";
+
+
+        this.currentTactic =
+            "Équilibrée";
+
 
         this.lineup = [];
 
+
         this.substitutes = [];
+
 
         this.roles = {};
 
+
+        /*
+         * positions :
+         *
+         * playerKey -> slotId
+         *
+         * Exemple :
+         *
+         * joueur123 -> DC_1
+         * joueur456 -> DC_2
+         */
+
         this.positions = {};
+
 
         this.style = {
 
-            mentality: "Équilibrée",
+            mentality:
+                "Équilibrée",
 
-            pressing: 50,
+            pressing:
+                50,
 
-            tempo: 50,
+            tempo:
+                50,
 
-            possession: 50
+            possession:
+                50
 
         };
 
     }
 
 
-    setDataManager(dataManager) {
 
-        this.dataManager = dataManager;
+    /* ================================================= */
+    /* DATA MANAGER */
+    /* ================================================= */
+
+    setDataManager(
+        dataManager
+    ) {
+
+        this.dataManager =
+            dataManager;
 
     }
 
+
+
+    /* ================================================= */
+    /* CLÉ JOUEUR */
+    /* ================================================= */
 
     getPlayerKey(player) {
 
@@ -52,27 +90,166 @@ class Tactics {
             player.id !== null
         ) {
 
-            return String(player.id);
+            return String(
+                player.id
+            );
 
         }
 
 
         return (
-            String(player.prenom || "") +
+
+            String(
+                player.prenom || ""
+            ) +
+
             "_" +
-            String(player.nom || "") +
+
+            String(
+                player.nom || ""
+            ) +
+
             "_" +
-            String(player.numero || "")
+
+            String(
+                player.numero || ""
+            )
+
         );
 
     }
 
 
-    setFormation(formation) {
+
+    /* ================================================= */
+    /* ID UNIQUE D'UN EMPLACEMENT */
+    /* ================================================= */
+
+    getPositionId(
+        poste,
+        index,
+        formation = null
+    ) {
+
+        if (!poste) {
+
+            return "";
+
+        }
+
+
+        /*
+         * Si les données de formation possèdent
+         * déjà un id, on l'utilise.
+         */
+
+        if (
+            poste.id !== undefined &&
+            poste.id !== null
+        ) {
+
+            return String(
+                poste.id
+            );
+
+        }
+
+
+        /*
+         * Sinon on génère un identifiant
+         * unique à partir du poste.
+         */
+
+        const position =
+            String(
+                poste.poste || "POS"
+            )
+            .toUpperCase()
+            .trim();
+
+
+        return (
+            position +
+            "_" +
+            (
+                Number(index) + 1
+            )
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* OBTENIR LES EMPLACEMENTS DE FORMATION */
+    /* ================================================= */
+
+    getFormationSlots(
+        formation = null
+    ) {
+
+        const currentFormation =
+            formation ||
+            this.getFormationData();
+
+
+        if (
+            !currentFormation ||
+            !Array.isArray(
+                currentFormation.postes
+            )
+        ) {
+
+            return [];
+
+        }
+
+
+        return currentFormation.postes.map(
+            (poste, index) => {
+
+                return {
+
+                    id:
+                        this.getPositionId(
+                            poste,
+                            index,
+                            currentFormation
+                        ),
+
+                    poste:
+                        poste.poste,
+
+                    x:
+                        poste.x,
+
+                    y:
+                        poste.y,
+
+                    index:
+                        index
+
+                };
+
+            }
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* FORMATION */
+    /* ================================================= */
+
+    setFormation(
+        formation
+    ) {
 
         if (!this.dataManager) {
 
-            this.formation = formation;
+            this.formation =
+                formation;
 
             return true;
 
@@ -85,18 +262,37 @@ class Tactics {
             );
 
 
-        if (formationData) {
+        if (!formationData) {
 
-            this.formation = formation;
+            console.error(
+                "❌ Formation introuvable :",
+                formation
+            );
 
-            return true;
+            return false;
 
         }
 
 
-        return false;
+        this.formation =
+            formation;
+
+
+        /*
+         * On ne détruit PAS la composition.
+         *
+         * On conserve les joueurs,
+         * puis on replace chaque joueur
+         * sur un emplacement valide.
+         */
+
+        this.reorganizePositions();
+
+
+        return true;
 
     }
+
 
 
     getFormation() {
@@ -104,6 +300,7 @@ class Tactics {
         return this.formation;
 
     }
+
 
 
     getFormationData() {
@@ -122,6 +319,7 @@ class Tactics {
     }
 
 
+
     getAvailableFormations() {
 
         if (!this.dataManager) {
@@ -136,7 +334,14 @@ class Tactics {
     }
 
 
-    setTactic(name) {
+
+    /* ================================================= */
+    /* TACTIQUES */
+    /* ================================================= */
+
+    setTactic(
+        name
+    ) {
 
         if (!this.dataManager) {
 
@@ -165,11 +370,14 @@ class Tactics {
         this.style.mentality =
             tactic.mentalite;
 
+
         this.style.pressing =
             tactic.pressing;
 
+
         this.style.tempo =
             tactic.tempo;
+
 
         this.style.possession =
             tactic.possession;
@@ -180,11 +388,13 @@ class Tactics {
     }
 
 
+
     getCurrentTactic() {
 
         return this.currentTactic;
 
     }
+
 
 
     getAvailableTactics() {
@@ -201,23 +411,29 @@ class Tactics {
     }
 
 
+
     /* ================================================= */
     /* INITIALISATION EFFECTIF */
     /* ================================================= */
 
-    initializeSquad(players) {
+    initializeSquad(
+        players
+    ) {
 
         this.lineup = [];
 
+
         this.substitutes = [];
 
+
         this.positions = {};
+
 
         this.roles = {};
 
 
         if (
-            !players ||
+            !Array.isArray(players) ||
             players.length === 0
         ) {
 
@@ -241,16 +457,22 @@ class Tactics {
         }
 
 
+        const slots =
+            this.getFormationSlots(
+                formation
+            );
+
+
         const availablePlayers =
             [...players];
 
 
-        /* ========================= */
+        /* ================================================= */
         /* 11 TITULAIRES */
-        /* ========================= */
+        /* ================================================= */
 
-        formation.postes.forEach(
-            poste => {
+        slots.forEach(
+            slot => {
 
                 if (
                     this.lineup.length >= 11
@@ -261,15 +483,34 @@ class Tactics {
                 }
 
 
+                /*
+                 * Chercher d'abord un joueur
+                 * ayant exactement le poste.
+                 */
+
                 let index =
                     availablePlayers.findIndex(
                         player =>
-                            player.poste ===
-                            poste.poste
+                            String(
+                                player.poste || ""
+                            )
+                            .toUpperCase()
+                            ===
+                            String(
+                                slot.poste || ""
+                            )
+                            .toUpperCase()
                     );
 
 
-                if (index === -1) {
+                /*
+                 * Sinon chercher le meilleur
+                 * joueur disponible.
+                 */
+
+                if (
+                    index === -1
+                ) {
 
                     index =
                         this.getBestPlayerIndex(
@@ -279,7 +520,9 @@ class Tactics {
                 }
 
 
-                if (index === -1) {
+                if (
+                    index === -1
+                ) {
 
                     return;
 
@@ -287,7 +530,9 @@ class Tactics {
 
 
                 const player =
-                    availablePlayers[index];
+                    availablePlayers[
+                        index
+                    ];
 
 
                 this.lineup.push(
@@ -295,10 +540,16 @@ class Tactics {
                 );
 
 
+                const playerKey =
+                    this.getPlayerKey(
+                        player
+                    );
+
+
                 this.positions[
-                    this.getPlayerKey(player)
+                    playerKey
                 ] =
-                    poste.poste;
+                    slot.id;
 
 
                 availablePlayers.splice(
@@ -310,9 +561,9 @@ class Tactics {
         );
 
 
-        /* ========================= */
-        /* COMPLÉTER LES 11 */
-        /* ========================= */
+        /* ================================================= */
+        /* COMPLÉTER SI BESOIN */
+        /* ================================================= */
 
         while (
             this.lineup.length < 11 &&
@@ -323,8 +574,8 @@ class Tactics {
                 availablePlayers.shift();
 
 
-            const poste =
-                formation.postes[
+            const slot =
+                slots[
                     this.lineup.length
                 ];
 
@@ -334,21 +585,23 @@ class Tactics {
             );
 
 
-            if (poste) {
+            if (slot) {
 
                 this.positions[
-                    this.getPlayerKey(player)
+                    this.getPlayerKey(
+                        player
+                    )
                 ] =
-                    poste.poste;
+                    slot.id;
 
             }
 
         }
 
 
-        /* ========================= */
+        /* ================================================= */
         /* 9 REMPLAÇANTS */
-        /* ========================= */
+        /* ================================================= */
 
         while (
             this.substitutes.length < 9 &&
@@ -375,7 +628,14 @@ class Tactics {
     }
 
 
-    getBestPlayerIndex(players) {
+
+    /* ================================================= */
+    /* MEILLEUR JOUEUR */
+    /* ================================================= */
+
+    getBestPlayerIndex(
+        players
+    ) {
 
         if (
             !players ||
@@ -387,7 +647,8 @@ class Tactics {
         }
 
 
-        let bestIndex = 0;
+        let bestIndex =
+            0;
 
 
         for (
@@ -413,7 +674,8 @@ class Tactics {
                 bestNote
             ) {
 
-                bestIndex = i;
+                bestIndex =
+                    i;
 
             }
 
@@ -423,6 +685,231 @@ class Tactics {
         return bestIndex;
 
     }
+
+
+
+    /* ================================================= */
+    /* RÉORGANISER LES POSITIONS */
+    /* ================================================= */
+
+    reorganizePositions() {
+
+        const slots =
+            this.getFormationSlots();
+
+
+        if (
+            slots.length === 0
+        ) {
+
+            return;
+
+        }
+
+
+        const usedSlots =
+            new Set();
+
+
+        const newPositions =
+            {};
+
+
+        /*
+         * Première priorité :
+         * conserver le même poste
+         * lorsque cela est possible.
+         */
+
+        this.lineup.forEach(
+            player => {
+
+                const key =
+                    this.getPlayerKey(
+                        player
+                    );
+
+
+                const oldSlotId =
+                    this.positions[
+                        key
+                    ];
+
+
+                const oldSlot =
+                    slots.find(
+                        slot =>
+                            slot.id ===
+                            oldSlotId
+                    );
+
+
+                if (!oldSlot) {
+
+                    return;
+
+                }
+
+
+                if (
+                    !usedSlots.has(
+                        oldSlot.id
+                    )
+                ) {
+
+                    newPositions[
+                        key
+                    ] =
+                        oldSlot.id;
+
+
+                    usedSlots.add(
+                        oldSlot.id
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Deuxième priorité :
+         * attribuer les places restantes.
+         */
+
+        this.lineup.forEach(
+            player => {
+
+                const key =
+                    this.getPlayerKey(
+                        player
+                    );
+
+
+                if (
+                    newPositions[key]
+                ) {
+
+                    return;
+
+                }
+
+
+                const playerPoste =
+                    String(
+                        player.poste || ""
+                    )
+                    .toUpperCase()
+                    .trim();
+
+
+                const availableSlot =
+                    slots.find(
+                        slot => {
+
+                            if (
+                                usedSlots.has(
+                                    slot.id
+                                )
+                            ) {
+
+                                return false;
+
+                            }
+
+
+                            return (
+                                String(
+                                    slot.poste || ""
+                                )
+                                .toUpperCase()
+                                .trim()
+                                ===
+                                playerPoste
+                            );
+
+                        }
+                    );
+
+
+                if (
+                    availableSlot
+                ) {
+
+                    newPositions[
+                        key
+                    ] =
+                        availableSlot.id;
+
+
+                    usedSlots.add(
+                        availableSlot.id
+                    );
+
+                }
+
+            }
+        );
+
+
+        /*
+         * Dernière solution :
+         * remplir les places libres.
+         */
+
+        this.lineup.forEach(
+            player => {
+
+                const key =
+                    this.getPlayerKey(
+                        player
+                    );
+
+
+                if (
+                    newPositions[key]
+                ) {
+
+                    return;
+
+                }
+
+
+                const freeSlot =
+                    slots.find(
+                        slot =>
+                            !usedSlots.has(
+                                slot.id
+                            )
+                    );
+
+
+                if (
+                    freeSlot
+                ) {
+
+                    newPositions[
+                        key
+                    ] =
+                        freeSlot.id;
+
+
+                    usedSlots.add(
+                        freeSlot.id
+                    );
+
+                }
+
+            }
+        );
+
+
+        this.positions =
+            newPositions;
+
+    }
+
 
 
     /* ================================================= */
@@ -444,7 +931,9 @@ class Tactics {
 
 
         const key =
-            this.getPlayerKey(player);
+            this.getPlayerKey(
+                player
+            );
 
 
         const alreadyStarter =
@@ -452,11 +941,14 @@ class Tactics {
                 starter =>
                     this.getPlayerKey(
                         starter
-                    ) === key
+                    ) ===
+                    key
             );
 
 
-        if (alreadyStarter) {
+        if (
+            alreadyStarter
+        ) {
 
             return false;
 
@@ -468,11 +960,14 @@ class Tactics {
                 substitute =>
                     this.getPlayerKey(
                         substitute
-                    ) === key
+                    ) ===
+                    key
             );
 
 
-        if (alreadySubstitute) {
+        if (
+            alreadySubstitute
+        ) {
 
             return false;
 
@@ -486,8 +981,10 @@ class Tactics {
 
         if (position) {
 
-            this.positions[key] =
-                position;
+            this.setPosition(
+                key,
+                position
+            );
 
         }
 
@@ -497,67 +994,360 @@ class Tactics {
     }
 
 
-    removeStarter(playerId) {
 
-        const player =
-            this.lineup.find(
-                joueur =>
-                    this.getPlayerKey(
-                        joueur
-                    ) === String(playerId)
+    removeStarter(
+        playerId
+    ) {
+
+        const key =
+            String(
+                playerId
             );
-
-
-        if (player) {
-
-            delete this.positions[
-                this.getPlayerKey(player)
-            ];
-
-        }
 
 
         this.lineup =
             this.lineup.filter(
-                joueur =>
+                player =>
                     this.getPlayerKey(
-                        joueur
-                    ) !== String(playerId)
+                        player
+                    ) !==
+                    key
             );
+
+
+        delete this.positions[
+            key
+        ];
 
     }
 
+
+
+    /* ================================================= */
+    /* POSITION */
+    /* ================================================= */
 
     setPosition(
         playerId,
         position
     ) {
 
-        this.positions[
-            String(playerId)
-        ] =
-            position;
+        const key =
+            String(
+                playerId
+            );
+
+
+        /*
+         * Si on reçoit un slotId,
+         * on l'utilise directement.
+         */
+
+        const slots =
+            this.getFormationSlots();
+
+
+        const slot =
+            slots.find(
+                current =>
+                    current.id ===
+                    String(position)
+            );
+
+
+        if (
+            slot
+        ) {
+
+            this.positions[key] =
+                slot.id;
+
+            return;
+
+        }
+
+
+        /*
+         * Compatibilité avec l'ancien système :
+         * si on reçoit simplement "DC",
+         * trouver une place libre de ce poste.
+         */
+
+        const positionText =
+            String(
+                position || ""
+            )
+            .toUpperCase()
+            .trim();
+
+
+        const playerCurrentSlot =
+            this.positions[key];
+
+
+        const freeSlot =
+            slots.find(
+                current => {
+
+                    if (
+                        current.poste
+                        .toUpperCase()
+                        .trim()
+                        !==
+                        positionText
+                    ) {
+
+                        return false;
+
+                    }
+
+
+                    /*
+                     * Autoriser le slot actuel.
+                     */
+
+                    if (
+                        current.id ===
+                        playerCurrentSlot
+                    ) {
+
+                        return true;
+
+                    }
+
+
+                    return !Object.values(
+                        this.positions
+                    ).includes(
+                        current.id
+                    );
+
+                }
+            );
+
+
+        if (
+            freeSlot
+        ) {
+
+            this.positions[key] =
+                freeSlot.id;
+
+        }
 
     }
 
 
-    getPosition(playerId) {
+
+    /* ================================================= */
+    /* ID DE POSITION DU JOUEUR */
+    /* ================================================= */
+
+    getPositionIdForPlayer(
+        playerId
+    ) {
+
+        const key =
+            String(
+                playerId
+            );
+
 
         return (
-            this.positions[
-                String(playerId)
-            ] ||
-            "Libre"
+            this.positions[key] ||
+            null
         );
 
     }
 
 
+
     /* ================================================= */
-    /* POSITIONNEMENT DES JOUEURS */
+    /* POSTE DE LA POSITION */
     /* ================================================= */
 
-    getPositionLine(position) {
+    getPosition(
+        playerId
+    ) {
+
+        const slotId =
+            this.getPositionIdForPlayer(
+                playerId
+            );
+
+
+        if (!slotId) {
+
+            return "Libre";
+
+        }
+
+
+        const slots =
+            this.getFormationSlots();
+
+
+        const slot =
+            slots.find(
+                current =>
+                    current.id ===
+                    slotId
+            );
+
+
+        if (!slot) {
+
+            return "Libre";
+
+        }
+
+
+        return slot.poste;
+
+    }
+
+
+
+    /* ================================================= */
+    /* OBTENIR LE SLOT */
+    /* ================================================= */
+
+    getPlayerSlot(
+        playerId
+    ) {
+
+        const slotId =
+            this.getPositionIdForPlayer(
+                playerId
+            );
+
+
+        if (!slotId) {
+
+            return null;
+
+        }
+
+
+        const slots =
+            this.getFormationSlots();
+
+
+        return (
+            slots.find(
+                slot =>
+                    slot.id ===
+                    slotId
+            ) ||
+            null
+        );
+
+    }
+
+
+
+    /* ================================================= */
+    /* REMPLAÇANTS */
+    /* ================================================= */
+
+    addSubstitute(
+        player
+    ) {
+
+        if (
+            this.substitutes.length >= 9
+        ) {
+
+            return false;
+
+        }
+
+
+        const key =
+            this.getPlayerKey(
+                player
+            );
+
+
+        const alreadyStarter =
+            this.lineup.some(
+                starter =>
+                    this.getPlayerKey(
+                        starter
+                    ) ===
+                    key
+            );
+
+
+        if (
+            alreadyStarter
+        ) {
+
+            return false;
+
+        }
+
+
+        const alreadySubstitute =
+            this.substitutes.some(
+                substitute =>
+                    this.getPlayerKey(
+                        substitute
+                    ) ===
+                    key
+            );
+
+
+        if (
+            alreadySubstitute
+        ) {
+
+            return false;
+
+        }
+
+
+        this.substitutes.push(
+            player
+        );
+
+
+        return true;
+
+    }
+
+
+
+    removeSubstitute(
+        playerId
+    ) {
+
+        const key =
+            String(
+                playerId
+            );
+
+
+        this.substitutes =
+            this.substitutes.filter(
+                player =>
+                    this.getPlayerKey(
+                        player
+                    ) !==
+                    key
+            );
+
+    }
+
+
+
+    /* ================================================= */
+    /* POSITIONNEMENT */
+    /* ================================================= */
+
+    getPositionLine(
+        position
+    ) {
 
         if (!position) {
 
@@ -567,30 +1357,40 @@ class Tactics {
 
 
         const poste =
-            String(position)
-                .toUpperCase()
-                .trim();
+            String(
+                position
+            )
+            .toUpperCase()
+            .trim();
 
-
-        /* ========================= */
-        /* DÉFENSE */
-        /* ========================= */
 
         const defense =
             [
+
+                "GB",
+                "GK",
+
                 "DG",
                 "DD",
+
                 "DC",
                 "DCD",
                 "DCG",
+
+                "DLD",
+                "DLG",
+
                 "LIB",
                 "LATERAL",
                 "LAT"
+
             ];
 
 
         if (
-            defense.includes(poste)
+            defense.includes(
+                poste
+            )
         ) {
 
             return "defense";
@@ -598,24 +1398,31 @@ class Tactics {
         }
 
 
-        /* ========================= */
-        /* MILIEU */
-        /* ========================= */
-
         const midfield =
             [
+
                 "MDC",
                 "MC",
+                "MCD",
+                "MCG",
+
                 "MOC",
+                "MOCD",
+                "MOCG",
+
                 "MG",
                 "MD",
+
                 "MO",
                 "MIL"
+
             ];
 
 
         if (
-            midfield.includes(poste)
+            midfield.includes(
+                poste
+            )
         ) {
 
             return "midfield";
@@ -623,24 +1430,27 @@ class Tactics {
         }
 
 
-        /* ========================= */
-        /* ATTAQUE */
-        /* ========================= */
-
         const attack =
             [
+
                 "AG",
                 "AD",
+
                 "BU",
                 "AC",
+                "AT",
+
                 "ATT",
                 "SA",
                 "BT"
+
             ];
 
 
         if (
-            attack.includes(poste)
+            attack.includes(
+                poste
+            )
         ) {
 
             return "attack";
@@ -652,6 +1462,11 @@ class Tactics {
 
     }
 
+
+
+    /* ================================================= */
+    /* STATUT DU POSTE */
+    /* ================================================= */
 
     getPositionStatus(
         player,
@@ -677,14 +1492,12 @@ class Tactics {
 
 
         const currentPosition =
-            String(position)
+            String(
+                position || ""
+            )
             .toUpperCase()
             .trim();
 
-
-        /*
-         * Poste naturel
-         */
 
         if (
             naturalPosition ===
@@ -708,14 +1521,12 @@ class Tactics {
             );
 
 
-        /*
-         * Même ligne,
-         * mais mauvais poste
-         */
-
         if (
-            naturalLine !== "unknown" &&
-            naturalLine === currentLine
+            naturalLine !==
+                "unknown" &&
+
+            naturalLine ===
+                currentLine
         ) {
 
             return "yellow";
@@ -723,14 +1534,15 @@ class Tactics {
         }
 
 
-        /*
-         * Ligne différente
-         */
-
         return "red";
 
     }
 
+
+
+    /* ================================================= */
+    /* PÉNALITÉ */
+    /* ================================================= */
 
     getPositionPenalty(
         player,
@@ -744,7 +1556,9 @@ class Tactics {
             );
 
 
-        switch (status) {
+        switch (
+            status
+        ) {
 
             case "green":
 
@@ -769,6 +1583,11 @@ class Tactics {
 
     }
 
+
+
+    /* ================================================= */
+    /* NOTE EFFECTIVE */
+    /* ================================================= */
 
     getEffectiveRating(
         player,
@@ -806,10 +1625,12 @@ class Tactics {
 
         return Math.max(
             0,
-            baseRating + penalty
+            baseRating +
+            penalty
         );
 
     }
+
 
 
     getPositionRating(
@@ -825,6 +1646,7 @@ class Tactics {
     }
 
 
+
     getPositionColor(
         player,
         position = null
@@ -838,79 +1660,6 @@ class Tactics {
     }
 
 
-    /* ================================================= */
-    /* REMPLAÇANTS */
-    /* ================================================= */
-
-    addSubstitute(player) {
-
-        if (
-            this.substitutes.length >= 9
-        ) {
-
-            return false;
-
-        }
-
-
-        const key =
-            this.getPlayerKey(player);
-
-
-        const alreadyStarter =
-            this.lineup.some(
-                starter =>
-                    this.getPlayerKey(
-                        starter
-                    ) === key
-            );
-
-
-        if (alreadyStarter) {
-
-            return false;
-
-        }
-
-
-        const alreadySubstitute =
-            this.substitutes.some(
-                substitute =>
-                    this.getPlayerKey(
-                        substitute
-                    ) === key
-            );
-
-
-        if (alreadySubstitute) {
-
-            return false;
-
-        }
-
-
-        this.substitutes.push(
-            player
-        );
-
-
-        return true;
-
-    }
-
-
-    removeSubstitute(playerId) {
-
-        this.substitutes =
-            this.substitutes.filter(
-                player =>
-                    this.getPlayerKey(
-                        player
-                    ) !== String(playerId)
-            );
-
-    }
-
 
     /* ================================================= */
     /* RÔLES */
@@ -922,23 +1671,31 @@ class Tactics {
     ) {
 
         this.roles[
-            String(playerId)
+            String(
+                playerId
+            )
         ] =
             role;
 
     }
 
 
-    getRole(playerId) {
+
+    getRole(
+        playerId
+    ) {
 
         return (
             this.roles[
-                String(playerId)
+                String(
+                    playerId
+                )
             ] ||
             ""
         );
 
     }
+
 
 
     /* ================================================= */
@@ -951,7 +1708,8 @@ class Tactics {
     ) {
 
         if (
-            this.style[type] !== undefined
+            this.style[type] !==
+            undefined
         ) {
 
             this.style[type] =
@@ -960,6 +1718,7 @@ class Tactics {
         }
 
     }
+
 
 
     /* ================================================= */
@@ -977,7 +1736,8 @@ class Tactics {
         }
 
 
-        let total = 0;
+        let total =
+            0;
 
 
         this.lineup.forEach(
@@ -1009,13 +1769,15 @@ class Tactics {
     }
 
 
+
     /* ================================================= */
     /* BONUS TACTIQUE */
     /* ================================================= */
 
     getTacticalBonus() {
 
-        let bonus = 0;
+        let bonus =
+            0;
 
 
         switch (
@@ -1050,6 +1812,7 @@ class Tactics {
         );
 
     }
+
 
 
     /* ================================================= */
