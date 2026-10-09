@@ -2125,6 +2125,55 @@ else {
                     matchBox
                 );
 
+/* ================================================= */
+/* BUTEURS DU MATCH */
+/* ================================================= */
+
+if (match.played && match.result) {
+
+    const events = Array.isArray(match.result.events)
+        ? match.result.events
+        : [];
+
+    const goalEvents = events
+        .filter(event => event.type === "goal")
+        .sort((a, b) => a.minute - b.minute);
+
+    if (goalEvents.length > 0) {
+
+        const scorersBox = document.createElement("div");
+
+        scorersBox.style.margin = "0 0 15px 0";
+        scorersBox.style.padding = "0 10px";
+
+        goalEvents.forEach(event => {
+
+            const scorerLine = document.createElement("p");
+
+            const minute = event.minute != null
+                ? event.minute + "' "
+                : "";
+
+            const scorer = event.scorer || "Buteur non renseigné";
+            const team = event.team || "Équipe inconnue";
+
+            scorerLine.textContent =
+                "⚽ " + minute + scorer + " — " + team;
+
+            scorerLine.style.margin = "5px 0";
+            scorerLine.style.fontSize = "0.9em";
+
+            scorersBox.appendChild(scorerLine);
+
+        });
+
+        this.container.appendChild(scorersBox);
+
+    }
+
+}
+
+
             }
         );
 
