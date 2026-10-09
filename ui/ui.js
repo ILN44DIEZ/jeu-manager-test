@@ -1164,33 +1164,77 @@ class UI {
             /* ÉVÉNEMENTS */
             /* ========================= */
 
-            const eventsTitle =
-                document.createElement(
-                    "h3"
-                );
+            
+const eventsTitle =
+    document.createElement("h3");
+
+eventsTitle.textContent =
+    "📋 Événements du match";
+
+eventsTitle.style.marginTop = "25px";
+
+this.container.appendChild(eventsTitle);
 
 
-            eventsTitle.textContent =
-                "📋 Événements du match";
+// Récupérer les événements générés par matches.js
+const events =
+    Array.isArray(clubResult.events)
+        ? clubResult.events
+        : (
+            clubResult.result &&
+            Array.isArray(clubResult.result.events)
+                ? clubResult.result.events
+                : []
+        );
 
+if (events.length > 0) {
 
-            eventsTitle.style.marginTop =
-                "25px";
+    events.forEach(event => {
 
+        const eventLine =
+            document.createElement("p");
 
-            this.container.appendChild(
-                eventsTitle
+        const minute =
+            event.minute != null
+                ? event.minute + "'"
+                : "";
+
+        const description =
+            event.description ||
+            (
+                event.scorer
+                    ? "⚽ " + event.scorer
+                    : "⚽ But"
             );
 
+        eventLine.textContent =
+            minute + " " + description;
 
-            this.showMessage(
-                "⚽ Match terminé."
-            );
+        eventLine.style.padding = "8px";
+        eventLine.style.margin = "5px 0";
+        eventLine.style.borderBottom =
+            "1px solid #ddd";
 
+        this.container.appendChild(eventLine);
 
-            this.showMessage(
-                "📊 Les statistiques détaillées seront disponibles lorsque le moteur de match les générera."
-            );
+    });
+
+} else {
+
+    this.showMessage(
+        "Aucun détail de but disponible pour ce match."
+    );
+
+}
+
+this.showMessage(
+    "✅ Match terminé."
+);
+
+this.showMessage(
+    "📊 Les statistiques détaillées seront ajoutées ultérieurement."
+);
+
 
         }
 
