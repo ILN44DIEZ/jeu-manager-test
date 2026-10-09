@@ -139,25 +139,38 @@ function chooseClub(club) {
     // MATCH ENGINE
     // =========================
 
-    game.matchEngine =
-        new MatchEngine(
-            game.standings
+    
+game.matchEngine =
+    new MatchEngine(
+        game.standings
+    );
+
+
+// =========================
+// EFFECTIFS POUR LES BUTEURS
+// =========================
+
+leagueClubs.forEach(club => {
+
+    const joueurs =
+        game.data.getPlayersByClub(
+            club.nom
         );
 
-
-    // =========================
-    // EFFECTIFS POUR LES BUTEURS
-    // =========================
-
     game.matchEngine.setTeamPlayers(
-        game.club.name,
-        game.players
+        club.nom,
+        joueurs
     );
 
+});
 
-    console.log(
-        "⚽ Effectif connecté au moteur de match."
-    );
+console.log(
+    "⚽ Effectifs du championnat connectés."
+);
+
+
+
+    
 
 
 
@@ -642,6 +655,20 @@ function loadCareer(slot = 1) {
         new MatchEngine(
             game.standings
         );
+leagueClubs.forEach(club => {
+
+    const joueurs =
+        game.data.getPlayersByClub(
+            club.nom
+        );
+
+    game.matchEngine.setTeamPlayers(
+        club.nom,
+        joueurs
+    );
+
+});
+
 
 
     /* ================================================= */
