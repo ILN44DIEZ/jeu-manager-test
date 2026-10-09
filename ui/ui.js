@@ -1200,15 +1200,20 @@ if (events.length > 0) {
                 : "";
 
         const description =
-            event.description ||
-            (
-                event.scorer
-                    ? "⚽ " + event.scorer
-                    : "⚽ But"
-            );
+    event.description ||
+    (
+        event.scorer
+            ? "⚽ " + event.scorer
+            : "⚽ But"
+    );
+
+const equipe =
+    event.team
+        ? " — " + event.team
+        : "";
 
         eventLine.textContent =
-            minute + " " + description;
+    minute + " " + description + equipe;
 
         eventLine.style.padding = "8px";
         eventLine.style.margin = "5px 0";
