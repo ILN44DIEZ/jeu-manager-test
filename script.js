@@ -134,6 +134,7 @@ function chooseClub(club) {
         );
 
 
+    
     // =========================
     // MATCH ENGINE
     // =========================
@@ -142,6 +143,22 @@ function chooseClub(club) {
         new MatchEngine(
             game.standings
         );
+
+
+    // =========================
+    // EFFECTIFS POUR LES BUTEURS
+    // =========================
+
+    game.matchEngine.setTeamPlayers(
+        game.club.name,
+        game.players
+    );
+
+
+    console.log(
+        "⚽ Effectif connecté au moteur de match."
+    );
+
 
 
     // =========================
