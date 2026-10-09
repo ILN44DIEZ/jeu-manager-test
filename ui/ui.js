@@ -866,39 +866,7 @@ class UI {
 
                 () => {
 
-                    this.showManager({
-
-                        managerName:
-                            game.manager.managerName,
-
-                        clubName:
-                            game.club.name,
-
-                        logo:
-                            game.club.logo,
-
-                        budget:
-                            game.manager.budget,
-
-                        country:
-                            game.club.country,
-
-                        league:
-                            game.club.league,
-
-                        level:
-                            game.club.level,
-
-                        reputation:
-                            game.manager.reputation,
-
-                        season:
-                            game.manager.season,
-
-                        objectives:
-                            game.manager.objectives
-
-                    });
+                    this.returnToManager();
 
                 }
 
@@ -965,234 +933,278 @@ class UI {
 
 
         /* ========================= */
-/* AFFICHAGE DU MATCH */
-/* ========================= */
+        /* AFFICHAGE DU MATCH */
+        /* ========================= */
 
-this.clear();
-
-
-this.showTitle(
-    "⚽ JOURNÉE " +
-    matchday.day
-);
+        this.clear();
 
 
-/* ========================= */
-/* MATCH DU CLUB */
-/* ========================= */
-
-if (clubResult) {
-
-    const isHome =
-        clubResult.homeTeam ===
-        game.club.name;
-
-
-    const homeBox =
-        document.createElement(
-            "div"
+        this.showTitle(
+            "⚽ Journée " +
+            matchday.day
         );
 
 
-    homeBox.style.textAlign =
-        "center";
+        if (
+            clubResult
+        ) {
+
+            const isHome =
+                clubResult.homeTeam ===
+                game.club.name;
 
 
-    homeBox.style.margin =
-        "20px 0";
+            /* ========================= */
+            /* CONTENEUR DU MATCH */
+            /* ========================= */
+
+            const matchBox =
+                document.createElement(
+                    "div"
+                );
 
 
-    const homeTitle =
-        document.createElement(
-            "h2"
+            matchBox.style.textAlign =
+                "center";
+
+
+            matchBox.style.margin =
+                "25px 0";
+
+
+            matchBox.style.padding =
+                "20px";
+
+
+            matchBox.style.border =
+                "1px solid #ccc";
+
+
+            matchBox.style.borderRadius =
+                "10px";
+
+
+            /* ========================= */
+            /* DOMICILE */
+            /* ========================= */
+
+            const homeTitle =
+                document.createElement(
+                    "h2"
+                );
+
+
+            homeTitle.textContent =
+                "🏠 " +
+                clubResult.homeTeam;
+
+
+            homeTitle.style.margin =
+                "10px 0";
+
+
+            matchBox.appendChild(
+                homeTitle
+            );
+
+
+            /* ========================= */
+            /* SCORE */
+            /* ========================= */
+
+            const score =
+                document.createElement(
+                    "div"
+                );
+
+
+            score.textContent =
+
+                clubResult.homeGoals +
+                "  -  " +
+                clubResult.awayGoals;
+
+
+            score.style.fontSize =
+                "42px";
+
+
+            score.style.fontWeight =
+                "bold";
+
+
+            score.style.margin =
+                "15px 0";
+
+
+            matchBox.appendChild(
+                score
+            );
+
+
+            /* ========================= */
+            /* EXTÉRIEUR */
+            /* ========================= */
+
+            const awayTitle =
+                document.createElement(
+                    "h2"
+                );
+
+
+            awayTitle.textContent =
+                "✈️ " +
+                clubResult.awayTeam;
+
+
+            awayTitle.style.margin =
+                "10px 0";
+
+
+            matchBox.appendChild(
+                awayTitle
+            );
+
+
+            this.container.appendChild(
+                matchBox
+            );
+
+
+            /* ========================= */
+            /* RÉSULTAT */
+            /* ========================= */
+
+            let resultTitle =
+                "";
+
+
+            if (
+                clubResult.homeGoals >
+                clubResult.awayGoals
+            ) {
+
+                resultTitle =
+                    isHome
+                        ? "🟢 VICTOIRE"
+                        : "🔴 DÉFAITE";
+
+            }
+
+            else if (
+                clubResult.homeGoals <
+                clubResult.awayGoals
+            ) {
+
+                resultTitle =
+                    isHome
+                        ? "🔴 DÉFAITE"
+                        : "🟢 VICTOIRE";
+
+            }
+
+            else {
+
+                resultTitle =
+                    "🟡 MATCH NUL";
+
+            }
+
+
+            const result =
+                document.createElement(
+                    "h2"
+                );
+
+
+            result.textContent =
+                resultTitle;
+
+
+            result.style.textAlign =
+                "center";
+
+
+            result.style.margin =
+                "20px 0";
+
+
+            this.container.appendChild(
+                result
+            );
+
+
+            /* ========================= */
+            /* INFORMATIONS */
+            /* ========================= */
+
+            this.showMessage(
+                "🏟️ " +
+                clubResult.homeTeam +
+                " contre " +
+                clubResult.awayTeam
+            );
+
+
+            this.showMessage(
+                "⚽ Score final : " +
+                clubResult.homeGoals +
+                " - " +
+                clubResult.awayGoals
+            );
+
+
+            this.showMessage(
+                "📅 Journée " +
+                matchday.day
+            );
+
+
+            /* ========================= */
+            /* ÉVÉNEMENTS */
+            /* ========================= */
+
+            const eventsTitle =
+                document.createElement(
+                    "h3"
+                );
+
+
+            eventsTitle.textContent =
+                "📋 Événements du match";
+
+
+            eventsTitle.style.marginTop =
+                "25px";
+
+
+            this.container.appendChild(
+                eventsTitle
+            );
+
+
+            this.showMessage(
+                "⚽ Match terminé."
+            );
+
+
+            this.showMessage(
+                "📊 Les statistiques détaillées seront disponibles lorsque le moteur de match les générera."
+            );
+
+        }
+
+
+        /* ========================= */
+        /* JOURNÉE TERMINÉE */
+        /* ========================= */
+
+        this.showMessage(
+            "✅ Journée " +
+            matchday.day +
+            " terminée."
         );
 
-
-    homeTitle.textContent =
-        "🏠 " +
-        clubResult.homeTeam;
-
-
-    homeBox.appendChild(
-        homeTitle
-    );
-
-
-    const score =
-        document.createElement(
-            "div"
-        );
-
-
-    score.style.fontSize =
-        "42px";
-
-
-    score.style.fontWeight =
-        "bold";
-
-
-    score.style.margin =
-        "15px 0";
-
-
-    score.textContent =
-
-        clubResult.homeGoals +
-        "  -  " +
-        clubResult.awayGoals;
-
-
-    homeBox.appendChild(
-        score
-    );
-
-
-    const awayTitle =
-        document.createElement(
-            "h2"
-        );
-
-
-    awayTitle.textContent =
-        "✈️ " +
-        clubResult.awayTeam;
-
-
-    homeBox.appendChild(
-        awayTitle
-    );
-
-
-    this.container.appendChild(
-        homeBox
-    );
-
-
-    /* ========================= */
-    /* RÉSULTAT */
-    /* ========================= */
-
-    let resultTitle;
-
-
-    if (
-        clubResult.homeGoals >
-        clubResult.awayGoals
-    ) {
-
-        resultTitle =
-            isHome
-                ? "🟢 VICTOIRE !"
-                : "🔴 DÉFAITE";
-
-    }
-
-    else if (
-        clubResult.homeGoals <
-        clubResult.awayGoals
-    ) {
-
-        resultTitle =
-            isHome
-                ? "🔴 DÉFAITE"
-                : "🟢 VICTOIRE !";
-
-    }
-
-    else {
-
-        resultTitle =
-            "🟡 MATCH NUL";
-
-    }
-
-
-    const result =
-        document.createElement(
-            "h2"
-        );
-
-
-    result.textContent =
-        resultTitle;
-
-
-    result.style.textAlign =
-        "center";
-
-
-    this.container.appendChild(
-        result
-    );
-
-
-    /* ========================= */
-    /* DÉTAIL DU MATCH */
-/* ========================= */
-
-    this.showMessage(
-        "🏟️ " +
-        clubResult.homeTeam +
-        " contre " +
-        clubResult.awayTeam
-    );
-
-
-    this.showMessage(
-        "⚽ Score final : " +
-        clubResult.homeGoals +
-        " - " +
-        clubResult.awayGoals
-    );
-
-
-    this.showMessage(
-        "📅 Journée " +
-        matchday.day
-    );
-
-
-    /* ========================= */
-    /* ÉVÉNEMENTS */
-/* ========================= */
-
-    const eventsTitle =
-        document.createElement(
-            "h3"
-        );
-
-
-    eventsTitle.textContent =
-        "📋 Événements du match";
-
-
-    this.container.appendChild(
-        eventsTitle
-    );
-
-
-    this.showMessage(
-        "⚽ Le match est terminé."
-    );
-
-
-    this.showMessage(
-        "📊 Les statistiques détaillées seront ajoutées lorsque le moteur de match les générera."
-    );
-
-}
-
-
-/* ========================= */
-/* JOURNÉE TERMINÉE */
-/* ========================= */
-
-this.showMessage(
-    "✅ Journée " +
-    matchday.day +
-    " terminée."
-);
 
         /* ========================= */
         /* VOIR LES AUTRES RÉSULTATS */
@@ -1255,46 +1267,13 @@ this.showMessage(
 
             () => {
 
-                this.showManager({
-
-                    managerName:
-                        game.manager.managerName,
-
-                    clubName:
-                        game.club.name,
-
-                    logo:
-                        game.club.logo,
-
-                    budget:
-                        game.manager.budget,
-
-                    country:
-                        game.club.country,
-
-                    league:
-                        game.club.league,
-
-                    level:
-                        game.club.level,
-
-                    reputation:
-                        game.manager.reputation,
-
-                    season:
-                        game.manager.season,
-
-                    objectives:
-                        game.manager.objectives
-
-                });
+                this.returnToManager();
 
             }
 
         );
 
     }
-
 
 
     /* ================================================= */
