@@ -61,7 +61,7 @@ class MatchEngine {
 
 
     /* ================================================= */
-    /* OUTILS JOUEURS */
+    /* RÉCUPÉRER LE NOM D'UN JOUEUR */
     /* ================================================= */
 
     getPlayerName(player) {
@@ -74,23 +74,48 @@ class MatchEngine {
             player.prenom ||
             player.firstName ||
             player.firstname ||
+            player.first_name ||
             "";
 
         const lastName =
             player.nom ||
             player.lastName ||
             player.lastname ||
+            player.last_name ||
             "";
 
         const fullName =
-            (firstName + " " + lastName).trim();
+            (
+                String(firstName).trim() +
+                " " +
+                String(lastName).trim()
+            ).trim();
 
         if (fullName) {
             return fullName;
         }
 
-        if (player.name) {
-            return player.name;
+        const alternatives = [
+
+            player.name,
+            player.nomComplet,
+            player.fullName,
+            player.full_name,
+            player.nom_complet
+
+        ];
+
+        for (const name of alternatives) {
+
+            if (
+                typeof name === "string" &&
+                name.trim()
+            ) {
+
+                return name.trim();
+
+            }
+
         }
 
         return null;
@@ -98,40 +123,87 @@ class MatchEngine {
     }
 
 
+    /* ================================================= */
+    /* CHOISIR UN BUTEUR */
+    /* ================================================= */
+
     getScorer(teamName) {
 
         const players =
             this.teamPlayers[teamName] || [];
 
-        if (!Array.isArray(players) || players.length === 0) {
+        if (
+            !Array.isArray(players) ||
+            players.length === 0
+        ) {
+
             return null;
+
         }
 
-        // Privilégier les joueurs offensifs
-        const attackingPlayers = players.filter(player => {
+        // Postes privilégiés pour les buteurs
+        const attackingPositions = [
 
-            const position = String(
-                player.poste ||
-                player.position ||
-                ""
-            ).toUpperCase();
+            "BU",
+            "AC",
+            "AG",
+            "AD",
+            "AV",
+            "MOC",
+            "MC",
+            "MG",
+            "MD"
 
-            return [
-                "BU", "AC", "AG", "AD", "AV",
-                "MOC", "MC", "MG", "MD"
-            ].includes(position);
+        ];
 
-        });
+        const attackingPlayers =
+            players.filter(player => {
 
+                const position = String(
+
+                    player.poste ||
+                    player.position ||
+                    player.pos ||
+                    ""
+
+                ).trim().toUpperCase();
+
+                return attackingPositions.includes(position);
+
+            });
+
+
+        // Si aucun joueur offensif n'est disponible,
+        // rechercher parmi tout l'effectif.
         const candidates =
             attackingPlayers.length > 0
                 ? attackingPlayers
                 : players;
 
+
+        // Écarter les joueurs dont le nom est inexploitable.
+        const namedPlayers =
+            candidates.filter(player => {
+
+                return this.getPlayerName(player) !== null;
+
+            });
+
+
+        if (namedPlayers.length === 0) {
+
+            return null;
+
+        }
+
+
         const player =
-            candidates[
-                Math.floor(Math.random() * candidates.length)
+            namedPlayers[
+                Math.floor(
+                    Math.random() * namedPlayers.length
+                )
             ];
+
 
         return this.getPlayerName(player);
 
@@ -150,8 +222,11 @@ class MatchEngine {
     ) {
 
         const events = [];
+
         const usedMinutes = new Set();
 
+
+        // Générer une minute unique entre 1 et 90.
         const getMinute = () => {
 
             let minute;
@@ -170,7 +245,7 @@ class MatchEngine {
         };
 
 
-        // Générer les buts de l'équipe à domicile
+        // Buts de l'équipe à domicile
         for (let i = 0; i < homeGoals; i++) {
 
             const scorer =
@@ -188,15 +263,16 @@ class MatchEngine {
                     scorer || "Buteur non renseigné",
 
                 description:
-                    "⚽ But de " +
-                    (scorer || "buteur non renseigné")
+                    scorer
+                        ? "⚽ But de " + scorer
+                        : "⚽ But (buteur inconnu)"
 
             });
 
         }
 
 
-        // Générer les buts de l'équipe à l'extérieur
+        // Buts de l'équipe à l'extérieur
         for (let i = 0; i < awayGoals; i++) {
 
             const scorer =
@@ -214,21 +290,24 @@ class MatchEngine {
                     scorer || "Buteur non renseigné",
 
                 description:
-                    "⚽ But de " +
-                    (scorer || "buteur non renseigné")
+                    scorer
+                        ? "⚽ But de " + scorer
+                        : "⚽ But (buteur inconnu)"
 
             });
 
         }
 
 
-        // Classer les événements par minute
+        // Classer les événements chronologiquement.
         events.sort((a, b) => a.minute - b.minute);
 
 
-        // Calculer le score après chaque but
+        // Calculer le score après chaque but.
         let currentHomeGoals = 0;
+
         let currentAwayGoals = 0;
+
 
         events.forEach(event => {
 
@@ -236,7 +315,7 @@ class MatchEngine {
 
                 currentHomeGoals++;
 
-            } else {
+            } else if (event.team === awayTeam) {
 
                 currentAwayGoals++;
 
@@ -249,13 +328,14 @@ class MatchEngine {
 
         });
 
+
         return events;
 
     }
 
 
     /* ================================================= */
-    /* SIMULATION D'UN MATCH */
+    /* SIMULER UN MATCH */
     /* ================================================= */
 
     simulateMatch(homeTeam, awayTeam) {
@@ -269,10 +349,15 @@ class MatchEngine {
 
         const events =
             this.generateGoalEvents(
+
                 homeTeam,
+
                 awayTeam,
+
                 homeGoals,
+
                 awayGoals
+
             );
 
 
@@ -310,6 +395,7 @@ class MatchEngine {
 
         }
 
+
         return result;
 
     }
@@ -322,6 +408,7 @@ class MatchEngine {
     simulateMatchday(matchday) {
 
         const results = [];
+
 
         if (
             !matchday ||
@@ -360,8 +447,12 @@ class MatchEngine {
 
         matchday.matches.forEach(match => {
 
-            // Ne jamais simuler une deuxième fois un match joué
-            if (match.played === true && match.result) {
+            // Ne jamais simuler une deuxième fois
+            // un match déjà enregistré.
+            if (
+                match.played === true &&
+                match.result
+            ) {
 
                 results.push({
 
@@ -396,13 +487,16 @@ class MatchEngine {
 
             const result =
                 this.simulateMatch(
+
                     match.home,
+
                     match.away
+
                 );
 
 
             /* ========================= */
-            /* ENREGISTREMENT CALENDRIER */
+            /* ENREGISTRER LE RÉSULTAT */
             /* ========================= */
 
             match.result = {
@@ -419,6 +513,7 @@ class MatchEngine {
 
             match.played = true;
 
+
             results.push(result);
 
         });
@@ -431,6 +526,7 @@ class MatchEngine {
         matchday.results = results;
 
         matchday.played = true;
+
 
         return results;
 
@@ -445,23 +541,35 @@ class MatchEngine {
 
         const results = [];
 
+
         if (!Array.isArray(matchdays)) {
+
             return results;
+
         }
+
 
         matchdays.forEach(matchday => {
 
-            // Ne pas rejouer une journée terminée
-            if (matchday && matchday.played === true) {
+            // Ne pas rejouer une journée terminée.
+            if (
+                matchday &&
+                matchday.played === true
+            ) {
+
                 return;
+
             }
+
 
             const dayResults =
                 this.simulateMatchday(matchday);
 
+
             results.push(...dayResults);
 
         });
+
 
         return results;
 
@@ -475,24 +583,32 @@ class MatchEngine {
     displayResult(match) {
 
         if (!match) {
+
             return;
+
         }
 
+
         console.log(
+
             `${match.homeTeam} ` +
             `${match.homeGoals} - ` +
             `${match.awayGoals} ` +
             `${match.awayTeam}`
+
         );
+
 
         if (Array.isArray(match.events)) {
 
             match.events.forEach(event => {
 
                 console.log(
+
                     `${event.minute}' — ` +
                     `${event.description} ` +
                     `(${event.score})`
+
                 );
 
             });
@@ -517,7 +633,9 @@ class MatchEngine {
 
         }
 
+
         console.log("=== RÉSULTATS ===");
+
 
         results.forEach(match => {
 
