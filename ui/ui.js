@@ -3187,22 +3187,35 @@ if (match.played && match.result) {
             player.forme = Math.max(0, currentForm - (focus === "physique" ? 4 : 2));
 
             if (rating >= potential) {
-                return { player, message: getName(player) + " a atteint son potentiel (" + rating + ")." };
+                return { player, progressed: false, message: "⭐ " + getName(player) + " · Potentiel atteint (" + rating + ")" };
             }
 
-            if (!Number.isFinite(Number(player.entrainementsDepuisProgression))) player.entrainementsDepuisProgression = 0;
-            if (!Number.isFinite(Number(player.seuilProgression))) player.seuilProgression = 5 + Math.floor(Math.random() * 16);
-            player.entrainementsDepuisProgression += 1;
+            // Migration douce des anciennes sauvegardes vers une progression décimale.
+            if (!Number.isFinite(Number(player.progressionEntrainement))) {
+                const oldCount = Math.max(0, Number(player.entrainementsDepuisProgression) || 0);
+                const oldThreshold = Math.max(5, Number(player.seuilProgression) || 10);
+                player.progressionEntrainement = Math.min(0.95, oldCount / oldThreshold);
+            }
 
-            if (player.entrainementsDepuisProgression >= player.seuilProgression) {
+            // Impact aléatoire par séance : de 0,05 à 0,20, soit au moins
+            // 5 séances et au maximum 20 séances pour atteindre le point suivant.
+            const impact = (5 + Math.floor(Math.random() * 16)) / 100;
+            player.progressionEntrainement = Math.min(1, Number(player.progressionEntrainement) + impact);
+
+            if (player.progressionEntrainement >= 1) {
                 player.note = Math.min(potential, rating + 1);
                 player.valeur = Math.round((Number(player.valeur) || 0) * 1.03);
+                player.progressionEntrainement = 0;
                 player.entrainementsDepuisProgression = 0;
-                player.seuilProgression = 5 + Math.floor(Math.random() * 16);
-                return { player, message: "✅ " + getName(player) + " progresse : note " + rating + " → " + player.note + " !" };
+                player.seuilProgression = null;
+                return { player, progressed: true, message: "⭐ " + getName(player) + " · Note " + rating + " → " + player.note };
             }
 
-            return { player, message: getName(player) + " : entraînement " + player.entrainementsDepuisProgression + "/" + player.seuilProgression + " avant une éventuelle hausse de note." };
+            return {
+                player,
+                progressed: false,
+                message: "✓ " + getName(player) + " · Séance effectuée · Progression " + Number(player.progressionEntrainement).toFixed(2)
+            };
         };
 
         trainButton.addEventListener("click", () => {
@@ -3228,25 +3241,13 @@ if (match.played && match.result) {
             }
 
             const results = eligible.map(player => trainPlayer(player, focus));
-            const successes = results.filter(result => result.message.startsWith("✅")).length;
+            const successes = results.filter(result => result.progressed).length;
             const title = modeSelect.value === "collectif" ? "Séance collective" : "Séance individuelle";
-
-            // Résultat volontairement sobre : le seuil de progression reste caché.
-            const details = results
-                .filter(result => result.message.startsWith("✅"))
-                .map(result => "⭐ " + result.message.replace(/^✅\s*/, ""))
-                .concat(
-                    results.filter(result => !result.message.startsWith("✅") &&
-                        !result.message.includes("a atteint son potentiel"))
-                        .slice(0, 8)
-                        .map(result => "✓ " + getName(result.player) + " a suivi la séance.")
-                );
-            const maxDetails = details.slice(0, 10);
-            const extra = details.length > 10 ? "\n… et " + (details.length - 10) + " autres joueurs." : "";
+            // Afficher tous les joueurs entraînés, sans révéler le nombre de séances restant.
+            const details = results.map(result => result.message);
             const summary = "👥 " + title + " terminée : " + eligible.length +
                 " joueur(s) entraîné(s), " + successes + " progression(s).";
-            this.showTrainingResult(manager, summary +
-                (maxDetails.length ? "\n\n" + maxDetails.join("\n") : "\n\nAucune hausse de note cette fois.") + extra);
+            this.showTrainingResult(manager, summary + "\n\n" + details.join("\n"));
         });
 
         form.append(modeLabel, modeSelect, playerLabel, playerSelect, groupLabel, groupSelect, focusLabel, focusSelect, info, trainButton);
