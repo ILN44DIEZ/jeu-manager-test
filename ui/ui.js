@@ -1640,6 +1640,67 @@ this.showMessage(
                         "td"
                     );
 
+                formCell.style.border =
+                    "1px solid #ccc";
+
+                formCell.style.padding =
+                    "6px";
+
+                formCell.style.textAlign =
+                    "center";
+
+                const formRow =
+                    document.createElement("div");
+
+                formRow.style.display = "flex";
+                formRow.style.flexDirection = "row";
+                formRow.style.flexWrap = "nowrap";
+                formRow.style.alignItems = "center";
+                formRow.style.justifyContent = "center";
+                formRow.style.gap = "3px";
+                formRow.style.whiteSpace = "nowrap";
+
+                if (team.form && team.form.length > 0) {
+
+                    team.form.forEach(result => {
+
+                        const badge =
+                            document.createElement("span");
+
+                        badge.textContent = result;
+                        badge.style.display = "inline-flex";
+                        badge.style.alignItems = "center";
+                        badge.style.justifyContent = "center";
+                        badge.style.flex = "0 0 22px";
+                        badge.style.width = "22px";
+                        badge.style.height = "22px";
+                        badge.style.borderRadius = "50%";
+                        badge.style.fontWeight = "bold";
+                        badge.style.fontSize = "12px";
+
+                        if (result === "V") {
+                            badge.style.backgroundColor = "#4CAF50";
+                            badge.style.color = "white";
+                        } else if (result === "N") {
+                            badge.style.backgroundColor = "#FFC107";
+                            badge.style.color = "black";
+                        } else if (result === "D") {
+                            badge.style.backgroundColor = "#F44336";
+                            badge.style.color = "white";
+                        }
+
+                        formRow.appendChild(badge);
+
+                    });
+
+                } else {
+
+                    formRow.textContent = "-";
+
+                }
+
+                formCell.appendChild(formRow);
+
 
                 formCell.style.border =
                     "1px solid #ccc";
