@@ -773,9 +773,19 @@ class UI {
                 const currentFatigue = Number(player.fatigue) || 0;
                 const injuryChance = 0.015 + Math.max(0, currentFatigue - 60) * 0.001;
                 if (Math.random() < injuryChance) {
-                    player[injuryField] = 1 + Math.floor(Math.random() * 4);
+                    const duration = 1 + Math.floor(Math.random() * 4);
+                    player[injuryField] = duration;
                     player.blessure = "Blessure";
                     player.injury = "Injured";
+
+                    if (!Array.isArray(player.historiqueBlessures)) {
+                        player.historiqueBlessures = [];
+                    }
+                    player.historiqueBlessures.push({
+                        type: "Blessure",
+                        jour: Number(game.currentMatchday) || 0,
+                        duree: duration
+                    });
                 }
             }
         });
