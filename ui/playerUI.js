@@ -5,8 +5,27 @@ class PlayerUI {
         this.container = ui.container;
     }
 
-    showProfile(player, manager, onBack) {
+    showProfile(player, manager, onBack, options = {}) {
         this.ui.clear();
+
+        const backButton = document.createElement("button");
+        backButton.type = "button";
+        backButton.textContent = options.backLabel || "← Retour à l'effectif";
+        backButton.style.width = "auto";
+        backButton.style.padding = "6px 10px";
+        backButton.style.fontSize = "13px";
+        backButton.style.borderRadius = "8px";
+        backButton.style.margin = "0 0 12px";
+        backButton.addEventListener("click", () => {
+            if (typeof onBack === "function") {
+                onBack();
+            } else if (typeof game !== "undefined" && game.ui && game.players) {
+                game.ui.squadUI.showClubPlayers(game.players, manager);
+            } else if (manager) {
+                this.ui.showManager(manager);
+            }
+        });
+        this.container.appendChild(backButton);
 
         const fullName = [player.prenom || "", player.nom || ""].join(" ").trim();
         this.ui.showTitle(fullName || "Fiche joueur");
@@ -45,7 +64,9 @@ class PlayerUI {
         };
 
         stat("⭐ Note", player.note, true);
-        stat("📈 Potentiel", player.potentiel, true);
+        if (!options.hidePotential) {
+            stat("📈 Potentiel", player.potentiel, true);
+        }
         stat("🎂 Âge", player.age === undefined ? "—" : player.age + " ans");
         stat("📍 Poste", player.poste || player.position || "—");
 
@@ -107,14 +128,6 @@ class PlayerUI {
         overview.appendChild(grid);
         this.container.appendChild(overview);
 
-        this.ui.createButton("⬅️ Retour à l'effectif", () => {
-            if (typeof onBack === "function") {
-                onBack();
-            } else if (typeof game !== "undefined" && game.ui && game.players) {
-                game.ui.squadUI.showClubPlayers(game.players, manager);
-            } else if (manager) {
-                this.ui.showManager(manager);
-            }
-        });
+
     }
 }
