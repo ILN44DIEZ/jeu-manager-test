@@ -929,6 +929,10 @@ class UI {
         game.currentMatchday =
             matchdayIndex + 1;
 
+        // Le calendrier de ligue doit s'ouvrir sur la journée qui vient d'être jouée.
+        this.currentLeagueMatchday =
+            matchdayIndex;
+
 
         /* ========================= */
         /* MATCH DU CLUB */
@@ -1372,8 +1376,16 @@ this.showMessage(
 
             () => {
 
-                this.currentLeagueMatchday =
-                    0;
+                // Afficher la dernière journée jouée, ou la première journée en début de saison.
+                this.currentLeagueMatchday = Math.max(
+                    0,
+                    Math.min(
+                        game.currentMatchday - 1,
+                        game.calendar && game.calendar.matchdays
+                            ? game.calendar.matchdays.length - 1
+                            : 0
+                    )
+                );
 
                 this.showLeagueCalendar();
 
