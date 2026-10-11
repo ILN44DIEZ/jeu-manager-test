@@ -741,8 +741,13 @@ class UI {
             const fatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
             const form = Math.max(0, Math.min(100, Number(player.forme) || 70));
 
-            player.fatigue = played ? Math.min(100, fatigue + 18) : Math.max(0, fatigue - 12);
+            player.fatigue = played
+                ? Math.min(100, fatigue + (10 + Math.floor(Math.random() * 11)))
+                : Math.max(0, fatigue - 12);
             player.forme = played ? Math.max(0, form - 3) : Math.min(100, form + 3);
+
+            // Une journée jouée autorise à nouveau une séance individuelle ou collective.
+            player.entrainementEnAttenteMatch = false;
 
             const daysField = Object.prototype.hasOwnProperty.call(player, "joursBlessure") ? "joursBlessure" : "injuryDays";
             const days = Math.max(0, Number(player[daysField]) || 0);
@@ -3051,88 +3056,102 @@ if (match.played && match.result) {
     /* ================================================= */
 
     showTraining(manager) {
-
         this.clear();
         this.showTitle("🏋️ Centre d'entraînement");
-        this.showMessage(
-            "Choisis un joueur pour organiser une séance. L'âge et le potentiel influencent sa progression. L'entraînement augmente aussi la fatigue."
-        );
+        this.showMessage("Les séances sont limitées à une par joueur entre deux journées jouées. Une progression de note demande au moins 5 entraînements, parfois jusqu'à 20.");
 
         const players = Array.isArray(game.players) ? game.players : [];
-
-        if (players.length === 0) {
+        if (!players.length) {
             this.showMessage("Aucun joueur disponible pour l'entraînement.");
             this.createButton("⬅️ Retour carrière", () => this.returnToManager());
             return;
         }
 
-        // Le projet utilise le schéma français : blessure, joursBlessure,
-        // fatigue, forme, note et potentiel.
-        const eligiblePlayers = players.filter(player => {
+        const isInjured = player => {
             const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
-            const injuryDays = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
-            const hasInjury = injuryDays > 0 ||
-                (injury !== "" && injury !== "false" && injury !== "aucune" &&
-                 injury !== "aucun" && injury !== "null" && injury !== "0");
-            return !hasInjury;
-        });
-
-        if (eligiblePlayers.length === 0) {
-            this.showMessage("Tous les joueurs sont actuellement blessés. Attends leur rétablissement avant de les entraîner.");
-            this.createButton("⬅️ Retour carrière", () => this.returnToManager());
-            return;
-        }
+            const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
+            return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
+        };
+        const getName = player => [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") || "Joueur sans nom";
+        const getPositionGroup = player => {
+            const position = String(player.poste || player.position || "").trim().toUpperCase();
+            if (["GB", "GK"].includes(position)) return "GB";
+            if (["DC", "DCD", "DCG", "DD", "DG", "DLD", "DLG", "DDG", "DL", "DF", "DCDG"].includes(position)) return "DEF";
+            if (["MDC", "MC", "MCD", "MCG", "MD", "MG", "MOC", "MOCD", "MOCG", "MR", "ML", "MIL"].includes(position)) return "MIL";
+            if (["BU", "AC", "AD", "AG", "AT", "AV", "SA"].includes(position)) return "ATT";
+            return "OTHER";
+        };
 
         const form = document.createElement("div");
-        form.style.maxWidth = "520px";
+        form.style.maxWidth = "560px";
         form.style.margin = "20px auto";
         form.style.padding = "15px";
         form.style.border = "1px solid #555";
         form.style.borderRadius = "12px";
         form.style.textAlign = "left";
 
-        const playerLabel = document.createElement("label");
-        playerLabel.textContent = "Joueur à entraîner";
-        playerLabel.style.display = "block";
-        playerLabel.style.marginBottom = "6px";
+        const makeLabel = text => {
+            const label = document.createElement("label");
+            label.textContent = text;
+            label.style.display = "block";
+            label.style.marginBottom = "6px";
+            return label;
+        };
+        const makeSelect = () => {
+            const select = document.createElement("select");
+            select.style.width = "100%";
+            select.style.boxSizing = "border-box";
+            select.style.padding = "12px";
+            select.style.marginBottom = "14px";
+            select.style.fontSize = "16px";
+            return select;
+        };
 
-        const playerSelect = document.createElement("select");
-        playerSelect.style.width = "100%";
-        playerSelect.style.boxSizing = "border-box";
-        playerSelect.style.padding = "12px";
-        playerSelect.style.marginBottom = "16px";
-        playerSelect.style.fontSize = "16px";
+        const modeLabel = makeLabel("Format de la séance");
+        const modeSelect = makeSelect();
+        [["individuel", "👤 Entraînement individuel"], ["collectif", "👥 Entraînement de groupe"]].forEach(([value, label]) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = label;
+            modeSelect.appendChild(option);
+        });
 
-        eligiblePlayers.forEach((player, index) => {
+        const playerLabel = makeLabel("Joueur à entraîner");
+        const playerSelect = makeSelect();
+        players.forEach((player, index) => {
             const option = document.createElement("option");
             option.value = String(index);
-            const name = [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") || "Joueur sans nom";
             const rating = Number(player.note) || 0;
             const potential = Math.max(rating, Number(player.potentiel) || rating);
-            option.textContent = name + " · " + (player.poste || player.position || "?") +
+            let status = "";
+            if (isInjured(player)) {
+                status = " · INDISPONIBLE (blessé)";
+                option.disabled = true;
+            } else if (player.entrainementEnAttenteMatch) {
+                status = " · INDISPONIBLE (déjà entraîné)";
+                option.disabled = true;
+            } else if ((Number(player.fatigue) || 0) >= 90) {
+                status = " · INDISPONIBLE (fatigue élevée)";
+                option.disabled = true;
+            }
+            option.textContent = getName(player) + " · " + (player.poste || player.position || "?") +
                 " · Note " + rating + " · Potentiel " + potential +
-                " · Fatigue " + (Number(player.fatigue) || 0) + "%";
+                " · Fatigue " + (Number(player.fatigue) || 0) + "%" + status;
             playerSelect.appendChild(option);
         });
 
-        const focusLabel = document.createElement("label");
-        focusLabel.textContent = "Type de séance";
-        focusLabel.style.display = "block";
-        focusLabel.style.marginBottom = "6px";
+        const groupLabel = makeLabel("Groupe à entraîner");
+        const groupSelect = makeSelect();
+        [["TOUS", "Effectif entier"], ["GB", "Gardiens"], ["DEF", "Défenseurs"], ["MIL", "Milieux"], ["ATT", "Attaquants"], ["OTHER", "Autres postes"]].forEach(([value, label]) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = label;
+            groupSelect.appendChild(option);
+        });
 
-        const focusSelect = document.createElement("select");
-        focusSelect.style.width = "100%";
-        focusSelect.style.boxSizing = "border-box";
-        focusSelect.style.padding = "12px";
-        focusSelect.style.marginBottom = "16px";
-        focusSelect.style.fontSize = "16px";
-
-        [
-            ["technique", "⚽ Technique"],
-            ["physique", "💪 Physique"],
-            ["tactique", "🧠 Tactique"],
-            ["mental", "🔥 Mental"]
-        ].forEach(([value, label]) => {
+        const focusLabel = makeLabel("Type de séance");
+        const focusSelect = makeSelect();
+        [["technique", "⚽ Technique"], ["physique", "💪 Physique"], ["tactique", "🧠 Tactique"], ["mental", "🔥 Mental"]].forEach(([value, label]) => {
             const option = document.createElement("option");
             option.value = value;
             option.textContent = label;
@@ -3142,74 +3161,81 @@ if (match.played && match.result) {
         const info = document.createElement("p");
         info.style.color = "#bbb";
         info.style.fontSize = "13px";
-        info.textContent = "Une réussite peut augmenter la note de 1, sans dépasser le potentiel. Chaque séance augmente la fatigue ; une séance physique est plus exigeante.";
-
+        info.textContent = "Chaque joueur ne peut participer qu'à une séance avant le prochain match. Les séances collectives entraînent tous les joueurs éligibles du groupe choisi. Chaque entraînement compte dans une progression variable de 5 à 20 séances.";
         const trainButton = document.createElement("button");
         trainButton.type = "button";
         trainButton.textContent = "Lancer la séance";
         trainButton.style.width = "100%";
 
-        trainButton.addEventListener("click", () => {
-            const player = eligiblePlayers[Number(playerSelect.value)];
-            if (!player) return;
+        const refreshAvailability = () => {
+            const individual = modeSelect.value === "individuel";
+            playerLabel.style.display = individual ? "block" : "none";
+            playerSelect.style.display = individual ? "block" : "none";
+            groupLabel.style.display = individual ? "none" : "block";
+            groupSelect.style.display = individual ? "none" : "block";
+        };
+        modeSelect.addEventListener("change", refreshAvailability);
+        refreshAvailability();
 
-            const age = Number(player.age) || 25;
+        const trainPlayer = (player, focus) => {
             const rating = Math.max(0, Number(player.note) || 0);
             const potential = Math.max(rating, Number(player.potentiel) || rating);
-            const focus = focusSelect.value;
-            const currentFatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
-            const currentForm = Math.max(0, Math.min(100, Number(player.forme) || 70));
-            const name = [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") || "Le joueur";
+            const fatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
+            const currentForm = Math.max(0, Math.min(100, player.forme == null ? 70 : Number(player.forme)));
+            player.entrainementEnAttenteMatch = true;
+            player.fatigue = Math.min(100, fatigue + (focus === "physique" ? 12 : 6 + Math.floor(Math.random() * 3)));
+            player.forme = Math.max(0, currentForm - (focus === "physique" ? 4 : 2));
 
-            if (currentFatigue >= 90) {
-                this.showTrainingResult(
-                    manager,
-                    "😴 " + name + " est trop fatigué pour une nouvelle séance. Laisse-le récupérer avant de reprendre l'entraînement."
-                );
-                return;
-            }
-
-            // La fatigue réduit les chances de progresser.
             if (rating >= potential) {
-                player.fatigue = Math.min(100, currentFatigue + (focus === "physique" ? 12 : 8));
-                player.forme = Math.max(0, currentForm - (focus === "physique" ? 5 : 3));
-                this.showTrainingResult(
-                    manager,
-                    "📈 " + name + " a déjà atteint son potentiel. Sa note reste à " + rating +
-                    ", mais la séance l'a fatigué : fatigue " + player.fatigue + "%."
-                );
-                return;
+                return { player, message: getName(player) + " a atteint son potentiel (" + rating + ")." };
             }
 
-            let chance = age < 21 ? 0.85 : age < 25 ? 0.7 : age < 30 ? 0.45 : 0.25;
-            if (focus === "technique" || focus === "tactique") chance += 0.05;
-            chance -= currentFatigue / 250;
-            chance = Math.max(0.1, Math.min(chance, 0.9));
+            if (!Number.isFinite(Number(player.entrainementsDepuisProgression))) player.entrainementsDepuisProgression = 0;
+            if (!Number.isFinite(Number(player.seuilProgression))) player.seuilProgression = 5 + Math.floor(Math.random() * 16);
+            player.entrainementsDepuisProgression += 1;
 
-            const success = Math.random() < chance;
-            const fatigueGain = focus === "physique" ? 12 : focus === "technique" ? 8 : 7;
-            player.fatigue = Math.min(100, currentFatigue + fatigueGain);
-            player.forme = Math.max(0, currentForm - (focus === "physique" ? 5 : 3));
-
-            if (success) {
+            if (player.entrainementsDepuisProgression >= player.seuilProgression) {
                 player.note = Math.min(potential, rating + 1);
                 player.valeur = Math.round((Number(player.valeur) || 0) * 1.03);
-                this.showTrainingResult(
-                    manager,
-                    "✅ " + name + " a progressé en " + focus + " : note " +
-                    rating + " → " + player.note + ". Fatigue : " + player.fatigue +
-                    "% ; forme : " + player.forme + "%."
-                );
-            } else {
-                this.showTrainingResult(
-                    manager,
-                    "🟡 Séance terminée pour " + name + ", sans hausse de note cette fois. " +
-                    "Fatigue : " + player.fatigue + "% ; forme : " + player.forme + "%."
-                );
+                player.entrainementsDepuisProgression = 0;
+                player.seuilProgression = 5 + Math.floor(Math.random() * 16);
+                return { player, message: "✅ " + getName(player) + " progresse : note " + rating + " → " + player.note + " !" };
             }
+
+            return { player, message: getName(player) + " : entraînement " + player.entrainementsDepuisProgression + "/" + player.seuilProgression + " avant une éventuelle hausse de note." };
+        };
+
+        trainButton.addEventListener("click", () => {
+            const focus = focusSelect.value;
+            let targets = [];
+            if (modeSelect.value === "individuel") {
+                const player = players[Number(playerSelect.value)];
+                if (player) targets = [player];
+            } else {
+                const group = groupSelect.value;
+                targets = players.filter(player => group === "TOUS" || getPositionGroup(player) === group);
+            }
+
+            const eligible = targets.filter(player =>
+                !isInjured(player) &&
+                !player.entrainementEnAttenteMatch &&
+                (Number(player.fatigue) || 0) < 90
+            );
+
+            if (!eligible.length) {
+                this.showTrainingResult(manager, "Aucun joueur disponible pour cette séance. Les joueurs blessés, déjà entraînés ou trop fatigués doivent attendre la prochaine journée jouée ou récupérer.");
+                return;
+            }
+
+            const results = eligible.map(player => trainPlayer(player, focus));
+            const successes = results.filter(result => result.message.startsWith("✅")).length;
+            const title = modeSelect.value === "collectif" ? "Séance collective" : "Séance individuelle";
+            const details = results.slice(0, 12).map(result => "• " + result.message).join("\n");
+            const extra = results.length > 12 ? "\n… et " + (results.length - 12) + " autres joueurs." : "";
+            this.showTrainingResult(manager, "👥 " + title + " terminée : " + eligible.length + " joueur(s) entraîné(s), " + successes + " progression(s).\n\n" + details + extra);
         });
 
-        form.append(playerLabel, playerSelect, focusLabel, focusSelect, info, trainButton);
+        form.append(modeLabel, modeSelect, playerLabel, playerSelect, groupLabel, groupSelect, focusLabel, focusSelect, info, trainButton);
         this.container.appendChild(form);
         this.createButton("⬅️ Retour carrière", () => this.returnToManager());
     }
@@ -3217,7 +3243,10 @@ if (match.played && match.result) {
     showTrainingResult(manager, message) {
         this.clear();
         this.showTitle("🏋️ Résultat de l'entraînement");
-        this.showMessage(message);
+        const resultText = document.createElement("p");
+        resultText.style.whiteSpace = "pre-line";
+        resultText.textContent = message;
+        this.container.appendChild(resultText);
         this.createButton("🔁 Nouvelle séance", () => this.showTraining(manager));
         this.createButton("⬅️ Retour carrière", () => this.returnToManager());
     }
