@@ -878,7 +878,12 @@ class UI {
         game.currentMatchday =
             matchdayIndex + 1;
 
-        // Le calendrier de ligue doit s'ouvrir sur la journée qui vient d'être jouée.
+        // Sécuriser l'état de la journée pour que le calendrier
+        // puisse retrouver cette journée même avec une ancienne sauvegarde.
+        matchday.played = true;
+        matchday.results = results;
+
+        // Le calendrier de ligue s'ouvrira sur la journée qui vient d'être jouée.
         this.currentLeagueMatchday =
             matchdayIndex;
 
@@ -1690,18 +1695,26 @@ this.showMessage(
                 ? game.calendar.matchdays
                 : [];
 
-        // Chercher la dernière journée réellement marquée comme jouée.
+        // Chercher la dernière journée jouée ou contenant déjà des résultats.
         let latestPlayedIndex = -1;
 
         for (let i = matchdays.length - 1; i >= 0; i--) {
-            if (matchdays[i] && matchdays[i].played === true) {
+            const day = matchdays[i];
+
+            if (
+                day &&
+                (
+                    day.played === true ||
+                    (Array.isArray(day.results) && day.results.length > 0)
+                )
+            ) {
                 latestPlayedIndex = i;
                 break;
             }
         }
 
         // Repli pour les anciennes sauvegardes dont le statut "played"
-        // n'est pas renseigné correctement.
+        // et la liste des résultats ne sont pas renseignés correctement.
         if (latestPlayedIndex === -1 && game.currentMatchday > 0) {
             latestPlayedIndex = Math.min(
                 game.currentMatchday - 1,
