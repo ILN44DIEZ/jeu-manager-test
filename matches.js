@@ -129,17 +129,22 @@ class MatchEngine {
 
     getScorer(teamName) {
 
-        const players =
+        const squad =
             this.teamPlayers[teamName] || [];
 
-        if (
-            !Array.isArray(players) ||
-            players.length === 0
-        ) {
-
+        if (!Array.isArray(squad) || squad.length === 0) {
             return null;
-
         }
+
+        // Un joueur blessé ne peut pas être sélectionné comme buteur.
+        const players = squad.filter(player => {
+            const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
+            const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
+            const hasInjuryText = injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury);
+            return days <= 0 && !hasInjuryText;
+        });
+
+        if (players.length === 0) return null;
 
         // Postes privilégiés pour les buteurs
         const attackingPositions = [
