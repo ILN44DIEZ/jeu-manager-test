@@ -606,6 +606,16 @@ class UI {
 
 
         /* ================================================= */
+        /* ENTRAÎNEMENT */
+        /* ================================================= */
+
+        this.createButton(
+            "🏋️ Entraînement",
+            () => this.showTraining(manager)
+        );
+
+
+        /* ================================================= */
         /* TRANSFERTS */
         /* ================================================= */
 
@@ -2995,6 +3005,155 @@ if (match.played && match.result) {
 
     }
 
+
+
+    /* ================================================= */
+    /* ENTRAÎNEMENT DES JOUEURS */
+    /* ================================================= */
+
+    showTraining(manager) {
+
+        this.clear();
+        this.showTitle("🏋️ Centre d'entraînement");
+        this.showMessage(
+            "Choisis un joueur pour organiser une séance. Les progrès dépendent de son âge, de son potentiel et de sa note actuelle."
+        );
+
+        const players = Array.isArray(game.players) ? game.players : [];
+
+        if (players.length === 0) {
+            this.showMessage("Aucun joueur disponible pour l'entraînement.");
+            this.createButton("⬅️ Retour carrière", () => this.returnToManager());
+            return;
+        }
+
+        const eligiblePlayers = players.filter(player => {
+            const injury = String(player.blessure || player.injury || "").trim().toLowerCase();
+            return !injury || injury === "false" || injury === "aucune" || injury === "null";
+        });
+
+        const form = document.createElement("div");
+        form.style.maxWidth = "520px";
+        form.style.margin = "20px auto";
+        form.style.padding = "15px";
+        form.style.border = "1px solid #555";
+        form.style.borderRadius = "12px";
+        form.style.textAlign = "left";
+
+        const playerLabel = document.createElement("label");
+        playerLabel.textContent = "Joueur à entraîner";
+        playerLabel.style.display = "block";
+        playerLabel.style.marginBottom = "6px";
+
+        const playerSelect = document.createElement("select");
+        playerSelect.style.width = "100%";
+        playerSelect.style.boxSizing = "border-box";
+        playerSelect.style.padding = "12px";
+        playerSelect.style.marginBottom = "16px";
+        playerSelect.style.fontSize = "16px";
+
+        eligiblePlayers.forEach((player, index) => {
+            const option = document.createElement("option");
+            option.value = String(index);
+            const name = [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") || "Joueur sans nom";
+            option.textContent = name + " · " + (player.poste || player.position || "?") +
+                " · Note " + (Number(player.note) || 0) +
+                " · Potentiel " + (Number(player.potentiel) || Number(player.note) || 0);
+            playerSelect.appendChild(option);
+        });
+
+        const focusLabel = document.createElement("label");
+        focusLabel.textContent = "Type de séance";
+        focusLabel.style.display = "block";
+        focusLabel.style.marginBottom = "6px";
+
+        const focusSelect = document.createElement("select");
+        focusSelect.style.width = "100%";
+        focusSelect.style.boxSizing = "border-box";
+        focusSelect.style.padding = "12px";
+        focusSelect.style.marginBottom = "16px";
+        focusSelect.style.fontSize = "16px";
+
+        [
+            ["technique", "⚽ Technique"],
+            ["physique", "💪 Physique"],
+            ["tactique", "🧠 Tactique"],
+            ["mental", "🔥 Mental"]
+        ].forEach(([value, label]) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = label;
+            focusSelect.appendChild(option);
+        });
+
+        const info = document.createElement("p");
+        info.style.color = "#bbb";
+        info.style.fontSize = "13px";
+        info.textContent = eligiblePlayers.length
+            ? "Une séance peut faire progresser la note, sans dépasser le potentiel. Les jeunes progressent plus facilement."
+            : "Tous les joueurs semblent indisponibles pour l'entraînement.";
+
+        const trainButton = document.createElement("button");
+        trainButton.type = "button";
+        trainButton.textContent = "Lancer la séance";
+        trainButton.disabled = eligiblePlayers.length === 0;
+        trainButton.style.width = "100%";
+
+        trainButton.addEventListener("click", () => {
+            const player = eligiblePlayers[Number(playerSelect.value)];
+            if (!player) return;
+
+            const age = Number(player.age) || 25;
+            const rating = Number(player.note) || 0;
+            const potential = Math.max(rating, Number(player.potentiel) || rating);
+            const focus = focusSelect.value;
+
+            if (rating >= potential) {
+                this.showTrainingResult(
+                    manager,
+                    "📈 " + [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") +
+                    " a déjà atteint son potentiel. La séance améliore sa préparation, mais pas sa note."
+                );
+                player.forme = Math.min(100, (Number(player.forme) || 70) + 5);
+                return;
+            }
+
+            let chance = age < 21 ? 0.85 : age < 25 ? 0.7 : age < 30 ? 0.45 : 0.25;
+            if (focus === "technique" || focus === "tactique") chance += 0.05;
+
+            const success = Math.random() < Math.min(chance, 0.9);
+            const name = [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") || "Le joueur";
+
+            if (success) {
+                player.note = Math.min(potential, rating + 1);
+                player.valeur = Math.round((Number(player.valeur) || 0) * 1.03);
+                player.forme = Math.min(100, (Number(player.forme) || 70) + 3);
+                this.showTrainingResult(
+                    manager,
+                    "✅ " + name + " a progressé en " + focus + " : note " +
+                    rating + " → " + player.note + ". Sa valeur marchande augmente légèrement."
+                );
+            } else {
+                player.forme = Math.max(0, (Number(player.forme) || 70) - (focus === "physique" ? 2 : 0));
+                this.showTrainingResult(
+                    manager,
+                    "🟡 Séance terminée pour " + name + ". Pas de hausse de note cette fois, mais il continue de travailler."
+                );
+            }
+        });
+
+        form.append(playerLabel, playerSelect, focusLabel, focusSelect, info, trainButton);
+        this.container.appendChild(form);
+        this.createButton("⬅️ Retour carrière", () => this.returnToManager());
+    }
+
+    showTrainingResult(manager, message) {
+        this.clear();
+        this.showTitle("🏋️ Résultat de l'entraînement");
+        this.showMessage(message);
+        this.createButton("🔁 Nouvelle séance", () => this.showTraining(manager));
+        this.createButton("⬅️ Retour carrière", () => this.returnToManager());
+    }
 
 
     /* ================================================= */
