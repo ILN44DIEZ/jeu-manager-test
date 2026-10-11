@@ -48,24 +48,89 @@ class DataManager {
 
     async loadPlayers() {
 
+        const files = [
+            "data/players.json",
+            "data/players_seriea_extra.json",
+            "data/players_seriea_ligue1_extra.json"
+        ];
+
         try {
 
-            const [response, ligue1Response] = await Promise.all([
-                fetch("data/players.json"),
-                fetch("data/players_ligue1.json").catch(() => null)
-            ]);
+            const responses = await Promise.all(
+                files.map(path => fetch(path))
+            );
 
-            this.players = await response.json();
-
-            if (ligue1Response && ligue1Response.ok) {
-                const ligue1Players = await ligue1Response.json();
-                this.players = this.players.concat(ligue1Players);
+            for (let i = 0; i < responses.length; i++) {
+                if (!responses[i].ok) {
+                    throw new Error("Impossible de charger " + files[i]);
+                }
             }
 
+            const datasets = await Promise.all(
+                responses.map(response => response.json())
+            );
+
+            this.players = datasets.flat();
+
+            // Vérifie que chaque joueur est lié à un club existant
+            // en utilisant le nom exact défini dans data/clubs.json.
+            const clubNames = new Set(
+                this.clubs.map(club => club.nom)
+            );
+
+            const unmatched = this.players.filter(
+                player => !clubNames.has(player.club)
+            );
+
+            if (unmatched.length > 0) {
+                console.error(
+                    "❌ Joueurs liés à un club absent de clubs.json :",
+                    unmatched.map(player => player.prenom + " " + player.nom + " — " + player.club)
+                );
+            } else {
+                console.log(
+                    "✅ Tous les joueurs sont liés à un club existant."
+                );
+            }
+
+            const duplicateKeys = new Set();
+            const seen = new Set();
+
+            this.players.forEach(player => {
+                const key = player.prenom + "|" + player.nom + "|" + player.club;
+                if (seen.has(key)) duplicateKeys.add(key);
+                seen.add(key);
+            });
+
+            if (duplicateKeys.size > 0) {
+                console.warn(
+                    "⚠️ Doublons exacts prénom/nom/club :",
+                    [...duplicateKeys]
+                );
+            }
+
+            const clubsWithoutPlayers = this.clubs
+                .filter(club => !this.players.some(player => player.club === club.nom))
+                .map(club => club.nom);
+
+            if (clubsWithoutPlayers.length > 0) {
+                console.warn(
+                    "⚠️ Clubs sans joueur dans la base :",
+                    clubsWithoutPlayers
+                );
+            } else {
+                console.log("✅ Les 97 clubs possèdent au moins un joueur.");
+            }
 
             console.log(
                 "✅ Joueurs chargés :",
-                this.players.length
+                this.players.length,
+                "| Clubs sans effectif :",
+                clubsWithoutPlayers.length,
+                "| Liens club invalides :",
+                unmatched.length,
+                "| Doublons exacts :",
+                duplicateKeys.size
             );
 
         } catch(error) {
