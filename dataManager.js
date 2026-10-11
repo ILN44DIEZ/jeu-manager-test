@@ -1,102 +1,46 @@
 class DataManager {
 
     constructor() {
-
         this.clubs = [];
-
         this.players = [];
-
         this.formations = [];
-
         this.tactics = [];
-
         this.loaded = false;
-
     }
-
-
 
     async loadClubs() {
-
         try {
+            const response = await fetch("data/clubs.json");
 
-            const response =
-                await fetch("data/clubs.json");
-
-
-            this.clubs =
-                await response.json();
-
-
-            console.log(
-                "✅ Clubs chargés :",
-                this.clubs.length
-            );
-
-        } catch(error) {
-
-            console.error(
-                "❌ Erreur chargement clubs",
-                error
-            );
-
-        }
-
-    }
-
-
-
-    async loadPlayers() {
-
-        const files = [
-            "data/players.json",
-            "data/players_seriea_debut.json",
-            "data/players_seriea_restant.json",
-            "data/players_seriea_ligue1_extra.json",
-            "data/players_ligue1_complement.json"
-        ];
-
-        try {
-
-            const responses = await Promise.all(
-                files.map(path => fetch(path))
-            );
-
-            for (let i = 0; i < responses.length; i++) {
-                if (!responses[i].ok) {
-                    throw new Error("Impossible de charger " + files[i]);
-                }
+            if (!response.ok) {
+                throw new Error("Impossible de charger data/clubs.json");
             }
 
-            const datasets = await Promise.all(
-                responses.map(response => response.json())
-            );
+            this.clubs = await response.json();
+            console.log("✅ Clubs chargés :", this.clubs.length);
+        } catch (error) {
+            console.error("❌ Erreur chargement clubs", error);
+        }
+    }
 
-            // Déduplique les joueurs selon prénom + nom + club.
-            // La base principale reste prioritaire sur les fichiers complémentaires.
-            const seenPlayers = new Set();
-            this.players = [];
+    async loadPlayers() {
+        try {
+            const response = await fetch("data/players.json");
 
-            datasets.flat().forEach(player => {
-                const key = [
-                    String(player.prenom || "").trim().toLocaleLowerCase(),
-                    String(player.nom || "").trim().toLocaleLowerCase(),
-                    String(player.club || "").trim()
-                ].join("|");
+            if (!response.ok) {
+                throw new Error("Impossible de charger data/players.json");
+            }
 
-                if (!seenPlayers.has(key)) {
-                    seenPlayers.add(key);
-                    this.players.push(player);
-                }
-            });
+            const players = await response.json();
 
-            const clubNames = new Set(
-                this.clubs.map(club => club.nom)
-            );
+            if (!Array.isArray(players)) {
+                throw new Error("data/players.json doit contenir une liste JSON de joueurs.");
+            }
 
-            const unmatched = this.players.filter(
-                player => !clubNames.has(player.club)
-            );
+            this.players = players;
+
+            const clubNames = new Set(this.clubs.map(club => club.nom));
+            const unmatched = this.players.filter(player => !clubNames.has(player.club));
 
             if (unmatched.length > 0) {
                 console.error(
@@ -107,16 +51,18 @@ class DataManager {
                 console.log("✅ Tous les joueurs sont liés à un club existant.");
             }
 
+            const requiredFields = [
+                "prenom", "nom", "club", "poste", "age", "nationalite",
+                "taille", "poids", "numero", "pied", "note", "potentiel",
+                "forme", "moral", "fatigue", "blessure", "joursBlessure",
+                "valeur", "salaire", "contratFin", "role", "experience",
+                "cartonsJaunes", "cartonsRouges", "buts", "passes",
+                "matchs", "minutes", "cleanSheets", "centreFormation",
+                "retraite", "pret", "clubPret", "suspendu", "joursSuspension"
+            ];
+
             const missingFields = this.players.filter(player =>
-                [
-                    "prenom", "nom", "club", "poste", "age", "nationalite",
-                    "taille", "poids", "numero", "pied", "note", "potentiel",
-                    "forme", "moral", "fatigue", "blessure", "joursBlessure",
-                    "valeur", "salaire", "contratFin", "role", "experience",
-                    "cartonsJaunes", "cartonsRouges", "buts", "passes",
-                    "matchs", "minutes", "cleanSheets", "centreFormation",
-                    "retraite", "pret", "clubPret", "suspendu", "joursSuspension"
-                ].some(field => !(field in player))
+                requiredFields.some(field => !(field in player))
             );
 
             const validPositions = new Set([
@@ -133,16 +79,11 @@ class DataManager {
                 .map(club => club.nom);
 
             console.log(
-                "✅ Joueurs chargés :",
-                this.players.length,
-                "| Clubs sans effectif :",
-                clubsWithoutPlayers.length,
-                "| Liens club invalides :",
-                unmatched.length,
-                "| Joueurs avec champs manquants :",
-                missingFields.length,
-                "| Postes invalides :",
-                invalidPositions.length
+                "✅ Joueurs chargés :", this.players.length,
+                "| Clubs sans effectif :", clubsWithoutPlayers.length,
+                "| Liens club invalides :", unmatched.length,
+                "| Joueurs avec champs manquants :", missingFields.length,
+                "| Postes invalides :", invalidPositions.length
             );
 
             if (clubsWithoutPlayers.length) {
@@ -154,213 +95,91 @@ class DataManager {
             if (invalidPositions.length) {
                 console.warn("⚠️ Joueurs avec poste invalide :", invalidPositions);
             }
-
-        } catch(error) {
-
-            console.error(
-                "❌ Erreur chargement joueurs",
-                error
-            );
-
+        } catch (error) {
+            console.error("❌ Erreur chargement joueurs", error);
         }
-
     }
-
-
 
     async loadFormations() {
-
         try {
+            const response = await fetch("data/formations.json");
 
-            const response =
-                await fetch("data/formations.json");
-
-
-            this.formations =
-                await response.json();
-
-
-            console.log(
-                "✅ Formations chargées :",
-                this.formations.length
-            );
-
-        } catch(error) {
-
-            console.error(
-                "❌ Erreur chargement formations",
-                error
-            );
-
-        }
-
-    }
-
-
-
-    async loadTactics() {
-
-        try {
-
-            const response =
-                await fetch("data/tactics.json");
-
-
-            this.tactics =
-                await response.json();
-
-
-            console.log(
-                "✅ Styles tactiques chargés :",
-                this.tactics.length
-            );
-
-        } catch(error) {
-
-            console.error(
-                "❌ Erreur chargement tactiques",
-                error
-            );
-
-        }
-
-    }
-
-
-
-    async loadAllData() {
-
-        await this.loadClubs();
-
-        await this.loadPlayers();
-
-        await this.loadFormations();
-
-        await this.loadTactics();
-
-
-        this.loaded = true;
-
-
-        console.log(
-            "✅ Toutes les données sont chargées"
-        );
-
-    }
-
-
-
-    getLeagues() {
-
-        let leagues = [];
-
-
-        this.clubs.forEach(club => {
-
-            if (!leagues.includes(club.ligue)) {
-
-                leagues.push(
-                    club.ligue
-                );
-
+            if (!response.ok) {
+                throw new Error("Impossible de charger data/formations.json");
             }
 
+            this.formations = await response.json();
+            console.log("✅ Formations chargées :", this.formations.length);
+        } catch (error) {
+            console.error("❌ Erreur chargement formations", error);
+        }
+    }
+
+    async loadTactics() {
+        try {
+            const response = await fetch("data/tactics.json");
+
+            if (!response.ok) {
+                throw new Error("Impossible de charger data/tactics.json");
+            }
+
+            this.tactics = await response.json();
+            console.log("✅ Styles tactiques chargés :", this.tactics.length);
+        } catch (error) {
+            console.error("❌ Erreur chargement tactiques", error);
+        }
+    }
+
+    async loadAllData() {
+        await this.loadClubs();
+        await this.loadPlayers();
+        await this.loadFormations();
+        await this.loadTactics();
+
+        this.loaded = true;
+        console.log("✅ Toutes les données sont chargées");
+    }
+
+    getLeagues() {
+        const leagues = [];
+
+        this.clubs.forEach(club => {
+            if (!leagues.includes(club.ligue)) {
+                leagues.push(club.ligue);
+            }
         });
 
-
         return leagues;
-
     }
-
-
 
     getClubsByLeague(league) {
-
-        return this.clubs.filter(
-
-            club =>
-                club.ligue === league
-
-        );
-
+        return this.clubs.filter(club => club.ligue === league);
     }
-
-
 
     getClub(name) {
-
-        return this.clubs.find(
-
-            club =>
-                club.nom === name
-
-        );
-
+        return this.clubs.find(club => club.nom === name);
     }
-
-
 
     getPlayersByClub(clubName) {
-
-        return this.players.filter(
-
-            player =>
-                player.club === clubName
-
-        );
-
+        return this.players.filter(player => player.club === clubName);
     }
-
-
 
     getFormation(name) {
-
-    console.log(
-        "Toutes les formations :",
-        this.formations
-    );
-
-    console.log(
-        "Recherche :",
-        name
-    );
-
-    return this.formations.find(
-
-        formation =>
-            formation.nom === name
-
-    );
-
-}
-
-
+        console.log("Toutes les formations :", this.formations);
+        console.log("Recherche :", name);
+        return this.formations.find(formation => formation.nom === name);
+    }
 
     getAllFormations() {
-
         return this.formations;
-
     }
-
-
 
     getTactic(name) {
-
-        return this.tactics.find(
-
-            tactic =>
-                tactic.nom === name
-
-        );
-
+        return this.tactics.find(tactic => tactic.nom === name);
     }
 
-
-
     getAllTactics() {
-
         return this.tactics;
-
     }
 
 }
