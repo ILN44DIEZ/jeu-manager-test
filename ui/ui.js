@@ -3264,18 +3264,24 @@ if (match.played && match.result) {
                 negotiationBox.style.marginTop = "10px";
                 negotiationBox.style.textAlign = "left";
 
+                let negotiationRound = 0;
+                let negotiationClosed = false;
+                const overall = Math.max(1, Math.min(99, Number(player.note) || 70));
                 const offerLabel = document.createElement("label");
                 offerLabel.textContent = "Ton offre (€)";
                 offerLabel.style.display = "block";
                 const offerInput = document.createElement("input");
                 offerInput.type = "number";
-                offerInput.min = "0";
+                offerInput.min = "1";
                 offerInput.step = "50000";
-                offerInput.value = valuePrice;
+                offerInput.value = Math.round(valuePrice * 0.75);
                 offerInput.style.width = "100%";
                 offerInput.style.boxSizing = "border-box";
                 offerInput.style.padding = "9px";
                 offerInput.style.margin = "6px 0";
+                const stepLabel = document.createElement("strong");
+                stepLabel.textContent = "Étape 1/3 — Première offre";
+                stepLabel.style.display = "block";
                 const submitOffer = document.createElement("button");
                 submitOffer.type = "button";
                 submitOffer.textContent = "Envoyer l'offre";
@@ -3289,8 +3295,12 @@ if (match.played && match.result) {
                     negotiationBox.style.display = negotiationBox.style.display === "none" ? "block" : "none";
                 });
 
+                offerInput.addEventListener("click", event => event.stopPropagation());
+
                 submitOffer.addEventListener("click", event => {
                     event.stopPropagation();
+                    if (negotiationClosed) return;
+
                     const offer = Math.floor(Number(offerInput.value));
                     if (!Number.isFinite(offer) || offer <= 0) {
                         response.textContent = "Entre un montant supérieur à 0 €.";
@@ -3305,7 +3315,22 @@ if (match.played && match.result) {
                         return;
                     }
 
-                    if (offer >= valuePrice) {
+                    negotiationRound++;
+                    stepLabel.textContent = "Étape " + negotiationRound + "/3 — " +
+                        (negotiationRound === 3 ? "Offre finale" : "Négociation en cours");
+
+                    // Les clubs sont plus souples pour les joueurs sous 80 de général.
+                    // Les joueurs très cotés peuvent au contraire coûter plus que leur valeur estimée.
+                    let acceptanceRatio;
+                    if (overall < 70) acceptanceRatio = 0.78;
+                    else if (overall < 75) acceptanceRatio = 0.83;
+                    else if (overall < 80) acceptanceRatio = 0.90;
+                    else if (overall < 85) acceptanceRatio = 1.00;
+                    else if (overall < 90) acceptanceRatio = 1.08;
+                    else acceptanceRatio = 1.18;
+
+                    const minimumAcceptable = Math.round(valuePrice * acceptanceRatio);
+                    if (offer >= minimumAcceptable || (valuePrice === 0 && offer > 0)) {
                         const previousClub = player.club;
                         manager.budget = Number(manager.budget || 0) - offer;
                         if (game.club) game.club.budget = manager.budget;
@@ -3317,26 +3342,47 @@ if (match.played && match.result) {
                         if (game.tactics && typeof game.tactics.initializeSquad === "function") {
                             game.tactics.initializeSquad(game.players);
                         }
-                        response.textContent = "✅ Offre acceptée ! " + name.textContent + " rejoint ton club pour " + offer.toLocaleString("fr-FR") + " €.";
+                        negotiationClosed = true;
+                        response.textContent = "✅ " + player.club + " accepte " + offer.toLocaleString("fr-FR") + " €. Transfert conclu !";
                         submitOffer.disabled = true;
+                        offerInput.disabled = true;
                         negotiate.disabled = true;
-                        value.textContent = "💶 Transfert conclu : " + offer.toLocaleString("fr-FR") + " €";
-                        const budgetLine = this.container.querySelector("p");
                         this.showTransferMarket(manager);
-                        this.showMessage("✅ Transfert conclu : " + name.textContent + " rejoint " + manager.clubName + " depuis " + previousClub + ".");
+                        this.showMessage("✅ Transfert conclu : " + name.textContent + " rejoint " + manager.clubName + " depuis " + previousClub + " pour " + offer.toLocaleString("fr-FR") + " €.");
                         return;
                     }
 
-                    if (valuePrice > 0 && offer >= valuePrice * 0.75) {
-                        const counterOffer = Math.ceil(valuePrice * 1.05 / 100000) * 100000;
-                        response.textContent = "🤝 " + player.club + " refuse cette offre, mais propose " + counterOffer.toLocaleString("fr-FR") + " €. Modifie ton offre pour poursuivre la négociation.";
-                        offerInput.value = counterOffer;
-                    } else {
-                        response.textContent = "❌ " + player.club + " refuse l'offre, jugée trop basse. Tu peux proposer un autre montant.";
+                    if (negotiationRound >= 3) {
+                        negotiationClosed = true;
+                        stepLabel.textContent = "Étape 3/3 — Négociation terminée";
+                        response.textContent = "❌ " + player.club + " refuse ton offre finale de " + offer.toLocaleString("fr-FR") + " €. Le club ne souhaite pas aller plus bas.";
+                        submitOffer.disabled = true;
+                        offerInput.disabled = true;
+                        return;
                     }
+
+                    // Contre-offre adaptée à la note générale : les joueurs très cotés sont moins négociables.
+                    let counterRatio;
+                    if (overall < 70) counterRatio = 0.88;
+                    else if (overall < 75) counterRatio = 0.92;
+                    else if (overall < 80) counterRatio = 0.97;
+                    else if (overall < 85) counterRatio = 1.05;
+                    else if (overall < 90) counterRatio = 1.12;
+                    else counterRatio = 1.22;
+
+                    const counterOffer = Math.max(offer + 1, Math.ceil((valuePrice * counterRatio) / 100000) * 100000);
+                    const clubName = player.club || "Le club";
+                    response.textContent = "🤝 " + clubName + " refuse cette offre de " + offer.toLocaleString("fr-FR") +
+                        " €, mais fait un effort et propose " + counterOffer.toLocaleString("fr-FR") +
+                        " €. Tu as encore " + (3 - negotiationRound) + " étape(s) pour trouver un accord.";
+                    offerInput.value = Math.min(counterOffer, Number(manager.budget || 0));
+                    if (Number(manager.budget || 0) < counterOffer) {
+                        response.textContent += " Attention : cette contre-offre dépasse ton budget.";
+                    }
+                    submitOffer.textContent = negotiationRound === 2 ? "Envoyer l'offre finale" : "Répondre à la contre-offre";
                 });
 
-                negotiationBox.append(offerLabel, offerInput, submitOffer, response);
+                negotiationBox.append(stepLabel, offerLabel, offerInput, submitOffer, response);
                 card.append(name, details, club, value, negotiate, negotiationBox);
                 results.appendChild(card);
             });
