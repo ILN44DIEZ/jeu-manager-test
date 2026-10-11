@@ -3016,7 +3016,7 @@ if (match.played && match.result) {
         this.clear();
         this.showTitle("🏋️ Centre d'entraînement");
         this.showMessage(
-            "Choisis un joueur pour organiser une séance. Les progrès dépendent de son âge, de son potentiel et de sa note actuelle."
+            "Choisis un joueur pour organiser une séance. L'âge et le potentiel influencent sa progression. L'entraînement augmente aussi la fatigue."
         );
 
         const players = Array.isArray(game.players) ? game.players : [];
@@ -3027,10 +3027,22 @@ if (match.played && match.result) {
             return;
         }
 
+        // Le projet utilise le schéma français : blessure, joursBlessure,
+        // fatigue, forme, note et potentiel.
         const eligiblePlayers = players.filter(player => {
-            const injury = String(player.blessure || player.injury || "").trim().toLowerCase();
-            return !injury || injury === "false" || injury === "aucune" || injury === "null";
+            const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
+            const injuryDays = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
+            const hasInjury = injuryDays > 0 ||
+                (injury !== "" && injury !== "false" && injury !== "aucune" &&
+                 injury !== "aucun" && injury !== "null" && injury !== "0");
+            return !hasInjury;
         });
+
+        if (eligiblePlayers.length === 0) {
+            this.showMessage("Tous les joueurs sont actuellement blessés. Attends leur rétablissement avant de les entraîner.");
+            this.createButton("⬅️ Retour carrière", () => this.returnToManager());
+            return;
+        }
 
         const form = document.createElement("div");
         form.style.maxWidth = "520px";
@@ -3056,9 +3068,11 @@ if (match.played && match.result) {
             const option = document.createElement("option");
             option.value = String(index);
             const name = [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") || "Joueur sans nom";
+            const rating = Number(player.note) || 0;
+            const potential = Math.max(rating, Number(player.potentiel) || rating);
             option.textContent = name + " · " + (player.poste || player.position || "?") +
-                " · Note " + (Number(player.note) || 0) +
-                " · Potentiel " + (Number(player.potentiel) || Number(player.note) || 0);
+                " · Note " + rating + " · Potentiel " + potential +
+                " · Fatigue " + (Number(player.fatigue) || 0) + "%";
             playerSelect.appendChild(option);
         });
 
@@ -3089,14 +3103,11 @@ if (match.played && match.result) {
         const info = document.createElement("p");
         info.style.color = "#bbb";
         info.style.fontSize = "13px";
-        info.textContent = eligiblePlayers.length
-            ? "Une séance peut faire progresser la note, sans dépasser le potentiel. Les jeunes progressent plus facilement."
-            : "Tous les joueurs semblent indisponibles pour l'entraînement.";
+        info.textContent = "Une réussite peut augmenter la note de 1, sans dépasser le potentiel. Chaque séance augmente la fatigue ; une séance physique est plus exigeante.";
 
         const trainButton = document.createElement("button");
         trainButton.type = "button";
         trainButton.textContent = "Lancer la séance";
-        trainButton.disabled = eligiblePlayers.length === 0;
         trainButton.style.width = "100%";
 
         trainButton.addEventListener("click", () => {
@@ -3104,40 +3115,57 @@ if (match.played && match.result) {
             if (!player) return;
 
             const age = Number(player.age) || 25;
-            const rating = Number(player.note) || 0;
+            const rating = Math.max(0, Number(player.note) || 0);
             const potential = Math.max(rating, Number(player.potentiel) || rating);
             const focus = focusSelect.value;
+            const currentFatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
+            const currentForm = Math.max(0, Math.min(100, Number(player.forme) || 70));
+            const name = [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") || "Le joueur";
 
-            if (rating >= potential) {
+            if (currentFatigue >= 90) {
                 this.showTrainingResult(
                     manager,
-                    "📈 " + [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") +
-                    " a déjà atteint son potentiel. La séance améliore sa préparation, mais pas sa note."
+                    "😴 " + name + " est trop fatigué pour une nouvelle séance. Laisse-le récupérer avant de reprendre l'entraînement."
                 );
-                player.forme = Math.min(100, (Number(player.forme) || 70) + 5);
+                return;
+            }
+
+            // La fatigue réduit les chances de progresser.
+            if (rating >= potential) {
+                player.fatigue = Math.min(100, currentFatigue + (focus === "physique" ? 12 : 8));
+                player.forme = Math.max(0, currentForm - (focus === "physique" ? 5 : 3));
+                this.showTrainingResult(
+                    manager,
+                    "📈 " + name + " a déjà atteint son potentiel. Sa note reste à " + rating +
+                    ", mais la séance l'a fatigué : fatigue " + player.fatigue + "%."
+                );
                 return;
             }
 
             let chance = age < 21 ? 0.85 : age < 25 ? 0.7 : age < 30 ? 0.45 : 0.25;
             if (focus === "technique" || focus === "tactique") chance += 0.05;
+            chance -= currentFatigue / 250;
+            chance = Math.max(0.1, Math.min(chance, 0.9));
 
-            const success = Math.random() < Math.min(chance, 0.9);
-            const name = [player.prenom || "", player.nom || ""].filter(Boolean).join(" ") || "Le joueur";
+            const success = Math.random() < chance;
+            const fatigueGain = focus === "physique" ? 12 : focus === "technique" ? 8 : 7;
+            player.fatigue = Math.min(100, currentFatigue + fatigueGain);
+            player.forme = Math.max(0, currentForm - (focus === "physique" ? 5 : 3));
 
             if (success) {
                 player.note = Math.min(potential, rating + 1);
                 player.valeur = Math.round((Number(player.valeur) || 0) * 1.03);
-                player.forme = Math.min(100, (Number(player.forme) || 70) + 3);
                 this.showTrainingResult(
                     manager,
                     "✅ " + name + " a progressé en " + focus + " : note " +
-                    rating + " → " + player.note + ". Sa valeur marchande augmente légèrement."
+                    rating + " → " + player.note + ". Fatigue : " + player.fatigue +
+                    "% ; forme : " + player.forme + "%."
                 );
             } else {
-                player.forme = Math.max(0, (Number(player.forme) || 70) - (focus === "physique" ? 2 : 0));
                 this.showTrainingResult(
                     manager,
-                    "🟡 Séance terminée pour " + name + ". Pas de hausse de note cette fois, mais il continue de travailler."
+                    "🟡 Séance terminée pour " + name + ", sans hausse de note cette fois. " +
+                    "Fatigue : " + player.fatigue + "% ; forme : " + player.forme + "%."
                 );
             }
         });
