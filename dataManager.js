@@ -52,7 +52,8 @@ class DataManager {
             "data/players.json",
             "data/players_seriea_debut.json",
             "data/players_seriea_restant.json",
-            "data/players_seriea_ligue1_extra.json"
+            "data/players_seriea_ligue1_extra.json",
+            "data/players_ligue1_complement.json"
         ];
 
         try {
