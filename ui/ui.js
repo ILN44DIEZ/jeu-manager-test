@@ -1304,7 +1304,7 @@ this.showMessage(
 
             () => {
 
-                this.showLeagueCalendar();
+                this.openLatestLeagueMatchday();
 
             }
 
@@ -1397,18 +1397,7 @@ this.showMessage(
 
             () => {
 
-                // Afficher la dernière journée jouée, ou la première journée en début de saison.
-                this.currentLeagueMatchday = Math.max(
-                    0,
-                    Math.min(
-                        game.currentMatchday - 1,
-                        game.calendar && game.calendar.matchdays
-                            ? game.calendar.matchdays.length - 1
-                            : 0
-                    )
-                );
-
-                this.showLeagueCalendar();
+                this.openLatestLeagueMatchday();
 
             }
 
@@ -1815,6 +1804,43 @@ else {
             }
 
         );
+
+    }
+
+
+
+    /* ================================================= */
+    /* OUVRIR LA DERNIÈRE JOURNÉE JOUÉE */
+    /* ================================================= */
+
+    openLatestLeagueMatchday() {
+
+        const matchdays =
+            game.calendar && Array.isArray(game.calendar.matchdays)
+                ? game.calendar.matchdays
+                : [];
+
+        // Chercher la dernière journée réellement marquée comme jouée.
+        let latestPlayedIndex = -1;
+
+        for (let i = matchdays.length - 1; i >= 0; i--) {
+            if (matchdays[i] && matchdays[i].played === true) {
+                latestPlayedIndex = i;
+                break;
+            }
+        }
+
+        // Repli pour les anciennes sauvegardes dont le statut "played"
+        // n'est pas renseigné correctement.
+        if (latestPlayedIndex === -1 && game.currentMatchday > 0) {
+            latestPlayedIndex = Math.min(
+                game.currentMatchday - 1,
+                matchdays.length - 1
+            );
+        }
+
+        this.currentLeagueMatchday = Math.max(0, latestPlayedIndex);
+        this.showLeagueCalendar();
 
     }
 
