@@ -545,96 +545,24 @@ class UI {
 
 
         this.showTitle(
-            "🎴 Carrière Manager"
+            manager.clubName + " · " + manager.season
         );
-
 
         this.showMessage(
-            "🏟️ Club : " +
-            manager.clubName
+            "👔 " + manager.managerName +
+            (manager.league ? " · " + manager.league : "")
         );
 
+        this.showMessage(
+            "💰 " + Number(manager.budget || 0).toLocaleString("fr-FR") +
+            " €  ·  ⭐ " + (manager.reputation ?? manager.level ?? 0)
+        );
 
-        if (manager.country) {
-
+        if (manager.objectives && manager.objectives.length) {
             this.showMessage(
-                "🌍 Pays : " +
-                manager.country
+                "🎯 " + manager.objectives.join(" · ")
             );
-
         }
-
-
-        if (manager.league) {
-
-            this.showMessage(
-                "🏆 Ligue : " +
-                manager.league
-            );
-
-        }
-
-
-        if (manager.level) {
-
-            this.showMessage(
-                "⭐ Niveau : " +
-                manager.level
-            );
-
-        }
-
-
-        this.showTitle(
-            "👔 Manager"
-        );
-
-
-        this.showMessage(
-            "Nom : " +
-            manager.managerName
-        );
-
-
-        this.showMessage(
-            "📅 Saison : " +
-            manager.season
-        );
-
-
-        this.showTitle(
-            "💰 Gestion"
-        );
-
-
-        this.showMessage(
-            "Budget : " +
-            manager.budget.toLocaleString() +
-            " €"
-        );
-
-
-        this.showMessage(
-            "⭐ Réputation : " +
-            manager.reputation
-        );
-
-
-        this.showTitle(
-            "🎯 Objectifs"
-        );
-
-
-        manager.objectives.forEach(
-            objective => {
-
-                this.showMessage(
-                    "• " +
-                    objective
-                );
-
-            }
-        );
 
 
         /* ================================================= */
