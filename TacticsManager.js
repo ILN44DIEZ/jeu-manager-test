@@ -254,11 +254,9 @@ class TacticsManager {
 
                     joueur:
 
-                        j.joueur.prenom
-                        +
-                        " "
-                        +
-                        j.joueur.nom
+                        [j.joueur.prenom, j.joueur.nom]
+                            .filter(Boolean)
+                            .join(" ")
 
 
                 }))
