@@ -738,24 +738,44 @@ class UI {
 
         players.forEach(player => {
             const played = starters.has(getKey(player));
-            const fatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
-            const form = Math.max(0, Math.min(100, Number(player.forme) || 70));
+            const injuryField = Object.prototype.hasOwnProperty.call(player, "joursBlessure") ? "joursBlessure" : "injuryDays";
+            const injuryText = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
+            const wasInjured = (Number(player[injuryField]) || 0) > 0 ||
+                (injuryText !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injuryText));
 
-            player.fatigue = played
-                ? Math.min(100, fatigue + (10 + Math.floor(Math.random() * 11)))
-                : Math.max(0, fatigue - 12);
-            player.forme = played ? Math.max(0, form - 3) : Math.min(100, form + 3);
+            // La récupération et la durée des blessures avancent après chaque journée jouée.
+            const injuryDays = Math.max(0, Number(player[injuryField]) || 0);
+            if (injuryDays > 0) {
+                player[injuryField] = injuryDays - 1;
+                if (player[injuryField] === 0) {
+                    player.blessure = "";
+                    player.injury = null;
+                }
+            }
+
+            const fatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
+            const form = Math.max(0, Math.min(100, player.forme == null ? 70 : Number(player.forme)));
+            if (played) {
+                player.fatigue = Math.min(100, fatigue + 10 + Math.floor(Math.random() * 11));
+                player.forme = Math.max(0, form - 3);
+            } else {
+                // Les remplaçants récupèrent davantage que les titulaires.
+                player.fatigue = Math.max(0, fatigue - (wasInjured ? 18 : 15));
+                player.forme = Math.min(100, form + 4);
+            }
 
             // Une journée jouée autorise à nouveau une séance individuelle ou collective.
             player.entrainementEnAttenteMatch = false;
 
-            const daysField = Object.prototype.hasOwnProperty.call(player, "joursBlessure") ? "joursBlessure" : "injuryDays";
-            const days = Math.max(0, Number(player[daysField]) || 0);
-            if (days > 0) {
-                player[daysField] = days - 1;
-                if (player[daysField] === 0) {
-                    if (Object.prototype.hasOwnProperty.call(player, "blessure")) player.blessure = "";
-                    if (Object.prototype.hasOwnProperty.call(player, "injury")) player.injury = null;
+            // Petit risque de blessure pour les titulaires, augmenté par une fatigue élevée.
+            // Les blessures durent de 1 à 4 journées de championnat.
+            if (played && !wasInjured) {
+                const currentFatigue = Number(player.fatigue) || 0;
+                const injuryChance = 0.015 + Math.max(0, currentFatigue - 60) * 0.001;
+                if (Math.random() < injuryChance) {
+                    player[injuryField] = 1 + Math.floor(Math.random() * 4);
+                    player.blessure = "Blessure";
+                    player.injury = "Injured";
                 }
             }
         });
