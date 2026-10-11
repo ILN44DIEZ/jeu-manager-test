@@ -41,6 +41,50 @@ class SquadUI {
             return;
         }
 
+        // Résumé rapide de l'effectif
+        const summary = document.createElement("div");
+        summary.style.display = "grid";
+        summary.style.gridTemplateColumns = "repeat(auto-fit, minmax(130px, 1fr))";
+        summary.style.gap = "10px";
+        summary.style.margin = "15px 0";
+        
+        const average = key => players.length
+            ? players.reduce((sum, player) => sum + (Number(player[key]) || 0), 0) / players.length
+            : 0;
+        
+        const totalValue = players.reduce((sum, player) => sum + (Number(player.valeur) || 0), 0);
+        const summaryItems = [
+            ["👥 Joueurs", players.length],
+            ["⭐ Note moyenne", average("note").toFixed(1) + "/100"],
+            ["🎂 Âge moyen", average("age").toFixed(1) + " ans"],
+            ["💶 Valeur totale", totalValue.toLocaleString("fr-FR") + " €"]
+        ];
+        
+        summaryItems.forEach(([label, value]) => {
+            const card = document.createElement("div");
+            card.style.padding = "12px";
+            card.style.border = "1px solid #555";
+            card.style.borderRadius = "10px";
+            card.style.background = "rgba(255,255,255,0.04)";
+            card.style.textAlign = "center";
+            
+            const title = document.createElement("div");
+            title.textContent = label;
+            title.style.fontSize = "13px";
+            title.style.color = "#bbb";
+            
+            const number = document.createElement("strong");
+            number.textContent = value;
+            number.style.display = "block";
+            number.style.marginTop = "5px";
+            number.style.fontSize = "18px";
+            
+            card.append(title, number);
+            summary.appendChild(card);
+        });
+        
+        this.container.appendChild(summary);
+
         const toolbar = document.createElement("div");
         toolbar.style.display = "grid";
         toolbar.style.gridTemplateColumns = "repeat(auto-fit, minmax(150px, 1fr))";
