@@ -657,10 +657,12 @@ function loadCareer(slot = 1) {
         );
 leagueClubs.forEach(club => {
 
+    // Pour le club dirigé, utiliser l'effectif restauré depuis la sauvegarde.
+    // Cela conserve les entraînements et les transferts après rechargement.
     const joueurs =
-        game.data.getPlayersByClub(
-            club.nom
-        );
+        club.nom === game.club.name && Array.isArray(game.players)
+            ? game.players
+            : game.data.getPlayersByClub(club.nom);
 
     game.matchEngine.setTeamPlayers(
         club.nom,
