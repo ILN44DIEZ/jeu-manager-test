@@ -50,12 +50,17 @@ class DataManager {
 
         try {
 
-            const response =
-                await fetch("data/players.json");
+            const [response, ligue1Response] = await Promise.all([
+                fetch("data/players.json"),
+                fetch("data/players_ligue1.json").catch(() => null)
+            ]);
 
+            this.players = await response.json();
 
-            this.players =
-                await response.json();
+            if (ligue1Response && ligue1Response.ok) {
+                const ligue1Players = await ligue1Response.json();
+                this.players = this.players.concat(ligue1Players);
+            }
 
 
             console.log(
