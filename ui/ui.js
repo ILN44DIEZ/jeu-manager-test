@@ -1334,11 +1334,11 @@ this.showMessage(
 
         this.createButton(
 
-            "📅 Voir le calendrier",
+            "📅 Calendrier de la ligue",
 
             () => {
 
-                this.showCalendar();
+                this.openLatestLeagueMatchday();
 
             }
 
