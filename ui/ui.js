@@ -657,6 +657,16 @@ class UI {
 
 
         /* ================================================= */
+        /* TRANSFERTS */
+        /* ================================================= */
+
+        this.createButton(
+            "💰 Marché des transferts",
+            () => this.showTransferMarket(manager)
+        );
+
+
+        /* ================================================= */
         /* TACTIQUES */
         /* ================================================= */
 
@@ -3037,6 +3047,122 @@ if (match.played && match.result) {
 
     }
 
+
+
+    /* ================================================= */
+    /* MARCHÉ DES TRANSFERTS */
+    /* ================================================= */
+
+    showTransferMarket(manager) {
+        this.clear();
+        this.showTitle("💰 Marché des transferts");
+        this.showMessage("🏟️ Club : " + manager.clubName);
+        this.showMessage("💰 Budget disponible : " + Number(manager.budget || 0).toLocaleString("fr-FR") + " €");
+
+        const search = document.createElement("input");
+        search.type = "search";
+        search.placeholder = "🔎 Rechercher un joueur ou un club...";
+        search.setAttribute("aria-label", "Rechercher un joueur ou un club");
+        search.style.width = "100%";
+        search.style.boxSizing = "border-box";
+        search.style.padding = "12px";
+        search.style.margin = "12px 0";
+        search.style.borderRadius = "8px";
+        search.style.fontSize = "16px";
+        this.container.appendChild(search);
+
+        const results = document.createElement("div");
+        results.style.display = "grid";
+        results.style.gridTemplateColumns = "repeat(auto-fit, minmax(145px, 1fr))";
+        results.style.gap = "10px";
+        this.container.appendChild(results);
+
+        const render = () => {
+            results.innerHTML = "";
+            const query = search.value.trim().toLocaleLowerCase("fr");
+            const players = (game.data?.players || []).filter(player => {
+                const club = String(player.club || "");
+                const fullName = [player.prenom || "", player.nom || ""].join(" ");
+                return club !== manager.clubName &&
+                    [fullName, club, player.poste || "", player.nationalite || ""]
+                        .join(" ").toLocaleLowerCase("fr").includes(query);
+            });
+
+            const count = document.createElement("p");
+            count.style.gridColumn = "1 / -1";
+            count.style.color = "#bbb";
+            count.textContent = players.length + " joueur" + (players.length > 1 ? "s" : "") + " disponible" + (players.length > 1 ? "s" : "");
+            results.appendChild(count);
+
+            if (!players.length) {
+                const empty = document.createElement("p");
+                empty.textContent = "Aucun joueur disponible pour cette recherche.";
+                results.appendChild(empty);
+                return;
+            }
+
+            players.slice(0, 100).forEach(player => {
+                const card = document.createElement("div");
+                card.style.border = "1px solid #555";
+                card.style.borderRadius = "10px";
+                card.style.padding = "12px";
+                card.style.textAlign = "center";
+                card.style.minWidth = "0";
+
+                const name = document.createElement("strong");
+                name.textContent = [player.prenom || "", player.nom || ""].join(" ").trim();
+                const details = document.createElement("p");
+                details.style.fontSize = "13px";
+                details.style.color = "#bbb";
+                details.textContent = (player.poste || "Poste inconnu") + " • ⭐ " + (player.note ?? "—") + " • " + (player.age ?? "—") + " ans";
+                const club = document.createElement("p");
+                club.textContent = "🏟️ " + (player.club || "Club inconnu");
+                club.style.fontSize = "13px";
+                const price = Number(player.valeur) || 0;
+                const value = document.createElement("strong");
+                value.textContent = "💶 " + price.toLocaleString("fr-FR") + " €";
+                const buy = document.createElement("button");
+                buy.type = "button";
+                buy.textContent = "Recruter";
+                buy.style.width = "100%";
+                buy.style.padding = "10px";
+                buy.style.marginTop = "10px";
+                buy.style.borderRadius = "8px";
+                buy.disabled = Number(manager.budget) < price;
+                buy.title = buy.disabled ? "Budget insuffisant" : "Recruter ce joueur";
+                buy.addEventListener("click", () => {
+                    if (Number(manager.budget) < price || player.club === manager.clubName) return;
+                    const previousClub = player.club;
+                    manager.budget = Number(manager.budget) - price;
+                    if (game.club) game.club.budget = manager.budget;
+                    player.club = manager.clubName;
+                    if (!Array.isArray(game.players)) game.players = [];
+                    if (!game.players.some(existing => existing === player || (existing.prenom === player.prenom && existing.nom === player.nom))) {
+                        game.players.push(player);
+                    }
+                    if (game.tactics && typeof game.tactics.initializeSquad === "function") {
+                        game.tactics.initializeSquad(game.players);
+                    }
+                    this.showTransferMarket(manager);
+                    this.showMessage("✅ " + name.textContent + " rejoint " + manager.clubName + " depuis " + previousClub + ".");
+                });
+
+                card.append(name, details, club, value, buy);
+                results.appendChild(card);
+            });
+
+            if (players.length > 100) {
+                const note = document.createElement("p");
+                note.style.gridColumn = "1 / -1";
+                note.textContent = "Affichage limité aux 100 premiers résultats. Utilise la recherche pour affiner.";
+                results.appendChild(note);
+            }
+        };
+
+        search.addEventListener("input", render);
+        render();
+        this.createButton("⬅️ Retour carrière", () => this.showManager(manager));
+    }
 
 
     /* ================================================= */
