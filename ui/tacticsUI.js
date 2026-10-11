@@ -2129,7 +2129,7 @@ class TacticsUI {
         card.innerHTML = `
 
             <strong>
-                ${player.prenom}
+                ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </strong>
 
@@ -2433,7 +2433,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                ⚽ ${player.prenom}
+                ⚽ ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -2594,7 +2594,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                🪑 ${player.prenom}
+                🪑 ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -2679,7 +2679,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                📋 ${player.prenom}
+                📋 ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -3102,7 +3102,7 @@ class TacticsUI {
         card.innerHTML = `
 
             <strong>
-                ${player.prenom}
+                ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </strong>
 
@@ -3406,7 +3406,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                ⚽ ${player.prenom}
+                ⚽ ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -3567,7 +3567,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                🪑 ${player.prenom}
+                🪑 ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -3652,7 +3652,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                📋 ${player.prenom}
+                📋 ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -4075,7 +4075,7 @@ class TacticsUI {
         card.innerHTML = `
 
             <strong>
-                ${player.prenom}
+                ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </strong>
 
@@ -4379,7 +4379,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                ⚽ ${player.prenom}
+                ⚽ ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -4540,7 +4540,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                🪑 ${player.prenom}
+                🪑 ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -4625,7 +4625,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                📋 ${player.prenom}
+                📋 ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -5153,7 +5153,7 @@ class TacticsUI {
         card.innerHTML = `
 
             <strong>
-                ${player.prenom}
+                ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </strong>
 
@@ -5457,7 +5457,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                ⚽ ${player.prenom}
+                ⚽ ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -5618,7 +5618,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                🪑 ${player.prenom}
+                🪑 ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
@@ -5703,7 +5703,7 @@ class TacticsUI {
         box.innerHTML = `
 
             <h3>
-                📋 ${player.prenom}
+                📋 ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </h3>
 
