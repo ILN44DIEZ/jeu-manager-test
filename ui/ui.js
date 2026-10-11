@@ -3128,7 +3128,7 @@ if (match.played && match.result) {
                 status = " · INDISPONIBLE (blessé)";
                 option.disabled = true;
             } else if (player.entrainementEnAttenteMatch) {
-                status = " · INDISPONIBLE (déjà entraîné)";
+                status = " · Déjà Entraîné";
                 option.disabled = true;
             } else if ((Number(player.fatigue) || 0) >= 90) {
                 status = " · INDISPONIBLE (fatigue élevée)";
