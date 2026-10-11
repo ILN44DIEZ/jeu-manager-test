@@ -3055,6 +3055,30 @@ if (match.played && match.result) {
 
     showTransferMarket(manager) {
         this.clear();
+
+        const topBar = document.createElement("div");
+        topBar.style.display = "flex";
+        topBar.style.alignItems = "center";
+        topBar.style.justifyContent = "flex-start";
+        topBar.style.margin = "0 0 12px";
+        topBar.style.position = "sticky";
+        topBar.style.top = "0";
+        topBar.style.zIndex = "5";
+        topBar.style.padding = "4px 0";
+        topBar.style.background = "inherit";
+
+        const backButton = document.createElement("button");
+        backButton.type = "button";
+        backButton.textContent = "← Retour";
+        backButton.style.width = "auto";
+        backButton.style.padding = "6px 10px";
+        backButton.style.fontSize = "13px";
+        backButton.style.borderRadius = "8px";
+        backButton.style.margin = "0";
+        backButton.addEventListener("click", () => this.showManager(manager));
+        topBar.appendChild(backButton);
+        this.container.appendChild(topBar);
+
         this.showTitle("💰 Marché des transferts");
         this.showMessage("🏟️ Club : " + manager.clubName);
         this.showMessage("💰 Budget disponible : " + Number(manager.budget || 0).toLocaleString("fr-FR") + " €");
@@ -3314,7 +3338,7 @@ if (match.played && match.result) {
         minSlider.addEventListener("input", updateAge);
         maxSlider.addEventListener("input", updateAge);
         render();
-        this.createButton("⬅️ Retour carrière", () => this.showManager(manager));
+
     }
 
     /* ================================================= */
