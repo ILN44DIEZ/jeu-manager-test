@@ -3125,7 +3125,7 @@ if (match.played && match.result) {
             const potential = Math.max(rating, Number(player.potentiel) || rating);
             let status = "";
             if (isInjured(player)) {
-                status = " · INDISPONIBLE (blessé)";
+                status = " · Blessé";
                 option.disabled = true;
             } else if (player.entrainementEnAttenteMatch) {
                 status = " · Déjà Entraîné";
