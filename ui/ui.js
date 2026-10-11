@@ -3230,9 +3230,23 @@ if (match.played && match.result) {
             const results = eligible.map(player => trainPlayer(player, focus));
             const successes = results.filter(result => result.message.startsWith("✅")).length;
             const title = modeSelect.value === "collectif" ? "Séance collective" : "Séance individuelle";
-            const details = results.slice(0, 12).map(result => "• " + result.message).join("\n");
-            const extra = results.length > 12 ? "\n… et " + (results.length - 12) + " autres joueurs." : "";
-            this.showTrainingResult(manager, "👥 " + title + " terminée : " + eligible.length + " joueur(s) entraîné(s), " + successes + " progression(s).\n\n" + details + extra);
+
+            // Résultat volontairement sobre : le seuil de progression reste caché.
+            const details = results
+                .filter(result => result.message.startsWith("✅"))
+                .map(result => "⭐ " + result.message.replace(/^✅\s*/, ""))
+                .concat(
+                    results.filter(result => !result.message.startsWith("✅") &&
+                        !result.message.includes("a atteint son potentiel"))
+                        .slice(0, 8)
+                        .map(result => "✓ " + getName(result.player) + " a suivi la séance.")
+                );
+            const maxDetails = details.slice(0, 10);
+            const extra = details.length > 10 ? "\n… et " + (details.length - 10) + " autres joueurs." : "";
+            const summary = "👥 " + title + " terminée : " + eligible.length +
+                " joueur(s) entraîné(s), " + successes + " progression(s).";
+            this.showTrainingResult(manager, summary +
+                (maxDetails.length ? "\n\n" + maxDetails.join("\n") : "\n\nAucune hausse de note cette fois.") + extra);
         });
 
         form.append(modeLabel, modeSelect, playerLabel, playerSelect, groupLabel, groupSelect, focusLabel, focusSelect, info, trainButton);
