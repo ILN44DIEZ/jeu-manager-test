@@ -85,6 +85,18 @@ class SquadUI {
         
         this.container.appendChild(summary);
 
+        const injuryButton = this.ui.createButton(
+            "🏥 Infirmerie",
+            () => this.showInfirmary(players, manager)
+        );
+        const injuredCount = players.filter(player => {
+            const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
+            const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
+            return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
+        }).length;
+        injuryButton.textContent = "🏥 Infirmerie (" + injuredCount + ")";
+        injuryButton.style.margin = "0 0 12px";
+
         const toolbar = document.createElement("div");
         toolbar.style.display = "grid";
         toolbar.style.gridTemplateColumns = "repeat(auto-fit, minmax(150px, 1fr))";
@@ -239,6 +251,67 @@ class SquadUI {
         renderPlayers();
 
         this.ui.createButton("⬅️ Retour carrière", () => this.ui.showManager(manager));
+    }
+
+
+
+    /* ================================================= */
+    /* INFIRMERIE ET HISTORIQUE DES BLESSURES */
+    /* ================================================= */
+
+    showInfirmary(players, manager) {
+        this.clear();
+        this.ui.showTitle("🏥 Infirmerie");
+
+        const isInjured = player => {
+            const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
+            const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
+            return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
+        };
+        const nameOf = player => [player.prenom || player.firstName || "", player.nom || player.lastName || ""].filter(Boolean).join(" ") || "Joueur sans nom";
+        const injured = players.filter(isInjured);
+
+        this.ui.showMessage(injured.length
+            ? injured.length + " joueur" + (injured.length > 1 ? "s" : "") + " actuellement blessé" + (injured.length > 1 ? "s" : "") + "."
+            : "✅ Aucun joueur blessé.");
+
+        injured.forEach(player => {
+            const card = document.createElement("div");
+            card.style.border = "1px solid #b94a48";
+            card.style.borderRadius = "10px";
+            card.style.padding = "12px";
+            card.style.margin = "10px 0";
+            const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
+            const title = document.createElement("strong");
+            title.textContent = "🩹 " + nameOf(player) + " · " + (player.poste || player.position || "Poste inconnu");
+            const details = document.createElement("p");
+            details.textContent = (player.blessure || player.injury || "Blessure") + " — " +
+                (days > 0 ? days + " journée" + (days > 1 ? "s" : "") + " restante" + (days > 1 ? "s" : "") : "retour à vérifier");
+            card.append(title, details);
+            this.container.appendChild(card);
+        });
+
+        this.ui.showTitle("📋 Historique des blessures");
+        const history = players.flatMap(player =>
+            (Array.isArray(player.historiqueBlessures) ? player.historiqueBlessures : []).map(item => ({
+                name: nameOf(player),
+                item
+            }))
+        ).sort((a, b) => (Number(b.item.jour) || 0) - (Number(a.item.jour) || 0));
+
+        if (!history.length) {
+            this.ui.showMessage("Aucune blessure passée enregistrée pour le moment.");
+        } else {
+            history.forEach(({ name, item }) => {
+                const line = document.createElement("p");
+                line.textContent = "• " + name + " — " + (item.type || "Blessure") +
+                    " · Journée " + (item.jour || "?") +
+                    " · " + (item.duree || "?") + " journée(s)";
+                this.container.appendChild(line);
+            });
+        }
+
+        this.ui.createButton("⬅️ Retour effectif", () => this.showClubPlayers(players, manager));
     }
 
 
