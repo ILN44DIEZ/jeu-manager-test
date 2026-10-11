@@ -721,6 +721,42 @@ class UI {
 
 
 
+    applyPostMatchPlayerCondition() {
+        const players = Array.isArray(game.players) ? game.players : [];
+        if (!players.length) return;
+
+        const getKey = player => {
+            if (!player) return "";
+            if (player.id !== undefined && player.id !== null) return String(player.id);
+            return [player.prenom || player.firstName || "", player.nom || player.lastName || "", player.numero ?? player.number ?? ""].join("_");
+        };
+
+        const starters = new Set(
+            (game.tactics && Array.isArray(game.tactics.lineup) ? game.tactics.lineup : [])
+                .map(getKey).filter(Boolean)
+        );
+
+        players.forEach(player => {
+            const played = starters.has(getKey(player));
+            const fatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
+            const form = Math.max(0, Math.min(100, Number(player.forme) || 70));
+
+            player.fatigue = played ? Math.min(100, fatigue + 18) : Math.max(0, fatigue - 12);
+            player.forme = played ? Math.max(0, form - 3) : Math.min(100, form + 3);
+
+            const daysField = Object.prototype.hasOwnProperty.call(player, "joursBlessure") ? "joursBlessure" : "injuryDays";
+            const days = Math.max(0, Number(player[daysField]) || 0);
+            if (days > 0) {
+                player[daysField] = days - 1;
+                if (player[daysField] === 0) {
+                    if (Object.prototype.hasOwnProperty.call(player, "blessure")) player.blessure = "";
+                    if (Object.prototype.hasOwnProperty.call(player, "injury")) player.injury = null;
+                }
+            }
+        });
+    }
+
+
     /* ================================================= */
     /* JOUER LE PROCHAIN MATCH */
     /* ================================================= */
@@ -896,6 +932,9 @@ class UI {
         // Le calendrier de ligue s'ouvrira sur la journée qui vient d'être jouée.
         this.currentLeagueMatchday =
             matchdayIndex;
+
+        // Gérer la fatigue et la récupération après cette journée jouée.
+        this.applyPostMatchPlayerCondition();
 
 
         /* ========================= */
