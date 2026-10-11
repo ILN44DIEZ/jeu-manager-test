@@ -17,6 +17,10 @@ class UI {
         };
 
 
+        this.playerUI =
+            new PlayerUI(this);
+
+
         this.squadUI =
             new SquadUI(this);
 
