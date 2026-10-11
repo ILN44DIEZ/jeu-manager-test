@@ -3215,6 +3215,29 @@ if (match.played && match.result) {
                 card.style.textAlign = "center";
                 card.style.minWidth = "0";
 
+                card.setAttribute("role", "button");
+                card.setAttribute("tabindex", "0");
+                card.setAttribute("aria-label", "Voir la fiche de " + [player.prenom || "", player.nom || ""].join(" ").trim());
+                card.addEventListener("click", () => {
+                    this.playerUI.showProfile(
+                        player,
+                        manager,
+                        () => this.showTransferMarket(manager),
+                        { hidePotential: true, backLabel: "← Retour au marché" }
+                    );
+                });
+                card.addEventListener("keydown", event => {
+                    if (event.target === card && (event.key === "Enter" || event.key === " ")) {
+                        event.preventDefault();
+                        this.playerUI.showProfile(
+                            player,
+                            manager,
+                            () => this.showTransferMarket(manager),
+                            { hidePotential: true, backLabel: "← Retour au marché" }
+                        );
+                    }
+                });
+
                 const name = document.createElement("strong");
                 name.textContent = [player.prenom || "", player.nom || ""].join(" ").trim();
                 const details = document.createElement("p");
@@ -3261,11 +3284,13 @@ if (match.played && match.result) {
                 response.style.fontSize = "13px";
                 response.style.lineHeight = "1.4";
 
-                negotiate.addEventListener("click", () => {
+                negotiate.addEventListener("click", event => {
+                    event.stopPropagation();
                     negotiationBox.style.display = negotiationBox.style.display === "none" ? "block" : "none";
                 });
 
-                submitOffer.addEventListener("click", () => {
+                submitOffer.addEventListener("click", event => {
+                    event.stopPropagation();
                     const offer = Math.floor(Number(offerInput.value));
                     if (!Number.isFinite(offer) || offer <= 0) {
                         response.textContent = "Entre un montant supérieur à 0 €.";
