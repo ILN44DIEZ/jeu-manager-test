@@ -387,7 +387,7 @@ class SquadUI {
         card.innerHTML = `
 
             <strong>
-                ${player.prenom}
+                ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </strong>
 
