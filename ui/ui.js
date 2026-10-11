@@ -95,10 +95,31 @@ class UI {
             action
         );
 
+        // Tous les boutons de retour restent au même endroit :
+        // en haut à gauche, comme dans le marché des transferts.
+        if (/retour|←|⬅️/i.test(text)) {
 
-        this.container.appendChild(
-            button
-        );
+            button.type = "button";
+            button.style.width = "auto";
+            button.style.display = "block";
+            button.style.padding = "6px 10px";
+            button.style.fontSize = "13px";
+            button.style.borderRadius = "8px";
+            button.style.margin = "0 auto 12px 0";
+            button.style.textAlign = "left";
+
+            this.container.insertBefore(
+                button,
+                this.container.firstChild
+            );
+
+        } else {
+
+            this.container.appendChild(
+                button
+            );
+
+        }
 
 
         return button;
@@ -3032,6 +3053,12 @@ if (match.played && match.result) {
 
         const leagues =
             dataManager.getLeagues();
+
+
+        this.createButton(
+            "← Retour",
+            () => this.showMainMenu()
+        );
 
 
         leagues.forEach(
