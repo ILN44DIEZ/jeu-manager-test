@@ -31,217 +31,171 @@ class SquadUI {
 
     showClubPlayers(players, manager) {
 
-        this.currentManager =
-            manager;
-
-
+        this.currentManager = manager;
         this.clear();
+        this.ui.showTitle("👥 Effectif " + manager.clubName);
 
-
-        this.ui.showTitle(
-            "👥 Effectif " +
-            manager.clubName
-        );
-
-
-        if (
-            !players ||
-            players.length === 0
-        ) {
-
-            this.ui.showMessage(
-                "Aucun joueur trouvé."
-            );
-
+        if (!Array.isArray(players) || players.length === 0) {
+            this.ui.showMessage("Aucun joueur trouvé.");
+            this.ui.createButton("⬅️ Retour carrière", () => this.ui.showManager(manager));
             return;
-
         }
 
+        const toolbar = document.createElement("div");
+        toolbar.style.display = "grid";
+        toolbar.style.gridTemplateColumns = "repeat(auto-fit, minmax(150px, 1fr))";
+        toolbar.style.gap = "10px";
+        toolbar.style.margin = "15px 0";
+        toolbar.style.padding = "0 5px";
 
-        /* ================================================= */
-/* CATÉGORIES */
-/* ================================================= */
+        const search = document.createElement("input");
+        search.type = "search";
+        search.placeholder = "🔎 Rechercher un joueur...";
+        search.setAttribute("aria-label", "Rechercher un joueur");
+        search.style.boxSizing = "border-box";
+        search.style.width = "100%";
+        search.style.minWidth = "0";
+        search.style.padding = "12px";
+        search.style.borderRadius = "8px";
+        search.style.border = "1px solid #666";
+        search.style.fontSize = "16px";
 
-const goalkeepers = [];
+        const positionFilter = document.createElement("select");
+        positionFilter.setAttribute("aria-label", "Filtrer par poste");
+        positionFilter.style.width = "100%";
+        positionFilter.style.minWidth = "0";
+        positionFilter.style.padding = "12px";
+        positionFilter.style.borderRadius = "8px";
+        positionFilter.style.fontSize = "16px";
 
-const defenders = [];
+        [
+            ["all", "Tous les postes"],
+            ["GB", "Gardiens"],
+            ["DEF", "Défenseurs"],
+            ["MIL", "Milieux"],
+            ["ATT", "Attaquants"],
+            ["OTHER", "Autres"]
+        ].forEach(([value, label]) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = label;
+            positionFilter.appendChild(option);
+        });
 
-const midfielders = [];
+        const sortSelect = document.createElement("select");
+        sortSelect.setAttribute("aria-label", "Trier les joueurs");
+        sortSelect.style.width = "100%";
+        sortSelect.style.minWidth = "0";
+        sortSelect.style.padding = "12px";
+        sortSelect.style.borderRadius = "8px";
+        sortSelect.style.fontSize = "16px";
 
-const attackers = [];
+        [
+            ["default", "Tri : poste"],
+            ["note", "Meilleure note"],
+            ["potential", "Meilleur potentiel"],
+            ["age", "Âge : du plus jeune"],
+            ["value", "Valeur marchande"]
+        ].forEach(([value, label]) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = label;
+            sortSelect.appendChild(option);
+        });
 
-const others = [];
+        toolbar.appendChild(search);
+        toolbar.appendChild(positionFilter);
+        toolbar.appendChild(sortSelect);
+        this.container.appendChild(toolbar);
 
+        const count = document.createElement("p");
+        count.style.margin = "8px 0 15px";
+        count.style.color = "#bbb";
+        this.container.appendChild(count);
 
-players.forEach(
-    player => {
+        const resultsContainer = document.createElement("div");
+        resultsContainer.className = "squad-results";
+        this.container.appendChild(resultsContainer);
 
-        const position =
-            String(
-                player.poste || ""
-            ).toUpperCase();
+        const getPositionGroup = player => {
+            const position = String(player.poste || player.position || "").trim().toUpperCase();
 
+            if (["GB", "GK"].includes(position)) return "GB";
+            if (["DC", "DCD", "DCG", "DD", "DG", "DLD", "DLG", "DDG", "DL", "DF", "DCDG"].includes(position)) return "DEF";
+            if (["MDC", "MC", "MCD", "MCG", "MD", "MG", "MOC", "MOCD", "MOCG", "MR", "ML", "MIL"].includes(position)) return "MIL";
+            if (["BU", "AC", "AD", "AG", "AT", "AV", "SA"].includes(position)) return "ATT";
 
-        /* ========================= */
-        /* GARDIENS */
-        /* ========================= */
+            return "OTHER";
+        };
 
-        if (
-            position === "GB" ||
-            position === "GK"
-        ) {
+        const renderPlayers = () => {
+            const query = search.value.trim().toLocaleLowerCase("fr");
+            const selectedPosition = positionFilter.value;
+            const sortBy = sortSelect.value;
 
-            goalkeepers.push(
-                player
-            );
+            let filtered = players.filter(player => {
+                const fullName = [player.prenom || "", player.nom || ""]
+                    .join(" ").toLocaleLowerCase("fr");
+                const position = String(player.poste || player.position || "")
+                    .toLocaleLowerCase("fr");
+                const nationality = String(player.nationalite || "").toLocaleLowerCase("fr");
 
-            return;
+                const matchesSearch =
+                    fullName.includes(query) ||
+                    position.includes(query) ||
+                    nationality.includes(query);
 
-        }
+                const matchesPosition =
+                    selectedPosition === "all" ||
+                    getPositionGroup(player) === selectedPosition;
 
+                return matchesSearch && matchesPosition;
+            });
 
-        /* ========================= */
-        /* DÉFENSEURS */
-        /* ========================= */
-
-        if (
-            position === "DC" ||
-            position === "DCD" ||
-            position === "DCG" ||
-            position === "DD" ||
-            position === "DG" ||
-            position === "DLD" ||
-            position === "DLG" ||
-            position === "DDG"
-        ) {
-
-            defenders.push(
-                player
-            );
-
-            return;
-
-        }
-
-
-        /* ========================= */
-        /* MILIEUX */
-        /* ========================= */
-
-        if (
-            position === "MDC" ||
-            position === "MC" ||
-            position === "MCD" ||
-            position === "MCG" ||
-            position === "MD" ||
-            position === "MG" ||
-            position === "MOC" ||
-            position === "MOCD" ||
-            position === "MOCG"
-        ) {
-
-            midfielders.push(
-                player
-            );
-
-            return;
-
-        }
-
-
-        /* ========================= */
-        /* ATTAQUANTS */
-        /* ========================= */
-
-        if (
-            position === "BU" ||
-            position === "AC" ||
-            position === "AD" ||
-            position === "AG" ||
-            position === "AT"
-        ) {
-
-            attackers.push(
-                player
-            );
-
-            return;
-
-        }
-
-
-        /* ========================= */
-        /* AUTRES */
-        /* ========================= */
-
-        others.push(
-            player
-        );
-
-    }
-);
-
-
-        /* ================================================= */
-        /* AFFICHAGE DES CATÉGORIES */
-        /* ================================================= */
-
-        this.showPlayerCategory(
-            "🧤 Gardiens",
-            goalkeepers
-        );
-
-
-        this.showPlayerCategory(
-            "🛡️ Défenseurs",
-            defenders
-        );
-
-
-        this.showPlayerCategory(
-            "⚙️ Milieux",
-            midfielders
-        );
-
-
-        this.showPlayerCategory(
-            "⚡ Attaquants",
-            attackers
-        );
-
-
-        if (
-            others.length > 0
-        ) {
-
-            this.showPlayerCategory(
-                "👤 Autres",
-                others
-            );
-
-        }
-
-
-        /* ================================================= */
-        /* RETOUR */
-        /* ================================================= */
-
-        this.ui.createButton(
-
-            "⬅️ Retour carrière",
-
-            () => {
-
-                this.ui.showManager(
-                    manager
-                );
-
+            if (sortBy === "note") {
+                filtered.sort((a, b) => (Number(b.note) || 0) - (Number(a.note) || 0));
+            } else if (sortBy === "potential") {
+                filtered.sort((a, b) => (Number(b.potentiel) || 0) - (Number(a.potentiel) || 0));
+            } else if (sortBy === "age") {
+                filtered.sort((a, b) => (Number(a.age) || 0) - (Number(b.age) || 0));
+            } else if (sortBy === "value") {
+                filtered.sort((a, b) => (Number(b.valeur) || 0) - (Number(a.valeur) || 0));
             }
 
-        );
+            resultsContainer.innerHTML = "";
+            count.textContent = filtered.length + " joueur" +
+                (filtered.length > 1 ? "s" : "") + " affiché" +
+                (filtered.length > 1 ? "s" : "");
 
+            if (filtered.length === 0) {
+                const empty = document.createElement("p");
+                empty.textContent = "Aucun joueur ne correspond à ta recherche.";
+                empty.style.padding = "15px";
+                resultsContainer.appendChild(empty);
+                return;
+            }
+
+            [
+                { key: "GB", title: "🧤 Gardiens" },
+                { key: "DEF", title: "🛡️ Défenseurs" },
+                { key: "MIL", title: "⚙️ Milieux" },
+                { key: "ATT", title: "⚡ Attaquants" },
+                { key: "OTHER", title: "👤 Autres" }
+            ].forEach(group => {
+                const groupPlayers = filtered.filter(player => getPositionGroup(player) === group.key);
+                if (groupPlayers.length > 0) {
+                    this.showPlayerCategory(group.title, groupPlayers, resultsContainer);
+                }
+            });
+        };
+
+        search.addEventListener("input", renderPlayers);
+        positionFilter.addEventListener("change", renderPlayers);
+        sortSelect.addEventListener("change", renderPlayers);
+        renderPlayers();
+
+        this.ui.createButton("⬅️ Retour carrière", () => this.ui.showManager(manager));
     }
-
 
 
     /* ================================================= */
@@ -250,7 +204,8 @@ players.forEach(
 
     showPlayerCategory(
         title,
-        players
+        players,
+        targetContainer = this.container
     ) {
 
         if (
@@ -286,7 +241,7 @@ players.forEach(
 
 
         grid.style.gridTemplateColumns =
-            "repeat(4, minmax(0, 1fr))";
+            "repeat(auto-fit, minmax(125px, 1fr))";
 
 
         grid.style.gap =
@@ -318,7 +273,7 @@ players.forEach(
         );
 
 
-        this.container.appendChild(
+        targetContainer.appendChild(
             grid
         );
 
