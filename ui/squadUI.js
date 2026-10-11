@@ -217,9 +217,12 @@ class SquadUI {
         }
 
 
-        this.ui.showTitle(
-            title
-        );
+        // Le titre doit être ajouté au conteneur des résultats,
+        // pas à la racine de l'interface, sinon il reste en bas
+        // et se répète à chaque changement de filtre ou de tri.
+        const heading = document.createElement("h2");
+        heading.textContent = title;
+        targetContainer.appendChild(heading);
 
 
         /* ================================================= */
