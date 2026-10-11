@@ -338,14 +338,34 @@ class MatchEngine {
     /* SIMULER UN MATCH */
     /* ================================================= */
 
+    getTeamFatiguePenalty(teamName) {
+        const players = this.teamPlayers[teamName] || [];
+        if (!Array.isArray(players) || players.length === 0) return 0;
+        const fatigueValues = players.filter(player => player && Number.isFinite(Number(player.fatigue))).map(player => Math.max(0, Math.min(100, Number(player.fatigue))));
+        if (fatigueValues.length === 0) return 0;
+        const averageFatigue = fatigueValues.reduce((sum, value) => sum + value, 0) / fatigueValues.length;
+        if (averageFatigue < 40) return 0;
+        if (averageFatigue < 60) return 0.005;
+        if (averageFatigue < 70) return 0.015;
+        if (averageFatigue < 80) return 0.03;
+        if (averageFatigue < 90) return 0.05;
+        if (averageFatigue < 100) return 0.075;
+        return 0.10;
+    }
+
+    applyFatigueToGoals(goals, penalty) {
+        let effectiveGoals = 0;
+        for (let i = 0; i < goals; i++) if (Math.random() >= penalty) effectiveGoals++;
+        return effectiveGoals;
+    }
+
     simulateMatch(homeTeam, awayTeam) {
-
-        const homeGoals =
-            Math.floor(Math.random() * 5);
-
-        const awayGoals =
-            Math.floor(Math.random() * 5);
-
+        const rawHomeGoals = Math.floor(Math.random() * 5);
+        const rawAwayGoals = Math.floor(Math.random() * 5);
+        const homePenalty = this.getTeamFatiguePenalty(homeTeam);
+        const awayPenalty = this.getTeamFatiguePenalty(awayTeam);
+        const homeGoals = this.applyFatigueToGoals(rawHomeGoals, homePenalty);
+        const awayGoals = this.applyFatigueToGoals(rawAwayGoals, awayPenalty);
 
         const events =
             this.generateGoalEvents(
