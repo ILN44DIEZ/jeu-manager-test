@@ -71,10 +71,24 @@ class DataManager {
                 responses.map(response => response.json())
             );
 
-            this.players = datasets.flat();
+            // Déduplique les joueurs selon prénom + nom + club.
+            // La base principale reste prioritaire sur les fichiers complémentaires.
+            const seenPlayers = new Set();
+            this.players = [];
 
-            // Vérifie que chaque joueur est lié à un club existant
-            // en utilisant le nom exact défini dans data/clubs.json.
+            datasets.flat().forEach(player => {
+                const key = [
+                    String(player.prenom || "").trim().toLocaleLowerCase(),
+                    String(player.nom || "").trim().toLocaleLowerCase(),
+                    String(player.club || "").trim()
+                ].join("|");
+
+                if (!seenPlayers.has(key)) {
+                    seenPlayers.add(key);
+                    this.players.push(player);
+                }
+            });
+
             const clubNames = new Set(
                 this.clubs.map(club => club.nom)
             );
@@ -89,39 +103,33 @@ class DataManager {
                     unmatched.map(player => player.prenom + " " + player.nom + " — " + player.club)
                 );
             } else {
-                console.log(
-                    "✅ Tous les joueurs sont liés à un club existant."
-                );
+                console.log("✅ Tous les joueurs sont liés à un club existant.");
             }
 
-            const duplicateKeys = new Set();
-            const seen = new Set();
+            const missingFields = this.players.filter(player =>
+                [
+                    "prenom", "nom", "club", "poste", "age", "nationalite",
+                    "taille", "poids", "numero", "pied", "note", "potentiel",
+                    "forme", "moral", "fatigue", "blessure", "joursBlessure",
+                    "valeur", "salaire", "contratFin", "role", "experience",
+                    "cartonsJaunes", "cartonsRouges", "buts", "passes",
+                    "matchs", "minutes", "cleanSheets", "centreFormation",
+                    "retraite", "pret", "clubPret", "suspendu", "joursSuspension"
+                ].some(field => !(field in player))
+            );
 
-            this.players.forEach(player => {
-                const key = player.prenom + "|" + player.nom + "|" + player.club;
-                if (seen.has(key)) duplicateKeys.add(key);
-                seen.add(key);
-            });
+            const validPositions = new Set([
+                "GB", "G", "DD", "DG", "DC", "DCD", "DCG", "MDC",
+                "MC", "MOC", "MD", "MG", "AD", "AG", "BU"
+            ]);
 
-            if (duplicateKeys.size > 0) {
-                console.warn(
-                    "⚠️ Doublons exacts prénom/nom/club :",
-                    [...duplicateKeys]
-                );
-            }
+            const invalidPositions = this.players.filter(
+                player => !validPositions.has(player.poste)
+            );
 
             const clubsWithoutPlayers = this.clubs
                 .filter(club => !this.players.some(player => player.club === club.nom))
                 .map(club => club.nom);
-
-            if (clubsWithoutPlayers.length > 0) {
-                console.warn(
-                    "⚠️ Clubs sans joueur dans la base :",
-                    clubsWithoutPlayers
-                );
-            } else {
-                console.log("✅ Les 97 clubs possèdent au moins un joueur.");
-            }
 
             console.log(
                 "✅ Joueurs chargés :",
@@ -130,9 +138,21 @@ class DataManager {
                 clubsWithoutPlayers.length,
                 "| Liens club invalides :",
                 unmatched.length,
-                "| Doublons exacts :",
-                duplicateKeys.size
+                "| Joueurs avec champs manquants :",
+                missingFields.length,
+                "| Postes invalides :",
+                invalidPositions.length
             );
+
+            if (clubsWithoutPlayers.length) {
+                console.warn("⚠️ Clubs sans joueur :", clubsWithoutPlayers);
+            }
+            if (missingFields.length) {
+                console.warn("⚠️ Joueurs avec champs manquants :", missingFields);
+            }
+            if (invalidPositions.length) {
+                console.warn("⚠️ Joueurs avec poste invalide :", invalidPositions);
+            }
 
         } catch(error) {
 
