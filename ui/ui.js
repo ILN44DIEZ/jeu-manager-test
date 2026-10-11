@@ -3059,6 +3059,36 @@ if (match.played && match.result) {
         this.showMessage("🏟️ Club : " + manager.clubName);
         this.showMessage("💰 Budget disponible : " + Number(manager.budget || 0).toLocaleString("fr-FR") + " €");
 
+        const clubs = game.data?.clubs || [];
+        const leagues = [...new Set(clubs.map(club => club.ligue).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr"));
+        const filters = document.createElement("div");
+        filters.style.display = "grid";
+        filters.style.gap = "10px";
+        filters.style.margin = "12px 0";
+        this.container.appendChild(filters);
+
+        const leagueLabel = document.createElement("label");
+        leagueLabel.textContent = "🏆 Championnat";
+        leagueLabel.style.fontWeight = "bold";
+        filters.appendChild(leagueLabel);
+
+        const leagueSelect = document.createElement("select");
+        leagueSelect.style.width = "100%";
+        leagueSelect.style.boxSizing = "border-box";
+        leagueSelect.style.padding = "12px";
+        leagueSelect.style.borderRadius = "8px";
+        const allLeagues = document.createElement("option");
+        allLeagues.value = "";
+        allLeagues.textContent = "Tous les championnats";
+        leagueSelect.appendChild(allLeagues);
+        leagues.forEach(league => {
+            const option = document.createElement("option");
+            option.value = league;
+            option.textContent = league;
+            leagueSelect.appendChild(option);
+        });
+        filters.appendChild(leagueSelect);
+
         const search = document.createElement("input");
         search.type = "search";
         search.placeholder = "🔎 Rechercher un joueur ou un club...";
@@ -3066,10 +3096,57 @@ if (match.played && match.result) {
         search.style.width = "100%";
         search.style.boxSizing = "border-box";
         search.style.padding = "12px";
-        search.style.margin = "12px 0";
         search.style.borderRadius = "8px";
         search.style.fontSize = "16px";
-        this.container.appendChild(search);
+        filters.appendChild(search);
+
+        const ageToggle = document.createElement("button");
+        ageToggle.type = "button";
+        ageToggle.textContent = "🎂 Filtrer par âge ▾";
+        ageToggle.style.width = "100%";
+        filters.appendChild(ageToggle);
+
+        const agePanel = document.createElement("div");
+        agePanel.style.display = "none";
+        agePanel.style.padding = "12px";
+        agePanel.style.border = "1px solid #555";
+        agePanel.style.borderRadius = "8px";
+        agePanel.style.gap = "8px";
+        filters.appendChild(agePanel);
+
+        let minAge = 15;
+        let maxAge = 40;
+        const ageValue = document.createElement("strong");
+        ageValue.textContent = "Âge : 15–40 ans";
+        agePanel.appendChild(ageValue);
+
+        const minLabel = document.createElement("label");
+        minLabel.textContent = "Âge minimum : 15 ans";
+        agePanel.appendChild(minLabel);
+        const minSlider = document.createElement("input");
+        minSlider.type = "range";
+        minSlider.min = "15";
+        minSlider.max = "40";
+        minSlider.value = "15";
+        minSlider.style.width = "100%";
+        agePanel.appendChild(minSlider);
+
+        const maxLabel = document.createElement("label");
+        maxLabel.textContent = "Âge maximum : 40 ans";
+        agePanel.appendChild(maxLabel);
+        const maxSlider = document.createElement("input");
+        maxSlider.type = "range";
+        maxSlider.min = "15";
+        maxSlider.max = "40";
+        maxSlider.value = "40";
+        maxSlider.style.width = "100%";
+        agePanel.appendChild(maxSlider);
+
+        ageToggle.addEventListener("click", () => {
+            const isHidden = agePanel.style.display === "none";
+            agePanel.style.display = isHidden ? "grid" : "none";
+            ageToggle.textContent = isHidden ? "🎂 Filtrer par âge ▴" : "🎂 Filtrer par âge ▾";
+        });
 
         const results = document.createElement("div");
         results.style.display = "grid";
@@ -3081,22 +3158,27 @@ if (match.played && match.result) {
             results.innerHTML = "";
             const query = search.value.trim().toLocaleLowerCase("fr");
             const players = (game.data?.players || []).filter(player => {
-                const club = String(player.club || "");
+                const playerClub = String(player.club || "");
+                const clubData = clubs.find(club => club.nom === playerClub);
+                const playerLeague = clubData?.ligue || "";
                 const fullName = [player.prenom || "", player.nom || ""].join(" ");
-                return club !== manager.clubName &&
-                    [fullName, club, player.poste || "", player.nationalite || ""]
+                const age = Number(player.age) || 0;
+                return playerClub !== manager.clubName &&
+                    (!leagueSelect.value || playerLeague === leagueSelect.value) &&
+                    age >= minAge && age <= maxAge &&
+                    [fullName, playerClub, player.poste || "", player.nationalite || ""]
                         .join(" ").toLocaleLowerCase("fr").includes(query);
             });
 
             const count = document.createElement("p");
             count.style.gridColumn = "1 / -1";
             count.style.color = "#bbb";
-            count.textContent = players.length + " joueur" + (players.length > 1 ? "s" : "") + " disponible" + (players.length > 1 ? "s" : "");
+            count.textContent = players.length + " joueur" + (players.length > 1 ? "s" : "") + " trouvé" + (players.length > 1 ? "s" : "");
             results.appendChild(count);
 
             if (!players.length) {
                 const empty = document.createElement("p");
-                empty.textContent = "Aucun joueur disponible pour cette recherche.";
+                empty.textContent = "Aucun joueur ne correspond à ces filtres.";
                 results.appendChild(empty);
                 return;
             }
@@ -3118,52 +3200,122 @@ if (match.played && match.result) {
                 const club = document.createElement("p");
                 club.textContent = "🏟️ " + (player.club || "Club inconnu");
                 club.style.fontSize = "13px";
-                const price = Number(player.valeur) || 0;
+                const valuePrice = Math.max(0, Number(player.valeur) || 0);
                 const value = document.createElement("strong");
-                value.textContent = "💶 " + price.toLocaleString("fr-FR") + " €";
-                const buy = document.createElement("button");
-                buy.type = "button";
-                buy.textContent = "Recruter";
-                buy.style.width = "100%";
-                buy.style.padding = "10px";
-                buy.style.marginTop = "10px";
-                buy.style.borderRadius = "8px";
-                buy.disabled = Number(manager.budget) < price;
-                buy.title = buy.disabled ? "Budget insuffisant" : "Recruter ce joueur";
-                buy.addEventListener("click", () => {
-                    if (Number(manager.budget) < price || player.club === manager.clubName) return;
-                    const previousClub = player.club;
-                    manager.budget = Number(manager.budget) - price;
-                    if (game.club) game.club.budget = manager.budget;
-                    player.club = manager.clubName;
-                    if (!Array.isArray(game.players)) game.players = [];
-                    if (!game.players.some(existing => existing === player || (existing.prenom === player.prenom && existing.nom === player.nom))) {
-                        game.players.push(player);
-                    }
-                    if (game.tactics && typeof game.tactics.initializeSquad === "function") {
-                        game.tactics.initializeSquad(game.players);
-                    }
-                    this.showTransferMarket(manager);
-                    this.showMessage("✅ " + name.textContent + " rejoint " + manager.clubName + " depuis " + previousClub + ".");
+                value.textContent = "💶 Valeur estimée : " + valuePrice.toLocaleString("fr-FR") + " €";
+
+                const negotiate = document.createElement("button");
+                negotiate.type = "button";
+                negotiate.textContent = "🤝 Négocier avec le club";
+                negotiate.style.width = "100%";
+                negotiate.style.padding = "10px";
+                negotiate.style.marginTop = "10px";
+                negotiate.style.borderRadius = "8px";
+
+                const negotiationBox = document.createElement("div");
+                negotiationBox.style.display = "none";
+                negotiationBox.style.marginTop = "10px";
+                negotiationBox.style.textAlign = "left";
+
+                const offerLabel = document.createElement("label");
+                offerLabel.textContent = "Ton offre (€)";
+                offerLabel.style.display = "block";
+                const offerInput = document.createElement("input");
+                offerInput.type = "number";
+                offerInput.min = "0";
+                offerInput.step = "50000";
+                offerInput.value = valuePrice;
+                offerInput.style.width = "100%";
+                offerInput.style.boxSizing = "border-box";
+                offerInput.style.padding = "9px";
+                offerInput.style.margin = "6px 0";
+                const submitOffer = document.createElement("button");
+                submitOffer.type = "button";
+                submitOffer.textContent = "Envoyer l'offre";
+                submitOffer.style.width = "100%";
+                const response = document.createElement("p");
+                response.style.fontSize = "13px";
+                response.style.lineHeight = "1.4";
+
+                negotiate.addEventListener("click", () => {
+                    negotiationBox.style.display = negotiationBox.style.display === "none" ? "block" : "none";
                 });
 
-                card.append(name, details, club, value, buy);
+                submitOffer.addEventListener("click", () => {
+                    const offer = Math.floor(Number(offerInput.value));
+                    if (!Number.isFinite(offer) || offer <= 0) {
+                        response.textContent = "Entre un montant supérieur à 0 €.";
+                        return;
+                    }
+                    if (offer > Number(manager.budget || 0)) {
+                        response.textContent = "❌ Cette offre dépasse ton budget actuel.";
+                        return;
+                    }
+                    if (player.club === manager.clubName) {
+                        response.textContent = "Ce joueur appartient déjà à ton club.";
+                        return;
+                    }
+
+                    if (offer >= valuePrice) {
+                        const previousClub = player.club;
+                        manager.budget = Number(manager.budget || 0) - offer;
+                        if (game.club) game.club.budget = manager.budget;
+                        player.club = manager.clubName;
+                        if (!Array.isArray(game.players)) game.players = [];
+                        if (!game.players.some(existing => existing === player || (existing.prenom === player.prenom && existing.nom === player.nom))) {
+                            game.players.push(player);
+                        }
+                        if (game.tactics && typeof game.tactics.initializeSquad === "function") {
+                            game.tactics.initializeSquad(game.players);
+                        }
+                        response.textContent = "✅ Offre acceptée ! " + name.textContent + " rejoint ton club pour " + offer.toLocaleString("fr-FR") + " €.";
+                        submitOffer.disabled = true;
+                        negotiate.disabled = true;
+                        value.textContent = "💶 Transfert conclu : " + offer.toLocaleString("fr-FR") + " €";
+                        const budgetLine = this.container.querySelector("p");
+                        this.showTransferMarket(manager);
+                        this.showMessage("✅ Transfert conclu : " + name.textContent + " rejoint " + manager.clubName + " depuis " + previousClub + ".");
+                        return;
+                    }
+
+                    if (valuePrice > 0 && offer >= valuePrice * 0.75) {
+                        const counterOffer = Math.ceil(valuePrice * 1.05 / 100000) * 100000;
+                        response.textContent = "🤝 " + player.club + " refuse cette offre, mais propose " + counterOffer.toLocaleString("fr-FR") + " €. Modifie ton offre pour poursuivre la négociation.";
+                        offerInput.value = counterOffer;
+                    } else {
+                        response.textContent = "❌ " + player.club + " refuse l'offre, jugée trop basse. Tu peux proposer un autre montant.";
+                    }
+                });
+
+                negotiationBox.append(offerLabel, offerInput, submitOffer, response);
+                card.append(name, details, club, value, negotiate, negotiationBox);
                 results.appendChild(card);
             });
 
             if (players.length > 100) {
                 const note = document.createElement("p");
                 note.style.gridColumn = "1 / -1";
-                note.textContent = "Affichage limité aux 100 premiers résultats. Utilise la recherche pour affiner.";
+                note.textContent = "Affichage limité aux 100 premiers résultats. Utilise les filtres pour affiner.";
                 results.appendChild(note);
             }
         };
 
+        const updateAge = () => {
+            minAge = Math.min(Number(minSlider.value), Number(maxSlider.value));
+            maxAge = Math.max(Number(minSlider.value), Number(maxSlider.value));
+            minLabel.textContent = "Âge minimum : " + minAge + " ans";
+            maxLabel.textContent = "Âge maximum : " + maxAge + " ans";
+            ageValue.textContent = "Âge : " + minAge + "–" + maxAge + " ans";
+            render();
+        };
+
+        leagueSelect.addEventListener("change", render);
         search.addEventListener("input", render);
+        minSlider.addEventListener("input", updateAge);
+        maxSlider.addEventListener("input", updateAge);
         render();
         this.createButton("⬅️ Retour carrière", () => this.showManager(manager));
     }
-
 
     /* ================================================= */
     /* CHOIX CLUB */
