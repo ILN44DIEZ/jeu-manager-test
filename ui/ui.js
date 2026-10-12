@@ -858,16 +858,75 @@ class UI {
     }
 
 
+
+    createRegensForRetirees(retirees) {
+        if (!Array.isArray(retirees) || !retirees.length) return 0;
+        const players = game.data?.players;
+        if (!Array.isArray(players)) return 0;
+        const clubs = Array.isArray(game.data.clubs) ? game.data.clubs : [];
+        const firstNames = Array.isArray(Names?.firstNames) ? Names.firstNames : ["Alex", "Sam", "Noah"];
+        const lastNames = Array.isArray(Names?.lastNames) ? Names.lastNames : ["Martin", "Bernard", "Petit"];
+        const positions = ["GB", "DD", "DG", "DC", "MDC", "MC", "MOC", "MD", "MG", "AD", "AG", "BU"];
+        let created = 0;
+
+        retirees.forEach(oldPlayer => {
+            if (!oldPlayer || oldPlayer.regenCree) return;
+            const oldPotential = Math.max(55, Math.min(99, Number(oldPlayer.potentiel) || Number(oldPlayer.note) || 65));
+            const potential = Math.max(55, Math.min(99, oldPotential + Math.floor(Math.random() * 7) - 3));
+            const overall = 44 + Math.floor(Math.random() * 14);
+            const oldClub = clubs.find(club => club.nom === oldPlayer.club);
+            const sameLeague = oldClub ? clubs.filter(club => club.ligue === oldClub.ligue && club.nom !== oldPlayer.club) : [];
+            const alternatives = sameLeague.length ? sameLeague : clubs.filter(club => club.nom !== oldPlayer.club);
+            const destination = alternatives.length ? alternatives[Math.floor(Math.random() * alternatives.length)] : null;
+            const pick = list => list[Math.floor(Math.random() * list.length)];
+            const regen = {
+                id: "regen-" + Date.now() + "-" + Math.floor(Math.random() * 1000000),
+                prenom: pick(firstNames),
+                nom: pick(lastNames),
+                club: destination ? destination.nom : (oldPlayer.club || ""),
+                poste: pick(positions),
+                age: 16 + Math.floor(Math.random() * 4),
+                nationalite: oldPlayer.nationalite || "Française",
+                taille: 165 + Math.floor(Math.random() * 26),
+                poids: 58 + Math.floor(Math.random() * 25),
+                numero: 1 + Math.floor(Math.random() * 99),
+                pied: Math.random() < 0.5 ? "Droit" : "Gauche",
+                note: Math.min(overall, potential),
+                potentiel: potential,
+                valeur: 100000 + overall * overall * 1000,
+                forme: 100,
+                moral: 75,
+                fatigue: 0,
+                blessure: false,
+                joursBlessure: 0,
+                retraite: false,
+                regen: true,
+                regenDe: (oldPlayer.prenom || "") + " " + (oldPlayer.nom || ""),
+                matchs: 0,
+                buts: 0,
+                passesDecisives: 0
+            };
+            players.push(regen);
+            oldPlayer.regenCree = true;
+            if (game.club && regen.club === game.club.name && Array.isArray(game.players) && !game.players.some(p => String(p.id) === String(regen.id))) {
+                game.players.push(regen);
+            }
+            created++;
+        });
+        return created;
+    }
+
     processEndOfSeasonPlayerAging() {
         const allPlayers = Array.isArray(game.data?.players) ? game.data.players : [];
-        if (!allPlayers.length) return { aged: 0, retired: 0, declined: 0 };
+        if (!allPlayers.length) return { aged: 0, retired: 0, declined: 0, regens: 0 };
 
         const seasonKey = String(game.manager?.season ?? game.manager?.seasonName ?? game.currentMatchday ?? "season");
-        if (game.lastAgedSeason === seasonKey) return { aged: 0, retired: 0, declined: 0 };
+        if (game.lastAgedSeason === seasonKey) return { aged: 0, retired: 0, declined: 0, regens: 0 };
 
         let aged = 0;
         let retired = 0;
         let declined = 0;
+        const newRetirees = [];
 
         allPlayers.forEach(player => {
             if (!player || player.retraite === true || player.retraite === "true") return;
@@ -894,11 +953,13 @@ class UI {
             if (age >= 40) {
                 player.retraite = true;
                 retired++;
+                newRetirees.push(player);
             }
         });
 
+        const regens = this.createRegensForRetirees(newRetirees);
         game.lastAgedSeason = seasonKey;
-        return { aged, retired, declined };
+        return { aged, retired, declined, regens };
     }
 
 
@@ -1059,6 +1120,10 @@ class UI {
             this.showMessage(
                 "Félicitations ! Tu as terminé la saison."
             );
+
+            if (aging.regens > 0) {
+                this.showMessage("🌱 " + aging.regens + " jeune(s) regen généré(s) après une retraite.");
+            }
 
             if (aging.aged > 0) {
                 this.showMessage(
