@@ -463,8 +463,14 @@ class Tactics {
             );
 
 
-        const availablePlayers =
-            [...players];
+        const isInjured = player => {
+            const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
+            const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
+            return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
+        };
+
+        // Un joueur blessé ne doit jamais entrer dans la composition automatique.
+        const availablePlayers = players.filter(player => !isInjured(player));
 
 
         /* ================================================= */
@@ -921,6 +927,11 @@ class Tactics {
         position = null
     ) {
 
+        const injuryDays = Math.max(0, Number(player && (player.joursBlessure ?? player.injuryDays)) || 0);
+        const injuryText = String(player && (player.blessure ?? player.injury) || "").trim().toLowerCase();
+        const isInjured = injuryDays > 0 || (injuryText !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injuryText));
+        if (!player || isInjured) return false;
+
         if (
             this.lineup.length >= 11
         ) {
@@ -1253,6 +1264,11 @@ class Tactics {
     addSubstitute(
         player
     ) {
+
+        const injuryDays = Math.max(0, Number(player && (player.joursBlessure ?? player.injuryDays)) || 0);
+        const injuryText = String(player && (player.blessure ?? player.injury) || "").trim().toLowerCase();
+        const isInjured = injuryDays > 0 || (injuryText !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injuryText));
+        if (!player || isInjured) return false;
 
         if (
             this.substitutes.length >= 9
