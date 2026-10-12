@@ -813,6 +813,53 @@ class UI {
     }
 
 
+    startNewSeason() {
+        if (!game.club || !game.data || !game.manager) return;
+
+        const leagueClubs = game.data.getClubsByLeague(game.club.league);
+        const teams = leagueClubs.map(club => club.nom);
+        if (!teams.length) {
+            alert("Impossible de créer une nouvelle saison : aucun club trouvé pour ce championnat.");
+            return;
+        }
+
+        // Le vieillissement a déjà été appliqué à la fin de la saison précédente.
+        game.manager.season = (Number(game.manager.season) || 1) + 1;
+        game.currentMatchday = 0;
+        this.currentLeagueMatchday = 0;
+
+        game.calendar = new ChampionshipCalendar(teams);
+        game.calendar.generateFullCalendar();
+
+        game.standings = new Standings(teams);
+        game.matchEngine = new MatchEngine(game.standings);
+
+        leagueClubs.forEach(club => {
+            const squad = club.nom === game.club.name && Array.isArray(game.players)
+                ? game.players
+                : game.data.getPlayersByClub(club.nom);
+            game.matchEngine.setTeamPlayers(club.nom, squad);
+        });
+
+        game.lastAgedSeason = String(Number(game.manager.season) - 1);
+
+        this.showTitle("🏆 Nouvelle saison " + game.manager.season);
+        this.showMessage("📅 Nouveau calendrier créé. Le classement et l'historique des matchs de la saison sont repartis à zéro.");
+        this.showMessage("👴 Le vieillissement, les baisses de niveau et les retraites ont été appliqués à la saison précédente.");
+
+        if (game.currentSaveSlot != null && typeof saveCareer === "function") {
+            const saved = saveCareer(game.currentSaveSlot);
+            this.showMessage(saved
+                ? "💾 Nouvelle saison sauvegardée automatiquement dans le slot " + game.currentSaveSlot + "."
+                : "⚠️ La sauvegarde automatique a échoué. Pense à sauvegarder manuellement.");
+        }
+
+        this.createButton("▶️ Commencer la saison", () => this.returnToManager());
+        this.createButton("📅 Voir le calendrier", () => this.showCalendar());
+        this.createButton("🏆 Voir le classement", () => this.showStandings());
+    }
+
+
     processEndOfSeasonPlayerAging() {
         const allPlayers = Array.isArray(game.data?.players) ? game.data.players : [];
         if (!allPlayers.length) return { aged: 0, retired: 0, declined: 0 };
@@ -1038,6 +1085,11 @@ class UI {
 
 
             this.createButton(
+                "🆕 Démarrer la saison suivante",
+                () => this.startNewSeason()
+            );
+
+            this.createButton(
 
                 "📅 Voir le calendrier",
 
@@ -1135,6 +1187,13 @@ class UI {
 
         // Gérer la fatigue et la récupération après cette journée jouée.
         this.applyPostMatchPlayerCondition();
+
+        // Sauvegarder automatiquement après chaque journée si la carrière
+        // est déjà associée à un emplacement de sauvegarde.
+        if (game.currentSaveSlot != null && typeof saveCareer === "function") {
+            const autoSaved = saveCareer(game.currentSaveSlot);
+            if (!autoSaved) console.error("⚠️ La sauvegarde automatique après match a échoué.");
+        }
 
 
         /* ========================= */
