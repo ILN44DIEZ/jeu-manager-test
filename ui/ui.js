@@ -770,6 +770,90 @@ class UI {
     }
 
 
+    updatePlayerMarketValue(player) {
+        if (!player) return 0;
+
+        const rating = Math.max(1, Math.min(99, Number(player.note) || 1));
+        const potential = Math.max(rating, Math.min(99, Number(player.potentiel) || rating));
+        const age = Math.max(15, Number(player.age) || 18);
+
+        // Conserver la valeur existante comme point de départ, pour éviter
+        // de bouleverser les prix des joueurs déjà présents dans la sauvegarde.
+        if (!Number.isFinite(Number(player.valeurReference)) || Number(player.valeurReference) <= 0) {
+            player.valeurReference = Math.max(100000, Number(player.valeur) || 100000);
+            player.noteValeurReference = rating;
+            player.ageValeurReference = age;
+        }
+
+        const baseValue = Number(player.valeurReference);
+        const referenceRating = Math.max(1, Number(player.noteValeurReference) || rating);
+        const referenceAge = Math.max(15, Number(player.ageValeurReference) || age);
+
+        // La note a le plus gros impact. Le potentiel ajoute une prime limitée
+        // pour les jeunes joueurs capables de progresser.
+        const ratingFactor = Math.pow(rating / referenceRating, 2);
+        const potentialBonus = 1 + Math.min(0.30, Math.max(0, potential - rating) * 0.01);
+
+        const ageFactor = currentAge => {
+            if (currentAge < 23) return 1.15;
+            if (currentAge < 28) return 1.00;
+            if (currentAge < 32) return 0.85;
+            if (currentAge < 34) return 0.70;
+            if (currentAge < 36) return 0.60;
+            if (currentAge < 38) return 0.45;
+            return 0.30;
+        };
+
+        const ageRatio = ageFactor(age) / ageFactor(referenceAge);
+        player.valeur = Math.max(50000, Math.round(baseValue * ratingFactor * potentialBonus * ageRatio));
+        return player.valeur;
+    }
+
+
+    processEndOfSeasonPlayerAging() {
+        const allPlayers = Array.isArray(game.data?.players) ? game.data.players : [];
+        if (!allPlayers.length) return { aged: 0, retired: 0, declined: 0 };
+
+        const seasonKey = String(game.manager?.season ?? game.manager?.seasonName ?? game.currentMatchday ?? "season");
+        if (game.lastAgedSeason === seasonKey) return { aged: 0, retired: 0, declined: 0 };
+
+        let aged = 0;
+        let retired = 0;
+        let declined = 0;
+
+        allPlayers.forEach(player => {
+            if (!player || player.retraite === true || player.retraite === "true") return;
+
+            player.age = Math.max(15, Number(player.age) || 18) + 1;
+            aged++;
+
+            const age = player.age;
+            let decline = 0;
+            if (age >= 34 && age <= 35) decline = 1;
+            else if (age >= 36 && age <= 37) decline = 2;
+            else if (age >= 38 && age <= 39) decline = 3;
+
+            if (decline > 0) {
+                const oldRating = Math.max(1, Number(player.note) || 1);
+                player.note = Math.max(1, oldRating - decline);
+                if (player.note < oldRating) declined++;
+            }
+
+            this.updatePlayerMarketValue(player);
+
+            // Retraite automatique à 40 ans. Le joueur reste dans l'historique
+            // des données, mais n'est plus proposé sur le marché.
+            if (age >= 40) {
+                player.retraite = true;
+                retired++;
+            }
+        });
+
+        game.lastAgedSeason = seasonKey;
+        return { aged, retired, declined };
+    }
+
+
     applyPostMatchPlayerCondition() {
         const players = Array.isArray(game.players) ? game.players : [];
         if (!players.length) return;
@@ -922,9 +1006,19 @@ class UI {
             );
 
 
+            const aging = this.processEndOfSeasonPlayerAging();
+
             this.showMessage(
                 "Félicitations ! Tu as terminé la saison."
             );
+
+            if (aging.aged > 0) {
+                this.showMessage(
+                    "📅 Fin de saison : " + aging.aged + " joueurs ont pris un an. " +
+                    aging.declined + " joueurs ont perdu du niveau et " +
+                    aging.retired + " joueur(s) ont pris leur retraite."
+                );
+            }
 
 
             this.createButton(
@@ -3302,7 +3396,7 @@ if (match.played && match.result) {
 
             if (player.progressionEntrainement >= 1) {
                 player.note = Math.min(potential, rating + 1);
-                player.valeur = Math.round((Number(player.valeur) || 0) * 1.03);
+                this.updatePlayerMarketValue(player);
                 player.progressionEntrainement = 0;
                 player.entrainementsDepuisProgression = 0;
                 player.seuilProgression = null;
@@ -3504,6 +3598,7 @@ if (match.played && match.result) {
                 const fullName = [player.prenom || "", player.nom || ""].join(" ");
                 const age = Number(player.age) || 0;
                 return playerClub !== manager.clubName &&
+                    player.retraite !== true && player.retraite !== "true" &&
                     (!leagueSelect.value || playerLeague === leagueSelect.value) &&
                     age >= minAge && age <= maxAge &&
                     [fullName, playerClub, player.poste || "", player.nationalite || ""]
