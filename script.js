@@ -342,7 +342,10 @@ function saveCareer(slot = 1) {
         matchHistory:
             game.matchEngine
                 ? game.matchEngine.getHistory()
-                : []
+                : [],
+
+        lastAgedSeason:
+            game.lastAgedSeason ?? null
 
     };
 
@@ -433,6 +436,8 @@ function loadCareer(slot = 1) {
 
     game.currentSaveSlot =
         slot;
+
+    game.lastAgedSeason = data.lastAgedSeason ?? null;
 
 
     /* ================================================= */
