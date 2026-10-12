@@ -259,7 +259,7 @@ class SquadUI {
     /* INFIRMERIE ET HISTORIQUE DES BLESSURES */
     /* ================================================= */
 
-    showInfirmary(players, manager) {
+    showInfirmary(players, manager, historyPage = 1) {
         this.clear();
         this.ui.showTitle("🏥 Infirmerie");
 
@@ -302,13 +302,37 @@ class SquadUI {
         if (!history.length) {
             this.ui.showMessage("Aucune blessure passée enregistrée pour le moment.");
         } else {
-            history.forEach(({ name, item }) => {
+            const pageSize = 10;
+            const pageCount = Math.max(1, Math.ceil(history.length / pageSize));
+            const currentPage = Math.max(1, Math.min(pageCount, Number(historyPage) || 1));
+            const visibleHistory = history.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+            this.ui.showMessage("Page " + currentPage + " / " + pageCount + " · " + history.length + " blessure(s) cette saison");
+            visibleHistory.forEach(({ name, item }) => {
                 const line = document.createElement("p");
                 line.textContent = "• " + name + " — " + (item.type || "Blessure") +
                     " · Journée " + (item.jour || "?") +
                     " · " + (item.duree || "?") + " journée(s)";
                 this.container.appendChild(line);
             });
+
+            if (pageCount > 1) {
+                const pagination = document.createElement("div");
+                pagination.style.display = "flex";
+                pagination.style.flexWrap = "wrap";
+                pagination.style.gap = "6px";
+                pagination.style.margin = "12px 0";
+                for (let page = 1; page <= pageCount; page++) {
+                    const button = document.createElement("button");
+                    button.type = "button";
+                    button.textContent = String(page);
+                    button.disabled = page === currentPage;
+                    button.setAttribute("aria-label", "Page " + page + " de l'historique des blessures");
+                    button.addEventListener("click", () => this.showInfirmary(players, manager, page));
+                    pagination.appendChild(button);
+                }
+                this.container.appendChild(pagination);
+            }
         }
 
         this.ui.createButton("⬅️ Retour effectif", () => this.showClubPlayers(players, manager));
