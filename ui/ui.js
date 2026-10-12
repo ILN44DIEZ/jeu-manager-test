@@ -190,6 +190,20 @@ class UI {
 
         );
 
+        // Version visible pour confirmer que la dernière version est chargée.
+        const buildLabel = document.createElement("small");
+        buildLabel.textContent = "Build 2026.10.12-01";
+        buildLabel.style.position = "fixed";
+        buildLabel.style.left = "10px";
+        buildLabel.style.bottom = "8px";
+        buildLabel.style.fontSize = "10px";
+        buildLabel.style.opacity = "0.65";
+        buildLabel.style.color = "inherit";
+        buildLabel.style.zIndex = "1000";
+        buildLabel.style.pointerEvents = "none";
+        buildLabel.setAttribute("aria-label", "Version du jeu");
+        this.container.appendChild(buildLabel);
+
     }
 
 
