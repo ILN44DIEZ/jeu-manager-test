@@ -721,6 +721,48 @@ class UI {
 
 
 
+    updateClubPlayerMatchStats(matchResult) {
+        if (!matchResult || !game.club || !Array.isArray(game.players)) return;
+
+        const normalize = value => String(value || "")
+            .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+            .trim().toLowerCase().replace(/\s+/g, " ");
+
+        const getName = player => {
+            const first = player.prenom || player.firstName || player.firstname || player.first_name || "";
+            const last = player.nom || player.lastName || player.lastname || player.last_name || "";
+            return normalize((String(first) + " " + String(last)).trim() ||
+                player.name || player.nomComplet || player.fullName || player.full_name || "");
+        };
+
+        const isClubMatch = matchResult.homeTeam === game.club.name || matchResult.awayTeam === game.club.name;
+        if (!isClubMatch) return;
+
+        // Seuls les titulaires enregistrés dans la tactique comptent comme ayant joué.
+        const starters = game.tactics && Array.isArray(game.tactics.lineup) ? game.tactics.lineup : [];
+        const playerByName = new Map(game.players.map(player => [getName(player), player]).filter(([name]) => name));
+
+        starters.forEach(starter => {
+            const player = playerByName.get(getName(starter));
+            if (!player) return;
+            player.matchsJoues = (Number(player.matchsJoues ?? player.matchesPlayed) || 0) + 1;
+            player.minutesJouees = (Number(player.minutesJouees ?? player.minutesPlayed) || 0) + 90;
+        });
+
+        (Array.isArray(matchResult.events) ? matchResult.events : []).forEach(event => {
+            if (event.team !== game.club.name) return;
+            const scorer = playerByName.get(normalize(event.scorer));
+            if (scorer && normalize(event.scorer) !== normalize("Buteur non renseigné")) {
+                scorer.buts = (Number(scorer.buts ?? scorer.goals) || 0) + 1;
+            }
+            const assister = playerByName.get(normalize(event.assist));
+            if (assister && normalize(event.assist) && assister !== scorer) {
+                assister.passesDecisives = (Number(assister.passesDecisives ?? assister.assists) || 0) + 1;
+            }
+        });
+    }
+
+
     applyPostMatchPlayerCondition() {
         const players = Array.isArray(game.players) ? game.players : [];
         if (!players.length) return;
@@ -980,6 +1022,12 @@ class UI {
         // Le calendrier de ligue s'ouvrira sur la journée qui vient d'être jouée.
         this.currentLeagueMatchday =
             matchdayIndex;
+
+        // Mettre à jour les statistiques individuelles du club après le match.
+        const playedClubMatch = results.find(match =>
+            match.homeTeam === game.club.name || match.awayTeam === game.club.name
+        );
+        if (playedClubMatch) this.updateClubPlayerMatchStats(playedClubMatch);
 
         // Gérer la fatigue et la récupération après cette journée jouée.
         this.applyPostMatchPlayerCondition();
