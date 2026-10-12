@@ -1103,7 +1103,7 @@ class UI {
             // Les blessures durent de 1 à 4 journées de championnat.
             if (played && !wasInjured) {
                 const currentFatigue = Number(player.fatigue) || 0;
-                const injuryChance = 0.015 + Math.max(0, currentFatigue - 60) * 0.001;
+                const injuryChance = Math.min(0.20, 0.05 + Math.max(0, currentFatigue - 50) * 0.002);
                 if (Math.random() < injuryChance) {
                     const duration = 1 + Math.floor(Math.random() * 4);
                     player[injuryField] = duration;
