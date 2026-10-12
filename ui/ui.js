@@ -789,13 +789,11 @@ class UI {
         const baseValue = Number(player.valeurReference);
         const referenceRating = Math.max(1, Number(player.noteValeurReference) || rating);
         const referenceAge = Math.max(15, Number(player.ageValeurReference) || age);
-        const referencePotential = Math.max(referenceRating, Number(player.potentielValeurReference) || potential);
-
-        // La note a le plus gros impact. Le potentiel ajoute une prime limitée
-        // pour les jeunes joueurs capables de progresser.
+        // La note actuelle détermine la base de valeur ; le potentiel ajoute
+        // une prime réelle, même pour les joueurs déjà présents en sauvegarde.
+        // Chaque point de potentiel au-dessus de la note ajoute 2,5 %, plafonné à 60 %.
         const ratingFactor = Math.pow(rating / referenceRating, 2);
-        const potentialBonus = 1 + Math.min(0.30, Math.max(0, potential - rating) * 0.01);
-        const referencePotentialBonus = 1 + Math.min(0.30, Math.max(0, referencePotential - referenceRating) * 0.01);
+        const potentialBonus = 1 + Math.min(0.60, Math.max(0, potential - rating) * 0.025);
 
         const ageFactor = currentAge => {
             if (currentAge < 23) return 1.15;
@@ -808,7 +806,7 @@ class UI {
         };
 
         const ageRatio = ageFactor(age) / ageFactor(referenceAge);
-        player.valeur = Math.max(50000, Math.round(baseValue * ratingFactor * (potentialBonus / referencePotentialBonus) * ageRatio));
+        player.valeur = Math.max(50000, Math.round(baseValue * ratingFactor * potentialBonus * ageRatio));
         return player.valeur;
     }
 
@@ -3740,6 +3738,7 @@ if (match.played && match.result) {
                 let negotiationRound = 0;
                 let negotiationClosed = false;
                 const overall = Math.max(1, Math.min(99, Number(player.note) || 70));
+                const potential = Math.max(overall, Math.min(99, Number(player.potentiel) || overall));
                 const offerLabel = document.createElement("label");
                 offerLabel.textContent = "Ton offre (€)";
                 offerLabel.style.display = "block";
@@ -3802,7 +3801,10 @@ if (match.played && match.result) {
                     else if (overall < 90) acceptanceRatio = 1.08;
                     else acceptanceRatio = 1.18;
 
-                    const minimumAcceptable = Math.round(valuePrice * acceptanceRatio);
+                    // Un potentiel élevé rend le club plus réticent à vendre :
+                    // +1 % par point de potentiel au-dessus de la note, plafonné à +20 %.
+                    const potentialResistance = 1 + Math.min(0.20, Math.max(0, potential - overall) * 0.01);
+                    const minimumAcceptable = Math.round(valuePrice * acceptanceRatio * potentialResistance);
                     if (offer >= minimumAcceptable || (valuePrice === 0 && offer > 0)) {
                         const previousClub = player.club;
                         manager.budget = Number(manager.budget || 0) - offer;
