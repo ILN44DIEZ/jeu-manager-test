@@ -766,8 +766,13 @@ class UI {
         starters.forEach(starter => {
             const player = playerByName.get(getName(starter));
             if (!player) return;
-            player.matchsJoues = (Number(player.matchsJoues ?? player.matchesPlayed) || 0) + 1;
-            player.minutesJouees = (Number(player.minutesJouees ?? player.minutesPlayed) || 0) + 90;
+            // La fiche joueur utilise les champs matchs, minutes et passes.
+            player.matchs = (Number(player.matchs ?? player.matchsJoues ?? player.matchesPlayed) || 0) + 1;
+            player.matchsJoues = player.matchs;
+            player.matchesPlayed = player.matchs;
+            player.minutes = (Number(player.minutes ?? player.minutesJouees ?? player.minutesPlayed) || 0) + 90;
+            player.minutesJouees = player.minutes;
+            player.minutesPlayed = player.minutes;
         });
 
         (Array.isArray(matchResult.events) ? matchResult.events : []).forEach(event => {
@@ -775,10 +780,13 @@ class UI {
             const scorer = playerByName.get(normalize(event.scorer));
             if (scorer && normalize(event.scorer) !== normalize("Buteur non renseigné")) {
                 scorer.buts = (Number(scorer.buts ?? scorer.goals) || 0) + 1;
+                scorer.goals = scorer.buts;
             }
             const assister = playerByName.get(normalize(event.assist));
             if (assister && normalize(event.assist) && assister !== scorer) {
-                assister.passesDecisives = (Number(assister.passesDecisives ?? assister.assists) || 0) + 1;
+                assister.passes = (Number(assister.passes ?? assister.passesDecisives ?? assister.assists) || 0) + 1;
+                assister.passesDecisives = assister.passes;
+                assister.assists = assister.passes;
             }
         });
     }
