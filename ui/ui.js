@@ -1087,6 +1087,7 @@ class UI {
 
 
     applyPostMatchPlayerCondition() {
+        this.lastMatchInjuries = [];
         const players = Array.isArray(game.players) ? game.players : [];
         if (!players.length) return;
 
@@ -1158,6 +1159,11 @@ class UI {
                         type: "Blessure",
                         jour: Number(game.currentMatchday) || 0,
                         duree: duration
+                    });
+                    this.lastMatchInjuries.push({
+                        player: [player.prenom || player.firstName || "", player.nom || player.lastName || ""].filter(Boolean).join(" ") || player.name || player.fullName || "Joueur inconnu",
+                        duration,
+                        team: game.club && game.club.name ? game.club.name : ""
                     });
                 }
             }
@@ -1736,6 +1742,24 @@ const equipe =
         "Aucun détail de but disponible pour ce match."
     );
 
+}
+
+// Blessures survenues pendant le match : les afficher dans le récapitulatif.
+if (Array.isArray(this.lastMatchInjuries) && this.lastMatchInjuries.length > 0) {
+    const injuriesTitle = document.createElement("h3");
+    injuriesTitle.textContent = "🚑 Blessures pendant le match";
+    injuriesTitle.style.marginTop = "20px";
+    this.container.appendChild(injuriesTitle);
+
+    this.lastMatchInjuries.forEach(injury => {
+        const line = document.createElement("p");
+        line.textContent = "🚑 " + injury.player + " s'est blessé" +
+            (injury.duration ? " — indisponible environ " + injury.duration + " journée(s)." : ".");
+        line.style.padding = "8px";
+        line.style.margin = "5px 0";
+        line.style.borderBottom = "1px solid #ddd";
+        this.container.appendChild(line);
+    });
 }
 
 this.showMessage(
