@@ -215,6 +215,22 @@ class MatchEngine {
     }
 
 
+    getAssist(teamName, scorerName) {
+        const squad = this.teamPlayers[teamName] || [];
+        const scorer = String(scorerName || "").trim().toLowerCase();
+        const candidates = squad.filter(player => {
+            const name = this.getPlayerName(player);
+            if (!name || name.toLowerCase() === scorer) return false;
+            const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
+            const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
+            const hasInjuryText = injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury);
+            return days <= 0 && !hasInjuryText;
+        });
+        if (!candidates.length || !scorerName || scorerName === "Buteur non renseigné") return null;
+        return this.getPlayerName(candidates[Math.floor(Math.random() * candidates.length)]);
+    }
+
+
     /* ================================================= */
     /* GÉNÉRER LES ÉVÉNEMENTS DE BUTS */
     /* ================================================= */
@@ -256,6 +272,8 @@ class MatchEngine {
             const scorer =
                 this.getScorer(homeTeam);
 
+            const assist = this.getAssist(homeTeam, scorer);
+
             events.push({
 
                 minute: getMinute(),
@@ -267,9 +285,11 @@ class MatchEngine {
                 scorer:
                     scorer || "Buteur non renseigné",
 
+                assist: assist,
+
                 description:
                     scorer
-                        ? "⚽ But de " + scorer
+                        ? "⚽ But de " + scorer + (assist ? " (passe décisive : " + assist + ")" : "")
                         : "⚽ But (buteur inconnu)"
 
             });
@@ -283,6 +303,8 @@ class MatchEngine {
             const scorer =
                 this.getScorer(awayTeam);
 
+            const assist = this.getAssist(awayTeam, scorer);
+
             events.push({
 
                 minute: getMinute(),
@@ -294,9 +316,11 @@ class MatchEngine {
                 scorer:
                     scorer || "Buteur non renseigné",
 
+                assist: assist,
+
                 description:
                     scorer
-                        ? "⚽ But de " + scorer
+                        ? "⚽ But de " + scorer + (assist ? " (passe décisive : " + assist + ")" : "")
                         : "⚽ But (buteur inconnu)"
 
             });
