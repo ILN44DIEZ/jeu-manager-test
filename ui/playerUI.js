@@ -15,7 +15,14 @@ class PlayerUI {
         backButton.style.padding = "6px 10px";
         backButton.style.fontSize = "13px";
         backButton.style.borderRadius = "8px";
-        backButton.style.margin = "0 0 12px";
+        backButton.style.margin = "0";
+        backButton.style.position = "fixed";
+        backButton.style.top = "calc(env(safe-area-inset-top, 0px) + 58px)";
+        backButton.style.left = "12px";
+        backButton.style.zIndex = "9999";
+        backButton.style.width = "auto";
+        backButton.style.maxWidth = "calc(100vw - 24px)";
+        backButton.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.35)";
         backButton.addEventListener("click", () => {
             if (typeof onBack === "function") {
                 onBack();
