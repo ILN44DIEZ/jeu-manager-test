@@ -963,6 +963,51 @@ class UI {
     }
 
 
+
+    applyPostMatchPlayerProgression() {
+        const players = Array.isArray(game.players) ? game.players : [];
+        const lineup = Array.isArray(game.tactics?.lineup) ? game.tactics.lineup : [];
+        if (!players.length || !lineup.length) return 0;
+
+        const getKey = player => {
+            if (!player) return "";
+            if (player.id !== undefined && player.id !== null) return String(player.id);
+            return [player.prenom || player.firstName || "", player.nom || player.lastName || "", player.numero ?? player.number ?? ""].join("_");
+        };
+        const playedKeys = new Set(lineup.map(getKey).filter(Boolean));
+        let progressed = 0;
+
+        players.forEach(player => {
+            if (!playedKeys.has(getKey(player))) return;
+            const rating = Math.max(0, Number(player.note) || 0);
+            const potential = Math.max(rating, Math.min(99, Number(player.potentiel) || rating));
+            if (rating >= potential) return;
+
+            // Partage la jauge avec l'entraînement : la progression cumulée reste lente.
+            if (!Number.isFinite(Number(player.progressionEntrainement))) {
+                const oldCount = Math.max(0, Number(player.entrainementsDepuisProgression) || 0);
+                const oldThreshold = Math.max(5, Number(player.seuilProgression) || 10);
+                player.progressionEntrainement = Math.min(0.95, oldCount / oldThreshold);
+            }
+
+            // Chaque match apporte aléatoirement entre 0,01 et 0,05 au maximum.
+            const impact = (1 + Math.floor(Math.random() * 5)) / 100;
+            player.progressionEntrainement = Math.min(1, Number(player.progressionEntrainement) + impact);
+
+            if (player.progressionEntrainement >= 1) {
+                player.note = Math.min(potential, rating + 1);
+                player.progressionEntrainement = 0;
+                player.entrainementsDepuisProgression = 0;
+                player.seuilProgression = null;
+                this.updatePlayerMarketValue(player);
+                progressed++;
+            }
+        });
+
+        return progressed;
+    }
+
+
     applyPostMatchPlayerCondition() {
         const players = Array.isArray(game.players) ? game.players : [];
         if (!players.length) return;
@@ -1247,6 +1292,9 @@ class UI {
             match.homeTeam === game.club.name || match.awayTeam === game.club.name
         );
         if (playedClubMatch) this.updateClubPlayerMatchStats(playedClubMatch);
+
+        // Les joueurs alignés progressent aussi grâce au match, sans dépasser 0,05 par rencontre.
+        this.applyPostMatchPlayerProgression();
 
         // Gérer la fatigue et la récupération après cette journée jouée.
         this.applyPostMatchPlayerCondition();
