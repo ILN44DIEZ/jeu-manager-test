@@ -927,6 +927,19 @@ class UI {
                 matchdayIndex
             ];
 
+        // Sécurité : aucun joueur encore blessé ne peut débuter le match,
+        // même si la tactique a été sauvegardée avant sa blessure.
+        if (game.tactics && Array.isArray(game.tactics.lineup)) {
+            const isInjured = player => {
+                const days = Math.max(0, Number(player && (player.joursBlessure ?? player.injuryDays)) || 0);
+                const injury = String(player && (player.blessure ?? player.injury) || "").trim().toLowerCase();
+                return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
+            };
+            game.tactics.lineup.filter(isInjured).forEach(player => {
+                game.tactics.removeStarter(game.tactics.getPlayerKey(player));
+            });
+            game.tactics.substitutes = (game.tactics.substitutes || []).filter(player => !isInjured(player));
+        }
 
         /* ========================= */
         /* SIMULATION */
