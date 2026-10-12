@@ -105,8 +105,15 @@ class UI {
             button.style.padding = "6px 10px";
             button.style.fontSize = "13px";
             button.style.borderRadius = "8px";
-            button.style.margin = "0 auto 12px 0";
+            button.style.margin = "0";
             button.style.textAlign = "left";
+            button.style.position = "fixed";
+            button.style.top = "calc(env(safe-area-inset-top, 0px) + 58px)";
+            button.style.left = "12px";
+            button.style.zIndex = "9999";
+            button.style.width = "auto";
+            button.style.maxWidth = "calc(100vw - 24px)";
+            button.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.35)";
 
             this.container.insertBefore(
                 button,
