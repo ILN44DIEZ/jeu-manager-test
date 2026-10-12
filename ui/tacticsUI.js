@@ -42,6 +42,16 @@ class TacticsUI {
 
         this.clear();
 
+        // Nettoyer les compositions sauvegardées si un joueur s'est blessé
+        // depuis leur dernière modification.
+        const isInjured = player => {
+            const days = Math.max(0, Number(player && (player.joursBlessure ?? player.injuryDays)) || 0);
+            const injury = String(player && (player.blessure ?? player.injury) || "").trim().toLowerCase();
+            return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
+        };
+        const injuredStarters = (tactics.lineup || []).filter(isInjured);
+        injuredStarters.forEach(player => tactics.removeStarter(tactics.getPlayerKey(player)));
+        tactics.substitutes = (tactics.substitutes || []).filter(player => !isInjured(player));
 
         this.ui.showTitle(
             "🧠 Tactiques"
@@ -2966,7 +2976,11 @@ class TacticsUI {
             );
 
 
-        tactics.substitutes.forEach(
+        tactics.substitutes.filter(substitute => {
+            const days = Math.max(0, Number(substitute.joursBlessure ?? substitute.injuryDays) || 0);
+            const injury = String(substitute.blessure ?? substitute.injury ?? "").trim().toLowerCase();
+            return days <= 0 && (injury === "" || ["false", "aucune", "aucun", "null", "0"].includes(injury));
+        }).forEach(
             substitute => {
 
                 const button =
