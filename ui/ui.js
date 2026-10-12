@@ -783,16 +783,19 @@ class UI {
             player.valeurReference = Math.max(100000, Number(player.valeur) || 100000);
             player.noteValeurReference = rating;
             player.ageValeurReference = age;
+            player.potentielValeurReference = potential;
         }
 
         const baseValue = Number(player.valeurReference);
         const referenceRating = Math.max(1, Number(player.noteValeurReference) || rating);
         const referenceAge = Math.max(15, Number(player.ageValeurReference) || age);
+        const referencePotential = Math.max(referenceRating, Number(player.potentielValeurReference) || potential);
 
         // La note a le plus gros impact. Le potentiel ajoute une prime limitée
         // pour les jeunes joueurs capables de progresser.
         const ratingFactor = Math.pow(rating / referenceRating, 2);
         const potentialBonus = 1 + Math.min(0.30, Math.max(0, potential - rating) * 0.01);
+        const referencePotentialBonus = 1 + Math.min(0.30, Math.max(0, referencePotential - referenceRating) * 0.01);
 
         const ageFactor = currentAge => {
             if (currentAge < 23) return 1.15;
@@ -805,7 +808,7 @@ class UI {
         };
 
         const ageRatio = ageFactor(age) / ageFactor(referenceAge);
-        player.valeur = Math.max(50000, Math.round(baseValue * ratingFactor * potentialBonus * ageRatio));
+        player.valeur = Math.max(50000, Math.round(baseValue * ratingFactor * (potentialBonus / referencePotentialBonus) * ageRatio));
         return player.valeur;
     }
 
