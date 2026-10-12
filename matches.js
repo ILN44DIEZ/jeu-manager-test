@@ -127,6 +127,32 @@ class MatchEngine {
     /* CHOISIR UN BUTEUR */
     /* ================================================= */
 
+    isGoalkeeper(player) {
+        const position = String(player && (player.poste || player.position || player.pos) || "").trim().toUpperCase();
+        return ["GB", "GK", "G", "GARDIEN", "GOALKEEPER"].includes(position);
+    }
+
+    seasonGoalContributions(player) {
+        return Math.max(0, Number(player && (player.butsSaison ?? player.seasonGoals)) || 0) +
+            Math.max(0, Number(player && (player.passesDecisivesSaison ?? player.seasonAssists)) || 0);
+    }
+
+    recordSeasonContribution(teamName, playerName, field) {
+        const target = String(playerName || "").trim().toLowerCase();
+        if (!target) return;
+        const squad = this.teamPlayers[teamName] || [];
+        const player = squad.find(candidate => String(this.getPlayerName(candidate) || "").trim().toLowerCase() === target);
+        if (!player) return;
+        if (field === "goal") {
+            player.butsSaison = (Number(player.butsSaison ?? player.seasonGoals) || 0) + 1;
+            player.seasonGoals = player.butsSaison;
+        } else {
+            player.passesDecisivesSaison = (Number(player.passesDecisivesSaison ?? player.seasonAssists) || 0) + 1;
+            player.seasonAssists = player.passesDecisivesSaison;
+        }
+    }
+
+
     getScorer(teamName) {
 
         const squad =
@@ -141,7 +167,8 @@ class MatchEngine {
             const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
             const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
             const hasInjuryText = injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury);
-            return days <= 0 && !hasInjuryText;
+            const goalkeeperBlocked = this.isGoalkeeper(player) && this.seasonGoalContributions(player) >= 2;
+            return days <= 0 && !hasInjuryText && !goalkeeperBlocked;
         });
 
         if (players.length === 0) return null;
@@ -224,7 +251,8 @@ class MatchEngine {
             const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
             const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
             const hasInjuryText = injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury);
-            return days <= 0 && !hasInjuryText;
+            const goalkeeperBlocked = this.isGoalkeeper(player) && this.seasonGoalContributions(player) >= 2;
+            return days <= 0 && !hasInjuryText && !goalkeeperBlocked;
         });
         if (!candidates.length || !scorerName || scorerName === "Buteur non renseigné") return null;
         return this.getPlayerName(candidates[Math.floor(Math.random() * candidates.length)]);
@@ -269,10 +297,10 @@ class MatchEngine {
         // Buts de l'équipe à domicile
         for (let i = 0; i < homeGoals; i++) {
 
-            const scorer =
-                this.getScorer(homeTeam);
-
+            const scorer = this.getScorer(homeTeam);
+            if (scorer) this.recordSeasonContribution(homeTeam, scorer, "goal");
             const assist = this.getAssist(homeTeam, scorer);
+            if (assist) this.recordSeasonContribution(homeTeam, assist, "assist");
 
             events.push({
 
@@ -300,10 +328,10 @@ class MatchEngine {
         // Buts de l'équipe à l'extérieur
         for (let i = 0; i < awayGoals; i++) {
 
-            const scorer =
-                this.getScorer(awayTeam);
-
+            const scorer = this.getScorer(awayTeam);
+            if (scorer) this.recordSeasonContribution(awayTeam, scorer, "goal");
             const assist = this.getAssist(awayTeam, scorer);
+            if (assist) this.recordSeasonContribution(awayTeam, assist, "assist");
 
             events.push({
 
