@@ -868,7 +868,14 @@ class UI {
             ...(Array.isArray(game.players) ? game.players : [])
         ]);
         seasonPlayers.forEach(player => {
-            if (player) player.historiqueBlessures = [];
+            if (!player) return;
+            player.historiqueBlessures = [];
+            player.butsSaison = 0;
+            player.seasonGoals = 0;
+            player.passesDecisivesSaison = 0;
+            player.seasonAssists = 0;
+            player.derniereBlessureJour = null;
+            player.derniereBlessureSaison = null;
         });
         game.manager.season = (Number(game.manager.season) || 1) + 1;
         game.currentMatchday = 0;
@@ -1129,9 +1136,17 @@ class UI {
             // Les blessures durent de 1 à 4 journées de championnat.
             if (played && !wasInjured) {
                 const currentFatigue = Number(player.fatigue) || 0;
-                const injuryChance = Math.min(0.20, 0.05 + Math.max(0, currentFatigue - 50) * 0.002);
-                if (Math.random() < injuryChance) {
+                const currentSeason = String(game.manager?.season ?? 1);
+                const lastInjurySeason = String(player.derniereBlessureSaison ?? "");
+                const lastInjuryDay = Number(player.derniereBlessureJour);
+                const injuryCooldownActive = lastInjurySeason === currentSeason &&
+                    Number.isFinite(lastInjuryDay) && lastInjuryDay > 0 &&
+                    (Number(game.currentMatchday) || 0) - lastInjuryDay < 4;
+                const injuryChance = Math.min(0.18, 0.04 + Math.max(0, currentFatigue - 55) * 0.002);
+                if (!injuryCooldownActive && Math.random() < injuryChance) {
                     const duration = 1 + Math.floor(Math.random() * 4);
+                    player.derniereBlessureJour = Number(game.currentMatchday) || 0;
+                    player.derniereBlessureSaison = currentSeason;
                     player[injuryField] = duration;
                     player.blessure = "Blessure";
                     player.injury = "Injured";
