@@ -744,29 +744,45 @@ class UI {
 
     updateClubPlayerMatchStats(matchResult) {
         if (!matchResult || !game.club || !Array.isArray(game.players)) return;
-
         const normalize = value => String(value || "")
             .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
             .trim().toLowerCase().replace(/\s+/g, " ");
+        const aliases = player => {
+            if (!player) return [];
+            const values = [
+                [player.prenom || player.firstName || player.firstname || player.first_name || "", player.nom || player.lastName || player.lastname || player.last_name || ""].filter(Boolean).join(" "),
+                player.name, player.nomComplet, player.fullName, player.full_name
+            ].map(normalize).filter(Boolean);
+            return [...new Set(values)];
+        };
+        if (matchResult.homeTeam !== game.club.name && matchResult.awayTeam !== game.club.name) return;
 
-        const getName = player => {
-            const first = player.prenom || player.firstName || player.firstname || player.first_name || "";
-            const last = player.nom || player.lastName || player.lastname || player.last_name || "";
-            return normalize((String(first) + " " + String(last)).trim() ||
-                player.name || player.nomComplet || player.fullName || player.full_name || "");
+        const playerById = new Map();
+        const playerByName = new Map();
+        game.players.forEach(player => {
+            if (player.id !== undefined && player.id !== null) playerById.set(String(player.id), player);
+            aliases(player).forEach(name => {
+                if (!playerByName.has(name)) playerByName.set(name, player);
+            });
+        });
+        const resolve = candidate => {
+            if (!candidate) return null;
+            if (candidate.id !== undefined && candidate.id !== null && playerById.has(String(candidate.id))) {
+                return playerById.get(String(candidate.id));
+            }
+            for (const name of aliases(candidate)) if (playerByName.has(name)) return playerByName.get(name);
+            return null;
         };
 
-        const isClubMatch = matchResult.homeTeam === game.club.name || matchResult.awayTeam === game.club.name;
-        if (!isClubMatch) return;
-
-        // Seuls les titulaires enregistrés dans la tactique comptent comme ayant joué.
+        // Les identifiants sont prioritaires ; les noms servent de secours pour les anciennes tactiques sauvegardées.
         const starters = game.tactics && Array.isArray(game.tactics.lineup) ? game.tactics.lineup : [];
-        const playerByName = new Map(game.players.map(player => [getName(player), player]).filter(([name]) => name));
-
+        const counted = new Set();
         starters.forEach(starter => {
-            const player = playerByName.get(getName(starter));
+            const player = resolve(starter);
             if (!player) return;
-            // La fiche joueur utilise les champs matchs, minutes et passes.
+            const key = player.id != null ? "id:" + player.id : aliases(player)[0];
+            if (counted.has(key)) return;
+            counted.add(key);
             player.matchs = (Number(player.matchs ?? player.matchsJoues ?? player.matchesPlayed) || 0) + 1;
             player.matchsJoues = player.matchs;
             player.matchesPlayed = player.matchs;
@@ -777,13 +793,15 @@ class UI {
 
         (Array.isArray(matchResult.events) ? matchResult.events : []).forEach(event => {
             if (event.team !== game.club.name) return;
-            const scorer = playerByName.get(normalize(event.scorer));
-            if (scorer && normalize(event.scorer) !== normalize("Buteur non renseigné")) {
+            const scorerName = normalize(event.scorer);
+            const scorer = scorerName ? playerByName.get(scorerName) : null;
+            if (scorer && scorerName !== normalize("Buteur non renseigné")) {
                 scorer.buts = (Number(scorer.buts ?? scorer.goals) || 0) + 1;
                 scorer.goals = scorer.buts;
             }
-            const assister = playerByName.get(normalize(event.assist));
-            if (assister && normalize(event.assist) && assister !== scorer) {
+            const assisterName = normalize(event.assist);
+            const assister = assisterName ? playerByName.get(assisterName) : null;
+            if (assister && assister !== scorer) {
                 assister.passes = (Number(assister.passes ?? assister.passesDecisives ?? assister.assists) || 0) + 1;
                 assister.passesDecisives = assister.passes;
                 assister.assists = assister.passes;
