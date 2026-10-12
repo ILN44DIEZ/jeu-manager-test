@@ -939,19 +939,33 @@ class UI {
     }
 
     processEndOfSeasonPlayerAging() {
-        const allPlayers = Array.isArray(game.data?.players) ? game.data.players : [];
-        if (!allPlayers.length) return { aged: 0, retired: 0, declined: 0, regens: 0 };
+        const dataPlayers = Array.isArray(game.data?.players) ? game.data.players : [];
+        const squadPlayers = Array.isArray(game.players) ? game.players : [];
+        const all = [...dataPlayers, ...squadPlayers].filter(Boolean);
+        if (!all.length) return { aged: 0, retired: 0, declined: 0, regens: 0 };
 
         const seasonKey = String(game.manager?.season ?? game.manager?.seasonName ?? game.currentMatchday ?? "season");
-        if (game.lastAgedSeason === seasonKey) return { aged: 0, retired: 0, declined: 0, regens: 0 };
+        if (String(game.lastAgedSeason) === seasonKey) return { aged: 0, retired: 0, declined: 0, regens: 0 };
+
+        const normalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
+        const groups = new Map();
+        all.forEach(player => {
+            const identity = player.id != null
+                ? "id:" + String(player.id)
+                : "name:" + normalize((player.prenom || player.firstName || "") + " " + (player.nom || player.lastName || "")) + "|club:" + normalize(player.club);
+            if (!groups.has(identity)) groups.set(identity, []);
+            if (!groups.get(identity).includes(player)) groups.get(identity).push(player);
+        });
 
         let aged = 0;
         let retired = 0;
         let declined = 0;
         const newRetirees = [];
 
-        allPlayers.forEach(player => {
-            if (!player || player.retraite === true || player.retraite === "true") return;
+        groups.forEach(copies => {
+            // Préférer la copie de l'effectif actif pour que la fiche du joueur se mette à jour.
+            const player = copies.find(p => squadPlayers.includes(p)) || copies[0];
+            if (player.retraite === true || player.retraite === "true") return;
 
             player.age = Math.max(15, Number(player.age) || 18) + 1;
             aged++;
@@ -968,22 +982,31 @@ class UI {
                 if (player.note < oldRating) declined++;
             }
 
-            this.updatePlayerMarketValue(player);
-
-            // Retraite automatique à 40 ans. Le joueur reste dans l'historique
-            // des données, mais n'est plus proposé sur le marché.
             if (age >= 40) {
                 player.retraite = true;
                 retired++;
                 newRetirees.push(player);
             }
+
+            this.updatePlayerMarketValue(player);
+            // Certaines parties chargent une copie distincte pour l'effectif et la base générale.
+            copies.forEach(copy => {
+                if (copy === player) return;
+                copy.age = player.age;
+                copy.note = player.note;
+                copy.retraite = player.retraite;
+                copy.valeur = player.valeur;
+                copy.valeurReference = player.valeurReference;
+                copy.noteValeurReference = player.noteValeurReference;
+                copy.ageValeurReference = player.ageValeurReference;
+                copy.potentielValeurReference = player.potentielValeurReference;
+            });
         });
 
         const regens = this.createRegensForRetirees(newRetirees);
         game.lastAgedSeason = seasonKey;
         return { aged, retired, declined, regens };
     }
-
 
 
     applyPostMatchPlayerProgression() {
