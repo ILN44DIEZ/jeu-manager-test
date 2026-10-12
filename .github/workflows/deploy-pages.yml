@@ -26,8 +26,18 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Generate build version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
-          printf 'window.MANAGER_BUILD_NUMBER = "%s";\n' "${GITHUB_RUN_NUMBER}" > build-version.js
+          # Use the GitHub Pages deployment run number for this exact commit.
+          for attempt in {1..10}; do
+            PAGES_BUILD=$(curl -fsSL -H "Authorization: Bearer ${GH_TOKEN}" -H "Accept: application/vnd.github+json" "https://api.github.com/repos/${GITHUB_REPOSITORY}/actions/runs?per_page=30" | jq -r --arg sha "${GITHUB_SHA}" '[.workflow_runs[] | select(.name == "pages build and deployment" and .head_sha == $sha)] | first | .run_number // empty')
+            if [ -n "${PAGES_BUILD}" ]; then break; fi
+            sleep 2
+          done
+          # Fallback only if GitHub has not exposed the Pages run yet.
+          BUILD_NUMBER="${PAGES_BUILD:-${GITHUB_RUN_NUMBER}}"
+          printf 'window.MANAGER_BUILD_NUMBER = "%s";\n' "${BUILD_NUMBER}" > build-version.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
