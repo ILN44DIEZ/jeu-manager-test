@@ -192,7 +192,7 @@ class UI {
 
         // Version visible pour confirmer que la dernière version est chargée.
         const buildLabel = document.createElement("small");
-        buildLabel.textContent = "Build 2026.10.12-01";
+        buildLabel.textContent = "Build #344";
         buildLabel.style.position = "fixed";
         buildLabel.style.left = "10px";
         buildLabel.style.bottom = "8px";
