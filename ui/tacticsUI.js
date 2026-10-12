@@ -1636,6 +1636,25 @@ class TacticsUI {
 
             }
 
+            // Emplacement vide : promouvoir le remplaçant au onze.
+            // Il faut d'abord le retirer du banc, sinon addStarter le refuse
+            // car un même joueur ne peut pas être titulaire et remplaçant.
+            const playerKey = tactics.getPlayerKey(player);
+            if (tactics.lineup.length < 11) {
+                tactics.removeSubstitute(playerKey);
+                const added = tactics.addStarter(player, target.positionId);
+                if (!added) {
+                    tactics.addSubstitute(player);
+                    this.showMessageTemporary("Impossible d'ajouter ce joueur à cet emplacement.");
+                }
+            } else {
+                this.showMessageTemporary("Les 11 places de titulaires sont déjà occupées.");
+            }
+
+            this.resetDrag();
+            this.show(tactics, manager);
+            return;
+
         }
 
 
