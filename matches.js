@@ -153,6 +153,17 @@ class MatchEngine {
     }
 
 
+    chooseWithRareGoalkeeperContribution(outfieldPlayers, goalkeeperPlayers) {
+        const outfield = (outfieldPlayers || []).filter(player => this.getPlayerName(player));
+        const goalkeepers = (goalkeeperPlayers || []).filter(player => this.getPlayerName(player));
+        if (goalkeepers.length && Math.random() < 0.01) {
+            return goalkeepers[Math.floor(Math.random() * goalkeepers.length)];
+        }
+        if (outfield.length) return outfield[Math.floor(Math.random() * outfield.length)];
+        return null;
+    }
+
+
     getScorer(teamName) {
 
         const squad =
@@ -173,71 +184,17 @@ class MatchEngine {
 
         if (players.length === 0) return null;
 
-        // Postes privilégiés pour les buteurs
-        const attackingPositions = [
-
-            "BU",
-            "AC",
-            "AG",
-            "AD",
-            "AV",
-            "MOC",
-            "MC",
-            "MG",
-            "MD"
-
-        ];
-
-        const attackingPlayers =
-            players.filter(player => {
-
-                const position = String(
-
-                    player.poste ||
-                    player.position ||
-                    player.pos ||
-                    ""
-
-                ).trim().toUpperCase();
-
-                return attackingPositions.includes(position);
-
-            });
-
-
-        // Si aucun joueur offensif n'est disponible,
-        // rechercher parmi tout l'effectif.
-        const candidates =
-            attackingPlayers.length > 0
-                ? attackingPlayers
-                : players;
-
-
-        // Écarter les joueurs dont le nom est inexploitable.
-        const namedPlayers =
-            candidates.filter(player => {
-
-                return this.getPlayerName(player) !== null;
-
-            });
-
-
-        if (namedPlayers.length === 0) {
-
-            return null;
-
-        }
-
-
-        const player =
-            namedPlayers[
-                Math.floor(
-                    Math.random() * namedPlayers.length
-                )
-            ];
-
-
-        return this.getPlayerName(player);
+        // Les gardiens restent éligibles, mais seulement avec une probabilité de 1 %.
+        const outfieldPlayers = players.filter(player => !this.isGoalkeeper(player));
+        const goalkeeperPlayers = players.filter(player => this.isGoalkeeper(player));
+        const attackingPositions = ["BU", "AC", "AG", "AD", "AV", "MOC", "MC", "MG", "MD"];
+        const attackingPlayers = outfieldPlayers.filter(player => {
+            const position = String(player.poste || player.position || player.pos || "").trim().toUpperCase();
+            return attackingPositions.includes(position);
+        });
+        const fieldCandidates = attackingPlayers.length ? attackingPlayers : outfieldPlayers;
+        const player = this.chooseWithRareGoalkeeperContribution(fieldCandidates, goalkeeperPlayers);
+        return player ? this.getPlayerName(player) : null;
 
     }
 
@@ -245,6 +202,7 @@ class MatchEngine {
     getAssist(teamName, scorerName) {
         const squad = this.teamPlayers[teamName] || [];
         const scorer = String(scorerName || "").trim().toLowerCase();
+        if (!scorerName || scorerName === "Buteur non renseigné") return null;
         const candidates = squad.filter(player => {
             const name = this.getPlayerName(player);
             if (!name || name.toLowerCase() === scorer) return false;
@@ -254,8 +212,10 @@ class MatchEngine {
             const goalkeeperBlocked = this.isGoalkeeper(player) && this.seasonGoalContributions(player) >= 2;
             return days <= 0 && !hasInjuryText && !goalkeeperBlocked;
         });
-        if (!candidates.length || !scorerName || scorerName === "Buteur non renseigné") return null;
-        return this.getPlayerName(candidates[Math.floor(Math.random() * candidates.length)]);
+        const outfieldPlayers = candidates.filter(player => !this.isGoalkeeper(player));
+        const goalkeeperPlayers = candidates.filter(player => this.isGoalkeeper(player));
+        const assister = this.chooseWithRareGoalkeeperContribution(outfieldPlayers, goalkeeperPlayers);
+        return assister ? this.getPlayerName(assister) : null;
     }
 
 
