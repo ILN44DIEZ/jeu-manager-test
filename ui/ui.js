@@ -875,7 +875,7 @@ class UI {
             const potential = Math.max(55, Math.min(99, oldPotential + Math.floor(Math.random() * 7) - 3));
             const overall = 44 + Math.floor(Math.random() * 14);
             const oldClub = clubs.find(club => club.nom === oldPlayer.club);
-            const sameLeague = oldClub ? clubs.filter(club => club.ligue === oldClub.ligue && club.nom !== oldPlayer.club) : [];
+            const sameLeague = oldClub ? clubs.filter(club => club.league === oldClub.league && club.nom !== oldPlayer.club) : [];
             const alternatives = sameLeague.length ? sameLeague : clubs.filter(club => club.nom !== oldPlayer.club);
             const destination = alternatives.length ? alternatives[Math.floor(Math.random() * alternatives.length)] : null;
             const pick = list => list[Math.floor(Math.random() * list.length)];
