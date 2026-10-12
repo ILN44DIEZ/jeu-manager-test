@@ -862,6 +862,14 @@ class UI {
         }
 
         // Le vieillissement a déjà été appliqué à la fin de la saison précédente.
+        // L'historique des blessures est saisonnier : repartir sur une liste vide.
+        const seasonPlayers = new Set([
+            ...(Array.isArray(game.data.players) ? game.data.players : []),
+            ...(Array.isArray(game.players) ? game.players : [])
+        ]);
+        seasonPlayers.forEach(player => {
+            if (player) player.historiqueBlessures = [];
+        });
         game.manager.season = (Number(game.manager.season) || 1) + 1;
         game.currentMatchday = 0;
         this.currentLeagueMatchday = 0;
@@ -1296,18 +1304,36 @@ class UI {
                 matchdayIndex
             ];
 
-        // Sécurité : aucun joueur encore blessé ne peut débuter le match,
-        // même si la tactique a été sauvegardée avant sa blessure.
+        // Bloquer les blessés en se basant sur l'effectif réel, même si la tactique
+        // contient une ancienne copie du joueur sans les informations de blessure.
         if (game.tactics && Array.isArray(game.tactics.lineup)) {
+            const normalize = value => String(value || "").normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
             const isInjured = player => {
                 const days = Math.max(0, Number(player && (player.joursBlessure ?? player.injuryDays)) || 0);
                 const injury = String(player && (player.blessure ?? player.injury) || "").trim().toLowerCase();
                 return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
             };
-            game.tactics.lineup.filter(isInjured).forEach(player => {
-                game.tactics.removeStarter(game.tactics.getPlayerKey(player));
-            });
-            game.tactics.substitutes = (game.tactics.substitutes || []).filter(player => !isInjured(player));
+            const injured = (game.players || []).filter(isInjured);
+            const matchesPlayer = (candidate, realPlayer) => {
+                if (!candidate || !realPlayer) return false;
+                if (candidate.id != null && realPlayer.id != null && String(candidate.id) === String(realPlayer.id)) return true;
+                const full = p => normalize([
+                    p.prenom || p.firstName || p.firstname || "",
+                    p.nom || p.lastName || p.lastname || ""
+                ].filter(Boolean).join(" ") || p.name || p.fullName || p.nomComplet || "");
+                const a = full(candidate), b = full(realPlayer);
+                return !!a && a === b;
+            };
+            const injuredStarters = game.tactics.lineup.filter(candidate => injured.some(player => matchesPlayer(candidate, player)));
+            injuredStarters.forEach(player => game.tactics.removeStarter(game.tactics.getPlayerKey(player)));
+            game.tactics.substitutes = (game.tactics.substitutes || []).filter(candidate =>
+                !injured.some(player => matchesPlayer(candidate, player))
+            );
+            // Dernière sécurité : le moteur ne reçoit pas de joueur blessé dans son onze.
+            game.tactics.lineup = game.tactics.lineup.filter(candidate =>
+                !injured.some(player => matchesPlayer(candidate, player))
+            );
         }
 
         /* ========================= */
