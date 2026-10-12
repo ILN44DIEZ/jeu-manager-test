@@ -1319,9 +1319,9 @@ class UI {
                 matchdayIndex
             ];
 
-        // Bloquer les blessés en se basant sur l'effectif réel, même si la tactique
-        // contient une ancienne copie du joueur sans les informations de blessure.
-        if (game.tactics && Array.isArray(game.tactics.lineup)) {
+        // Refuser de lancer le match si un joueur blessé figure dans le onze OU sur le banc.
+        // On compare à l'effectif réel pour tenir compte des anciennes copies sauvegardées.
+        if (game.tactics) {
             const normalize = value => String(value || "").normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
             const isInjured = player => {
@@ -1333,22 +1333,33 @@ class UI {
             const matchesPlayer = (candidate, realPlayer) => {
                 if (!candidate || !realPlayer) return false;
                 if (candidate.id != null && realPlayer.id != null && String(candidate.id) === String(realPlayer.id)) return true;
-                const full = p => normalize([
-                    p.prenom || p.firstName || p.firstname || "",
-                    p.nom || p.lastName || p.lastname || ""
-                ].filter(Boolean).join(" ") || p.name || p.fullName || p.nomComplet || "");
+                const full = player => normalize([
+                    player.prenom || player.firstName || player.firstname || "",
+                    player.nom || player.lastName || player.lastname || ""
+                ].filter(Boolean).join(" ") || player.name || player.fullName || player.nomComplet || "");
                 const a = full(candidate), b = full(realPlayer);
                 return !!a && a === b;
             };
-            const injuredStarters = game.tactics.lineup.filter(candidate => injured.some(player => matchesPlayer(candidate, player)));
-            injuredStarters.forEach(player => game.tactics.removeStarter(game.tactics.getPlayerKey(player)));
-            game.tactics.substitutes = (game.tactics.substitutes || []).filter(candidate =>
-                !injured.some(player => matchesPlayer(candidate, player))
-            );
-            // Dernière sécurité : le moteur ne reçoit pas de joueur blessé dans son onze.
-            game.tactics.lineup = game.tactics.lineup.filter(candidate =>
-                !injured.some(player => matchesPlayer(candidate, player))
-            );
+            const starters = Array.isArray(game.tactics.lineup) ? game.tactics.lineup : [];
+            const substitutes = Array.isArray(game.tactics.substitutes) ? game.tactics.substitutes : [];
+            const injuredSelected = [
+                ...starters.map(player => ({ player, role: "titulaire" })),
+                ...substitutes.map(player => ({ player, role: "remplaçant" }))
+            ].filter(entry => injured.some(realPlayer => matchesPlayer(entry.player, realPlayer)));
+
+            if (injuredSelected.length) {
+                const names = [...new Set(injuredSelected.map(({ player }) => {
+                    const real = injured.find(candidate => matchesPlayer(player, candidate)) || player;
+                    return [real.prenom || real.firstName || "", real.nom || real.lastName || ""].filter(Boolean).join(" ") ||
+                        real.name || real.fullName || "Joueur inconnu";
+                }))];
+                alert(
+                    "⛔ Match impossible à lancer : un ou plusieurs joueurs blessés sont sélectionnés.\n\n" +
+                    names.map(name => "• " + name).join("\n") +
+                    "\n\nRetire ces joueurs du onze de départ et du banc, puis réessaie."
+                );
+                return;
+            }
         }
 
         /* ========================= */
