@@ -1142,7 +1142,7 @@ class UI {
                 const injuryCooldownActive = lastInjurySeason === currentSeason &&
                     Number.isFinite(lastInjuryDay) && lastInjuryDay > 0 &&
                     (Number(game.currentMatchday) || 0) - lastInjuryDay < 4;
-                const injuryChance = Math.min(0.18, 0.04 + Math.max(0, currentFatigue - 55) * 0.002);
+                const injuryChance = Math.min(0.09, 0.02 + Math.max(0, currentFatigue - 55) * 0.001);
                 if (!injuryCooldownActive && Math.random() < injuryChance) {
                     const duration = 1 + Math.floor(Math.random() * 4);
                     player.derniereBlessureJour = Number(game.currentMatchday) || 0;
