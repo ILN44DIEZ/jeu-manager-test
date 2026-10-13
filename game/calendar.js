@@ -1,13 +1,62 @@
 class ChampionshipCalendar {
 
-    constructor(teams) {
+    constructor(teams, seasonStartDate = "2026-08-15") {
 
         this.teams = [
             ...teams
         ];
 
         this.matchdays = [];
+        this.seasonStartDate = seasonStartDate;
+        // Infrastructure commune pour les futures fenêtres de transferts,
+        // trêves internationales, coupes et autres événements.
+        this.events = [];
 
+    }
+
+    formatDate(dateValue) {
+        if (!dateValue) return "";
+        const date = new Date(dateValue + "T12:00:00");
+        return new Intl.DateTimeFormat("fr-FR", {
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }).format(date);
+    }
+
+    assignMatchdayDates() {
+        const start = new Date(this.seasonStartDate + "T12:00:00");
+        this.matchdays.forEach((day, index) => {
+            const date = new Date(start);
+            date.setDate(start.getDate() + index * 7);
+            day.date = date.getFullYear() + "-" +
+                String(date.getMonth() + 1).padStart(2, "0") + "-" +
+                String(date.getDate()).padStart(2, "0");
+            if (!Array.isArray(day.events)) day.events = [];
+        });
+        return this.matchdays;
+    }
+
+    addEvent(event) {
+        if (!event || !event.title || !event.startDate) return false;
+        const normalized = {
+            id: event.id || "event-" + Date.now() + "-" + Math.random().toString(36).slice(2, 8),
+            title: String(event.title),
+            type: event.type || "other",
+            startDate: event.startDate,
+            endDate: event.endDate || event.startDate,
+            description: event.description || ""
+        };
+        this.events = (this.events || []).filter(item => item.id !== normalized.id);
+        this.events.push(normalized);
+        this.events.sort((a, b) => a.startDate.localeCompare(b.startDate));
+        return true;
+    }
+
+    getEventsForDate(dateValue) {
+        return (this.events || []).filter(event =>
+            event.startDate <= dateValue && (event.endDate || event.startDate) >= dateValue
+        );
     }
 
 
@@ -538,6 +587,8 @@ class ChampionshipCalendar {
             }
         );
 
+
+        this.assignMatchdayDates();
 
         return this.matchdays;
 
