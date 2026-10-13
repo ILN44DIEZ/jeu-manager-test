@@ -666,12 +666,12 @@ class TacticsUI {
                     this.dragGhost.style.top = event.clientY + "px";
 
                     // Défilement automatique lorsque le doigt approche du haut ou du bas de l'écran.
-                    const edge = 85;
-                    const speed = 18;
+                    const edge = 100;
+                    const speed = 14;
                     if (event.clientY > window.innerHeight - edge) {
-                        window.scrollBy(0, speed);
+                        window.scrollBy({ top: speed, left: 0, behavior: "auto" });
                     } else if (event.clientY < edge) {
-                        window.scrollBy(0, -speed);
+                        window.scrollBy({ top: -speed, left: 0, behavior: "auto" });
                     }
                 }
 
@@ -768,6 +768,16 @@ class TacticsUI {
 
         let dragging = false;
 
+        // Éviter la sélection de texte sur iOS pendant les gestes tactiles.
+        element.style.webkitUserSelect = "none";
+        element.style.userSelect = "none";
+        element.style.webkitTouchCallout = "none";
+        element.style.touchAction = "none";
+        element.style.cursor = "grab";
+        element.setAttribute("draggable", "false");
+        element.addEventListener("selectstart", event => event.preventDefault());
+        element.addEventListener("dragstart", event => event.preventDefault());
+
 
         element.dataset.wasDragged =
             "false";
@@ -776,6 +786,8 @@ class TacticsUI {
         element.addEventListener(
             "pointerdown",
             event => {
+
+                event.preventDefault();
 
                 startX =
                     event.clientX;
@@ -6567,6 +6579,7 @@ class TacticsUI {
             if (this.dragOriginalOpacity !== undefined) {
                 this.draggingElement.style.opacity = this.dragOriginalOpacity;
             }
+            this.draggingElement.style.cursor = "grab";
         }
         this.dragOriginalOpacity = undefined;
 
