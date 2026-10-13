@@ -2469,7 +2469,8 @@ this.showMessage(
             "Journée " +
             currentDay.day +
             " / " +
-            matchdays.length;
+            matchdays.length +
+            (currentDay.date ? " · " + game.calendar.formatDate(currentDay.date) : "");
 
 
         navigation.appendChild(
@@ -2520,6 +2521,23 @@ this.showMessage(
             navigation
         );
 
+
+        if (currentDay.date) {
+            const dateLine = document.createElement("p");
+            dateLine.textContent = "📅 " + game.calendar.formatDate(currentDay.date);
+            dateLine.style.textAlign = "center";
+            dateLine.style.opacity = "0.85";
+            this.container.appendChild(dateLine);
+
+            const events = game.calendar.getEventsForDate(currentDay.date);
+            events.forEach(event => {
+                const eventLine = document.createElement("p");
+                eventLine.textContent = "🗓️ " + event.title;
+                eventLine.title = event.description || "";
+                eventLine.style.textAlign = "center";
+                this.container.appendChild(eventLine);
+            });
+        }
 
         /* ================================================= */
         /* STATUT */
@@ -2823,8 +2841,15 @@ if (match.played && match.result) {
 
                 this.showTitle(
                     "Journée " +
-                    day.day
+                    day.day +
+                    (day.date ? " · " + game.calendar.formatDate(day.date) : "")
                 );
+
+                if (day.date) {
+                    game.calendar.getEventsForDate(day.date).forEach(event => {
+                        this.showMessage("🗓️ " + event.title);
+                    });
+                }
 
 
                 clubMatches.forEach(
