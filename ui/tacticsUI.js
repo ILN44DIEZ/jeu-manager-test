@@ -42,43 +42,9 @@ class TacticsUI {
 
         this.clear();
 
-        // Nettoyer les compositions sauvegardées si un joueur s'est blessé.
-        // Les sauvegardes peuvent contenir des copies du joueur avec des clés différentes.
-        const normalize = value => String(value || "").normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
-        const isInjured = player => {
-            const days = Math.max(0, Number(player && (player.joursBlessure ?? player.injuryDays)) || 0);
-            const injury = String(player && (player.blessure ?? player.injury) || "").trim().toLowerCase();
-            return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
-        };
-        const fullName = player => normalize([
-            player && (player.prenom || player.firstName || player.firstname || ""),
-            player && (player.nom || player.lastName || player.lastname || "")
-        ].filter(Boolean).join(" ") || (player && (player.name || player.fullName || player.nomComplet)) || "");
-        const samePlayer = (a, b) => {
-            if (!a || !b) return false;
-            if (a.id != null && b.id != null && String(a.id) === String(b.id)) return true;
-            const aName = fullName(a), bName = fullName(b);
-            return !!aName && aName === bName;
-        };
-        const injuredSquad = (game.players || []).filter(isInjured);
-        const injuredStarters = (tactics.lineup || []).filter(player =>
-            injuredSquad.some(injured => samePlayer(player, injured)) || isInjured(player)
-        );
-        injuredStarters.forEach(player => {
-            const keys = new Set([tactics.getPlayerKey(player)]);
-            injuredSquad.filter(injured => samePlayer(player, injured))
-                .forEach(injured => keys.add(tactics.getPlayerKey(injured)));
-            keys.forEach(key => tactics.removeStarter(key));
-        });
-        tactics.substitutes = (tactics.substitutes || []).filter(player =>
-            !isInjured(player) && !injuredSquad.some(injured => samePlayer(player, injured))
-        );
-        // Supprimer les positions orphelines laissées par les anciennes copies.
-        const activeStarterKeys = new Set((tactics.lineup || []).map(player => tactics.getPlayerKey(player)));
-        Object.keys(tactics.positions || {}).forEach(key => {
-            if (!activeStarterKeys.has(String(key))) delete tactics.positions[key];
-        });
+        // Les joueurs blessés restent visibles dans la composition et sur le banc.
+        // Leur indisponibilité est signalée par 🤕 ; le lancement du match reste bloqué
+        // par la validation dédiée tant qu'un joueur blessé est sélectionné.
 
         this.ui.showTitle(
             "🧠 Tactiques"
@@ -225,6 +191,10 @@ class TacticsUI {
 
                 player.className =
                     "pitch-player";
+
+                if (this.isGoalkeeperSlot(slot.poste)) {
+                    player.classList.add("goalkeeper-slot");
+                }
 
 
                 /*
