@@ -1369,6 +1369,25 @@ class UI {
         }
 
         /* ========================= */
+        /* COMPOSITIONS POUR LE MATCH */
+        /* ========================= */
+
+        // Le onze tactique du joueur est la seule composition active connue.
+        // Les autres équipes recevront automatiquement 11 joueurs aptes dans le moteur.
+        if (typeof game.matchEngine.clearActiveLineups === "function") {
+            game.matchEngine.clearActiveLineups();
+        }
+
+        const userMatch = matchday.matches.find(match =>
+            match.home === game.club.name || match.away === game.club.name
+        );
+
+        if (userMatch && game.tactics && Array.isArray(game.tactics.lineup)) {
+            const userStarters = game.tactics.lineup.filter(Boolean).slice(0, 11);
+            game.matchEngine.setActiveLineup(game.club.name, userStarters);
+        }
+
+        /* ========================= */
         /* SIMULATION */
         /* ========================= */
 
