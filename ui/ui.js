@@ -3546,6 +3546,63 @@ if (match.played && match.result) {
             () => this.showMainMenu()
         );
 
+        // Identité de l'entraîneur, choisie avant le championnat et le club.
+        const identityForm = document.createElement("div");
+        identityForm.style.maxWidth = "560px";
+        identityForm.style.margin = "18px auto";
+        identityForm.style.padding = "16px";
+        identityForm.style.border = "1px solid #555";
+        identityForm.style.borderRadius = "12px";
+        identityForm.style.textAlign = "left";
+        identityForm.style.boxSizing = "border-box";
+
+        const identityTitle = document.createElement("h3");
+        identityTitle.textContent = "👔 Identité de l'entraîneur";
+        identityForm.appendChild(identityTitle);
+
+        const firstNameLabel = document.createElement("label");
+        firstNameLabel.textContent = "Prénom";
+        firstNameLabel.style.display = "block";
+        firstNameLabel.style.marginTop = "10px";
+        const firstNameInput = document.createElement("input");
+        firstNameInput.type = "text";
+        firstNameInput.autocomplete = "given-name";
+        firstNameInput.placeholder = "Ton prénom";
+        firstNameInput.maxLength = 40;
+        firstNameInput.style.width = "100%";
+        firstNameInput.style.boxSizing = "border-box";
+        firstNameInput.style.padding = "12px";
+        firstNameInput.style.marginTop = "5px";
+        firstNameInput.style.borderRadius = "8px";
+        firstNameInput.style.fontSize = "16px";
+        firstNameInput.value = game.pendingManagerFirstName || "";
+        identityForm.append(firstNameLabel, firstNameInput);
+
+        const lastNameLabel = document.createElement("label");
+        lastNameLabel.textContent = "Nom";
+        lastNameLabel.style.display = "block";
+        lastNameLabel.style.marginTop = "12px";
+        const lastNameInput = document.createElement("input");
+        lastNameInput.type = "text";
+        lastNameInput.autocomplete = "family-name";
+        lastNameInput.placeholder = "Ton nom";
+        lastNameInput.maxLength = 40;
+        lastNameInput.style.width = "100%";
+        lastNameInput.style.boxSizing = "border-box";
+        lastNameInput.style.padding = "12px";
+        lastNameInput.style.marginTop = "5px";
+        lastNameInput.style.borderRadius = "8px";
+        lastNameInput.style.fontSize = "16px";
+        lastNameInput.value = game.pendingManagerLastName || "";
+        identityForm.append(lastNameLabel, lastNameInput);
+
+        const saveIdentity = () => {
+            game.pendingManagerFirstName = firstNameInput.value.trim();
+            game.pendingManagerLastName = lastNameInput.value.trim();
+        };
+        firstNameInput.addEventListener("input", saveIdentity);
+        lastNameInput.addEventListener("input", saveIdentity);
+        this.container.appendChild(identityForm);
 
         leagues.forEach(
             league => {
@@ -4250,10 +4307,15 @@ if (match.played && match.result) {
             "✅ Choisir ce club",
 
             () => {
+                const firstName = String(game.pendingManagerFirstName || "").trim();
+                const lastName = String(game.pendingManagerLastName || "").trim();
+                if (!firstName || !lastName) {
+                    alert("Renseigne ton prénom et ton nom avant de choisir un club.");
+                    this.showLeagueSelection(dataManager);
+                    return;
+                }
 
-                chooseClub(
-                    club
-                );
+                chooseClub(club, firstName + " " + lastName);
 
             }
 
