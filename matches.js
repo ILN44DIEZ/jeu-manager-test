@@ -7,8 +7,12 @@ class MatchEngine {
 
         this.standings = standings;
 
-        // Effectifs associés à chaque club
+        // Effectifs associés à chaque club.
         this.teamPlayers = {};
+
+        // Onze réellement utilisés pour la simulation du match en cours.
+        // Les clubs IA ont un onze automatique ; le club du joueur reçoit son onze tactique.
+        this.activePlayersByTeam = {};
 
     }
 
@@ -57,6 +61,58 @@ class MatchEngine {
 
         return true;
 
+    }
+
+
+    setActiveLineup(teamName, players) {
+        if (!teamName || !Array.isArray(players)) return false;
+        this.activePlayersByTeam[teamName] = players;
+        return true;
+    }
+
+
+    getEligibleMatchPlayers(teamName) {
+        const squad = Array.isArray(this.teamPlayers[teamName]) ? this.teamPlayers[teamName] : [];
+        const selected = this.activePlayersByTeam[teamName];
+
+        // Si un onze est fourni, seuls ses joueurs peuvent marquer ou faire une passe.
+        // Sinon, choisir automatiquement jusqu'à 11 joueurs aptes pour les clubs IA.
+        const source = Array.isArray(selected)
+            ? selected
+            : squad.filter(player => !this.isInjured(player)).slice(0, 11);
+
+        const resolveToSquad = candidate => {
+            if (!candidate) return null;
+            if (candidate.id != null) {
+                const byId = squad.find(player => player && player.id != null &&
+                    String(player.id) === String(candidate.id));
+                if (byId) return byId;
+            }
+            const key = String(this.getPlayerName(candidate) || "").trim().toLowerCase();
+            return key ? squad.find(player =>
+                String(this.getPlayerName(player) || "").trim().toLowerCase() === key
+            ) || null : null;
+        };
+
+        const seen = new Set();
+        return source.map(resolveToSquad).filter(player => {
+            if (!player || seen.has(player)) return false;
+            seen.add(player);
+            return !this.isInjured(player);
+        });
+    }
+
+
+    isInjured(player) {
+        const injury = String(player && (player.blessure ?? player.injury) || "").trim().toLowerCase();
+        const days = Math.max(0, Number(player && (player.joursBlessure ?? player.injuryDays)) || 0);
+        const hasInjuryText = injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury);
+        return days > 0 || hasInjuryText;
+    }
+
+
+    clearActiveLineups() {
+        this.activePlayersByTeam = {};
     }
 
 
@@ -166,27 +222,22 @@ class MatchEngine {
 
     getScorer(teamName) {
 
-        const squad =
-            this.teamPlayers[teamName] || [];
+        const players = this.getEligibleMatchPlayers(teamName);
 
-        if (!Array.isArray(squad) || squad.length === 0) {
+        if (!players.length) {
             return null;
         }
 
-        // Un joueur blessé ne peut pas être sélectionné comme buteur.
-        const players = squad.filter(player => {
-            const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
-            const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
-            const hasInjuryText = injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury);
+        const eligiblePlayers = players.filter(player => {
             const goalkeeperBlocked = this.isGoalkeeper(player) && this.seasonGoalContributions(player) >= 2;
-            return days <= 0 && !hasInjuryText && !goalkeeperBlocked;
+            return !goalkeeperBlocked;
         });
 
         if (players.length === 0) return null;
 
         // Les gardiens restent éligibles, mais seulement avec une probabilité de 1 %.
-        const outfieldPlayers = players.filter(player => !this.isGoalkeeper(player));
-        const goalkeeperPlayers = players.filter(player => this.isGoalkeeper(player));
+        const outfieldPlayers = eligiblePlayers.filter(player => !this.isGoalkeeper(player));
+        const goalkeeperPlayers = eligiblePlayers.filter(player => this.isGoalkeeper(player));
         const attackingPositions = ["BU", "AC", "AG", "AD", "AV", "MOC", "MC", "MG", "MD"];
         const attackingPlayers = outfieldPlayers.filter(player => {
             const position = String(player.poste || player.position || player.pos || "").trim().toUpperCase();
@@ -200,17 +251,13 @@ class MatchEngine {
 
 
     getAssist(teamName, scorerName) {
-        const squad = this.teamPlayers[teamName] || [];
         const scorer = String(scorerName || "").trim().toLowerCase();
         if (!scorerName || scorerName === "Buteur non renseigné") return null;
-        const candidates = squad.filter(player => {
+        const candidates = this.getEligibleMatchPlayers(teamName).filter(player => {
             const name = this.getPlayerName(player);
             if (!name || name.toLowerCase() === scorer) return false;
-            const injury = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
-            const days = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
-            const hasInjuryText = injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury);
             const goalkeeperBlocked = this.isGoalkeeper(player) && this.seasonGoalContributions(player) >= 2;
-            return days <= 0 && !hasInjuryText && !goalkeeperBlocked;
+            return !goalkeeperBlocked;
         });
         const outfieldPlayers = candidates.filter(player => !this.isGoalkeeper(player));
         const goalkeeperPlayers = candidates.filter(player => this.isGoalkeeper(player));
