@@ -3873,7 +3873,7 @@ if (match.played && match.result) {
         backButton.style.fontSize = "13px";
         backButton.style.borderRadius = "8px";
         backButton.style.margin = "0";
-        backButton.addEventListener("click", () => this.showManager(manager));
+        backButton.addEventListener("click", () => { this.transferMarketFilters = null; this.showManager(manager); });
         topBar.appendChild(backButton);
         this.container.appendChild(topBar);
 
@@ -3909,6 +3909,7 @@ if (match.played && match.result) {
             option.textContent = league;
             leagueSelect.appendChild(option);
         });
+        leagueSelect.value = savedFilters.league || "";
         filters.appendChild(leagueSelect);
 
         const search = document.createElement("input");
@@ -3920,6 +3921,7 @@ if (match.played && match.result) {
         search.style.padding = "12px";
         search.style.borderRadius = "8px";
         search.style.fontSize = "16px";
+        search.value = savedFilters.search || "";
         filters.appendChild(search);
 
         const ageToggle = document.createElement("button");
@@ -3936,10 +3938,13 @@ if (match.played && match.result) {
         agePanel.style.gap = "8px";
         filters.appendChild(agePanel);
 
-        let minAge = 15;
-        let maxAge = 40;
+        const savedFilters = this.transferMarketFilters || {};
+        let minAge = Number.isFinite(Number(savedFilters.minAge)) ? Number(savedFilters.minAge) : 15;
+        let maxAge = Number.isFinite(Number(savedFilters.maxAge)) ? Number(savedFilters.maxAge) : 40;
+        minAge = Math.max(15, Math.min(40, minAge));
+        maxAge = Math.max(minAge, Math.min(40, maxAge));
         const ageValue = document.createElement("strong");
-        ageValue.textContent = "Âge : 15–40 ans";
+        ageValue.textContent = "Âge : " + minAge + "–" + maxAge + " ans";
         agePanel.appendChild(ageValue);
 
         const minLabel = document.createElement("label");
@@ -3949,7 +3954,7 @@ if (match.played && match.result) {
         minSlider.type = "range";
         minSlider.min = "15";
         minSlider.max = "40";
-        minSlider.value = "15";
+        minSlider.value = String(minAge);
         minSlider.style.width = "100%";
         agePanel.appendChild(minSlider);
 
@@ -3960,14 +3965,18 @@ if (match.played && match.result) {
         maxSlider.type = "range";
         maxSlider.min = "15";
         maxSlider.max = "40";
-        maxSlider.value = "40";
+        maxSlider.value = String(maxAge);
         maxSlider.style.width = "100%";
         agePanel.appendChild(maxSlider);
 
+        const agePanelOpen = Boolean(savedFilters.agePanelOpen);
+        agePanel.style.display = agePanelOpen ? "grid" : "none";
+        ageToggle.textContent = agePanelOpen ? "🎂 Filtrer par âge ▴" : "🎂 Filtrer par âge ▾";
         ageToggle.addEventListener("click", () => {
             const isHidden = agePanel.style.display === "none";
             agePanel.style.display = isHidden ? "grid" : "none";
             ageToggle.textContent = isHidden ? "🎂 Filtrer par âge ▴" : "🎂 Filtrer par âge ▾";
+            saveFilters();
         });
 
         const results = document.createElement("div");
@@ -3976,7 +3985,18 @@ if (match.played && match.result) {
         results.style.gap = "10px";
         this.container.appendChild(results);
 
+        const saveFilters = () => {
+            this.transferMarketFilters = {
+                league: leagueSelect.value,
+                search: search.value,
+                minAge,
+                maxAge,
+                agePanelOpen: agePanel.style.display !== "none"
+            };
+        };
+
         const render = () => {
+            saveFilters();
             results.innerHTML = "";
             const query = search.value.trim().toLocaleLowerCase("fr");
             const players = (game.data?.players || []).filter(player => {
@@ -4204,6 +4224,8 @@ if (match.played && match.result) {
             minLabel.textContent = "Âge minimum : " + minAge + " ans";
             maxLabel.textContent = "Âge maximum : " + maxAge + " ans";
             ageValue.textContent = "Âge : " + minAge + "–" + maxAge + " ans";
+            minSlider.value = String(minAge);
+            maxSlider.value = String(maxAge);
             render();
         };
 
