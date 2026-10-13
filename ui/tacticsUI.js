@@ -6618,4 +6618,23 @@ const removeButton =
 
     }
 
+
+
+    // Les joueurs ouvrent leur fiche : aucun menu de remplacement par clic.
+    showPlayerActions(tactics, manager, player) {
+        this.openPlayerProfile(player, manager, () => this.show(tactics, manager));
+    }
+
+    showSubstituteActions(tactics, manager, player) {
+        this.openPlayerProfile(player, manager, () => this.show(tactics, manager));
+    }
+
+    showReserveActions(tactics, manager, player) {
+        this.openPlayerProfile(player, manager, () => this.show(tactics, manager));
+    }
+
+    showReplacementList() {
+        // Les changements d'effectif se font uniquement par glisser-déposer.
+        this.removeActionMenu();
+    }
 }
