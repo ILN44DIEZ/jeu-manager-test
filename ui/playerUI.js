@@ -15,7 +15,7 @@ class PlayerUI {
         const money = value => value == null ? "—" : Number(value).toLocaleString("fr-FR") + " €";
         const form = sharedCondition?.form ?? Math.max(0, Math.min(100, Number(player.forme ?? player.form ?? player.moral ?? 70)));
         const fatigue = sharedCondition?.fatigue ?? Math.max(0, Math.min(100, Number(player.fatigue ?? 0)));
-        const fitness = sharedCondition?.fitness ?? Math.max(0, Math.min(100, Number(player.conditionPhysique ?? player.fitness ?? player.condition ?? 100)));        const overall = player.note ?? player.overall ?? "—";
+        const energy = sharedCondition?.energy ?? Math.max(0, Math.min(100, Number(player.energy ?? player.energie ?? (100 - Number(player.fatigue ?? 0)))));        const overall = player.note ?? player.overall ?? "—";
         const potential = player.potentiel ?? player.potential ?? "—";
         const value = player.valeur ?? player.marketValue;
 
@@ -104,8 +104,7 @@ class PlayerUI {
                     const injury=document.createElement("div");injury.textContent="🤕 Joueur blessé"+(Number(player.joursBlessure ?? player.injuryDays)>0 ? " · "+Number(player.joursBlessure ?? player.injuryDays)+" jour(s) restant(s)" : "");injury.style.cssText="padding:12px;color:#ff8585;font-weight:bold;";content.appendChild(injury);
                 } else {
                     content.append(bar("Forme",form,"#16c75b"));
-                    content.append(bar("Fatigue",fatigue,"#ffb51b"));
-                    content.append(bar("Condition",fitness,"#45a6ff"));
+                    content.append(bar("Énergie",energy,tacticsUI?.getEnergyColor ? tacticsUI.getEnergyColor(energy) : (energy >= 70 ? "#35C759" : energy >= 40 ? "#F5C542" : energy >= 20 ? "#FF8C42" : "#FF453A")));
                 }
             } else if (tab === "Stats") {
                 [["⚽ Buts",player.buts ?? player.goals],["🎯 Passes décisives",player.passes ?? player.assists],["🕒 Matchs joués",player.matchs ?? player.matchesPlayed],["⏱️ Minutes jouées",player.minutes ?? player.minutesPlayed],["🟨 Cartons jaunes",player.cartonsJaunes],["🟥 Cartons rouges",player.cartonsRouges]].forEach(([l,v])=>content.appendChild(makeRow(l,v)));
