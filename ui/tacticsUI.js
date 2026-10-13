@@ -2289,6 +2289,13 @@ class TacticsUI {
         zone.className =
             "tactics-substitutes-zone";
 
+        // Deux cartes par ligne, y compris sur mobile, en gardant toutes les infos.
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
+
 
         if (
             tactics.substitutes.length ===
@@ -2397,6 +2404,13 @@ class TacticsUI {
 
         zone.className =
             "tactics-reserves-zone";
+
+        // Même présentation que le banc : deux réservistes par ligne.
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
 
 
         if (
