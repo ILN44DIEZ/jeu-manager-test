@@ -2289,6 +2289,13 @@ class TacticsUI {
         zone.className =
             "tactics-substitutes-zone";
 
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.alignItems = "start";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
+
         // Deux cartes par ligne, y compris sur mobile, en gardant toutes les infos.
         zone.style.display = "grid";
         zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
@@ -2404,6 +2411,13 @@ class TacticsUI {
 
         zone.className =
             "tactics-reserves-zone";
+
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.alignItems = "start";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
 
         // Même présentation que le banc : deux réservistes par ligne.
         zone.style.display = "grid";
@@ -3280,6 +3294,13 @@ class TacticsUI {
         zone.className =
             "tactics-substitutes-zone";
 
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.alignItems = "start";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
+
 
         if (
             tactics.substitutes.length ===
@@ -3388,6 +3409,13 @@ class TacticsUI {
 
         zone.className =
             "tactics-reserves-zone";
+
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.alignItems = "start";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
 
 
         if (
@@ -4253,6 +4281,13 @@ class TacticsUI {
         zone.className =
             "tactics-substitutes-zone";
 
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.alignItems = "start";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
+
 
         if (
             tactics.substitutes.length ===
@@ -4361,6 +4396,13 @@ class TacticsUI {
 
         zone.className =
             "tactics-reserves-zone";
+
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.alignItems = "start";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
 
 
         if (
@@ -5331,6 +5373,13 @@ class TacticsUI {
         zone.className =
             "tactics-substitutes-zone";
 
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.alignItems = "start";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
+
 
         if (
             tactics.substitutes.length ===
@@ -5439,6 +5488,13 @@ class TacticsUI {
 
         zone.className =
             "tactics-reserves-zone";
+
+        zone.style.display = "grid";
+        zone.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        zone.style.alignItems = "start";
+        zone.style.gap = "10px";
+        zone.style.width = "100%";
+        zone.style.boxSizing = "border-box";
 
 
         if (
