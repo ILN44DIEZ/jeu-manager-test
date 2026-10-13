@@ -445,9 +445,8 @@ class SquadUI {
         const indicators = document.createElement("span"); indicators.className = "player-condition-indicators";
         indicators.style.cssText = "display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:3px 7px;border:1px solid rgba(141,255,173,.25);border-radius:6px;background:rgba(10,45,20,.55);font-weight:800;white-space:nowrap";
         const form = document.createElement("span"); form.style.color = "#8dffad"; form.textContent = "▰ " + status.form;
-        const fatigue = document.createElement("span"); fatigue.style.color = "#ff9aa5"; fatigue.textContent = "♥ " + status.fatigue;
-        indicators.append(form, fatigue); card.append(indicators, document.createElement("br"));
-        const fitness = document.createElement("span"); fitness.textContent = "⚡ Condition " + status.fitness + "%"; card.appendChild(fitness);
+        const energy = document.createElement("span"); energy.style.color = status.energyColor || this.ui?.tacticsUI?.getEnergyColor?.(status.energy) || "#35C759"; energy.textContent = "⚡ " + status.energy;
+        indicators.append(form, energy); card.append(indicators, document.createElement("br"));
         card.addEventListener("mouseenter", () => { card.style.transform = "scale(1.02)"; });
         card.addEventListener("mouseleave", () => { card.style.transform = "scale(1)"; });
         card.addEventListener("click", () => this.showPlayerProfile(current, this.currentManager));
