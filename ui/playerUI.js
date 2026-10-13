@@ -33,13 +33,9 @@ class PlayerUI {
         overlay.appendChild(closeX);
 
         const header = document.createElement("div");
-        header.style.cssText = "display:grid;grid-template-columns:94px minmax(0,1fr);gap:14px;align-items:center;margin-bottom:16px;";
-        const avatar = document.createElement("div");
-        const initials = fullName.split(/\s+/).filter(Boolean).slice(0,2).map(part => part[0]).join("").toUpperCase();
-        avatar.textContent = initials || "⚽";
-        avatar.style.cssText = "width:94px;height:112px;display:flex;align-items:center;justify-content:center;border:1px solid #555;border-radius:14px;background:linear-gradient(145deg,#343434,#171717);font-size:30px;font-weight:bold;color:#ddd;";
-        header.appendChild(avatar);
+        header.style.cssText = "display:block;width:100%;margin-bottom:16px;";
         const identity = document.createElement("div");
+        identity.style.cssText = "width:100%;min-width:0;";
         const name = document.createElement("h2");
         name.textContent = fullName;
         name.style.cssText = "margin:0 0 4px;font-size:clamp(20px,5vw,27px);text-align:left;";
