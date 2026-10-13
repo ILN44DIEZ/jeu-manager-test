@@ -614,6 +614,20 @@ class TacticsUI {
                         "dragging"
                     );
 
+                    // Clone flottant qui suit le doigt, même quand la carte d'origine est hors écran.
+                    this.dragGhost = element.cloneNode(true);
+                    this.dragGhost.style.position = "fixed";
+                    this.dragGhost.style.left = event.clientX + "px";
+                    this.dragGhost.style.top = event.clientY + "px";
+                    this.dragGhost.style.width = Math.min(element.getBoundingClientRect().width, window.innerWidth - 24) + "px";
+                    this.dragGhost.style.margin = "0";
+                    this.dragGhost.style.zIndex = "99999";
+                    this.dragGhost.style.opacity = "0.92";
+                    this.dragGhost.style.pointerEvents = "none";
+                    this.dragGhost.style.transform = "translate(-50%, -50%) scale(1.04)";
+                    this.dragGhost.style.boxShadow = "0 8px 24px rgba(0,0,0,0.45)";
+                    document.body.appendChild(this.dragGhost);
+                    element.style.opacity = "0.28";
 
                     try {
 
@@ -645,6 +659,20 @@ class TacticsUI {
                         event
                     );
 
+                }
+
+                if (dragging && this.dragGhost) {
+                    this.dragGhost.style.left = event.clientX + "px";
+                    this.dragGhost.style.top = event.clientY + "px";
+
+                    // Défilement automatique lorsque le doigt approche du haut ou du bas de l'écran.
+                    const edge = 85;
+                    const speed = 18;
+                    if (event.clientY > window.innerHeight - edge) {
+                        window.scrollBy(0, speed);
+                    } else if (event.clientY < edge) {
+                        window.scrollBy(0, -speed);
+                    }
                 }
 
             }
@@ -768,6 +796,9 @@ class TacticsUI {
                 this.draggingType =
                     type;
 
+                this.dragGhost = null;
+                this.dragOriginalOpacity = element.style.opacity;
+
             }
         );
 
@@ -827,6 +858,20 @@ class TacticsUI {
                         "dragging"
                     );
 
+                    // Clone flottant qui suit le doigt, même quand la carte d'origine est hors écran.
+                    this.dragGhost = element.cloneNode(true);
+                    this.dragGhost.style.position = "fixed";
+                    this.dragGhost.style.left = event.clientX + "px";
+                    this.dragGhost.style.top = event.clientY + "px";
+                    this.dragGhost.style.width = Math.min(element.getBoundingClientRect().width, window.innerWidth - 24) + "px";
+                    this.dragGhost.style.margin = "0";
+                    this.dragGhost.style.zIndex = "99999";
+                    this.dragGhost.style.opacity = "0.92";
+                    this.dragGhost.style.pointerEvents = "none";
+                    this.dragGhost.style.transform = "translate(-50%, -50%) scale(1.04)";
+                    this.dragGhost.style.boxShadow = "0 8px 24px rgba(0,0,0,0.45)";
+                    document.body.appendChild(this.dragGhost);
+                    element.style.opacity = "0.28";
 
                     try {
 
@@ -836,6 +881,20 @@ class TacticsUI {
 
                     } catch (error) {}
 
+                }
+
+                if (dragging && this.dragGhost) {
+                    this.dragGhost.style.left = event.clientX + "px";
+                    this.dragGhost.style.top = event.clientY + "px";
+
+                    // Défilement automatique lorsque le doigt approche du haut ou du bas de l'écran.
+                    const edge = 85;
+                    const speed = 18;
+                    if (event.clientY > window.innerHeight - edge) {
+                        window.scrollBy(0, speed);
+                    } else if (event.clientY < edge) {
+                        window.scrollBy(0, -speed);
+                    }
                 }
 
             }
@@ -6498,16 +6557,18 @@ class TacticsUI {
 
     resetDrag() {
 
-        if (
-            this.draggingElement
-        ) {
-
-            this.draggingElement.classList.remove(
-                "dragging"
-            );
-
+        if (this.dragGhost && this.dragGhost.parentNode) {
+            this.dragGhost.parentNode.removeChild(this.dragGhost);
         }
+        this.dragGhost = null;
 
+        if (this.draggingElement) {
+            this.draggingElement.classList.remove("dragging");
+            if (this.dragOriginalOpacity !== undefined) {
+                this.draggingElement.style.opacity = this.dragOriginalOpacity;
+            }
+        }
+        this.dragOriginalOpacity = undefined;
 
         this.draggingElement =
             null;
