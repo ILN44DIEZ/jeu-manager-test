@@ -496,3 +496,15 @@ textarea,
 .tactics-player-card > .tactics-card-condition {
     margin-top: 2px !important;
 }
+
+/* Pastille compacte sous la note, identique sur titulaires/remplaçants/réservistes. */
+.tactics-player-card .tactics-card-condition {
+ display:inline-flex!important; align-self:center!important; justify-content:center!important; align-items:center!important; flex-direction:row!important; gap:7px!important;
+ width:auto!important; min-width:82px; max-width:100%; min-height:22px!important; margin:2px 0 0!important; padding:3px 7px!important; box-sizing:border-box!important;
+ border:1px solid rgba(141,255,173,.28)!important; border-radius:6px!important; background:rgba(10,45,20,.55)!important; color:#fff!important;
+ font-size:12px!important; font-weight:800!important; line-height:1.1!important; white-space:nowrap!important; overflow:visible!important;
+}
+.tactics-player-card .tactics-card-condition .condition-form{color:#8dffad!important}
+.tactics-player-card .tactics-card-condition .condition-fatigue{color:#ff9aa5!important}
+.tactics-player-card .tactics-card-condition.injured{display:inline-flex!important;width:auto!important;min-width:0!important;padding:2px 6px!important;border-color:rgba(255,141,155,.4)!important;background:rgba(90,20,20,.45)!important;color:#ffb5bc!important}
+.player-condition-indicators{font-size:12px}
