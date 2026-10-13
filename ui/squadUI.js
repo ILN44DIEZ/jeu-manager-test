@@ -481,25 +481,50 @@ class SquadUI {
         /* CONTENU */
         /* ================================================= */
 
+        const injuryDays = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
+        const injuryText = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
+        const injured = injuryDays > 0 ||
+            (injuryText !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injuryText));
+        const fatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
+        const form = Math.max(0, Math.min(100, Number(player.forme ?? player.form ?? 70) || 0));
+        const fitness = Math.max(0, Math.min(100, Number(player.fitness ?? player.condition ?? 100) || 0));
+
+        if (injured) {
+            card.style.border = "2px solid #e05252";
+            card.style.background = "rgba(224, 82, 82, 0.12)";
+        } else if (fatigue >= 80) {
+            card.style.border = "2px solid #e0a33a";
+        }
+
         card.innerHTML = `
 
             <strong>
                 ${player.prenom ? player.prenom + " " : ""}
-                ${player.nom}
+                ${player.nom || player.lastName || "Joueur sans nom"}
             </strong>
 
             <br>
 
-            ${player.poste}
-            • ⭐ ${player.note}
+            ${player.poste || player.position || "?"}
+            • ⭐ ${player.note ?? player.overall ?? "—"}
 
             <br>
 
-            🎂 ${player.age} ans
+            🎂 ${player.age ?? "—"} ans
 
             <br>
 
-            💶 ${player.valeur.toLocaleString()} €
+            💶 ${Number(player.valeur ?? player.value ?? 0).toLocaleString("fr-FR")} €
+
+            <br>
+
+            ${injured
+                ? "🚑 Blessé" + (injuryDays > 0 ? " · " + injuryDays + " j" : "")
+                : "✅ Disponible"}
+
+            <br>
+
+            😮‍💨 Fatigue ${fatigue}% · 💪 Forme ${form}% · ⚡ Condition ${fitness}%
 
         `;
 
