@@ -327,7 +327,8 @@ class TacticsUI {
 
                         "<span class=\"player-position\">" +
                         slot.poste +
-                        "</span>";
+                        "</span>" +
+                        this.getPlayerConditionMarkup(selectedPlayer);
 
 
                     /*
@@ -406,12 +407,7 @@ class TacticsUI {
                             }
 
 
-                            this.showPlayerActions(
-                                tactics,
-                                manager,
-                                selectedPlayer,
-                                slot.poste
-                            );
+                            this.openPlayerProfile(selectedPlayer, manager, () => this.show(tactics, manager));
 
                         }
                     );
@@ -2245,6 +2241,27 @@ class TacticsUI {
     /* CARTES */
     /* ================================================= */
 
+    isPlayerInjured(player) {
+        const days = Math.max(0, Number(player?.joursBlessure ?? player?.injuryDays) || 0);
+        const injury = String(player?.blessure ?? player?.injury ?? "").trim().toLowerCase();
+        return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
+    }
+
+    getPlayerConditionMarkup(player) {
+        if (this.isPlayerInjured(player)) return '<div class="tactics-condition injured" aria-label="Joueur blessé">🤕</div>';
+        const form = Math.max(0, Math.min(100, Number(player?.forme ?? player?.form ?? player?.fitness ?? 100) || 0));
+        const fatigue = Math.max(0, Math.min(100, Number(player?.fatigue ?? player?.currentFatigue ?? 0) || 0));
+        return '<div class="tactics-condition" aria-label="Forme et fatigue"><span class="condition-form">▰ ' + form + '</span><span class="condition-fatigue">♥ ' + fatigue + '</span></div>';
+    }
+
+    openPlayerProfile(player, manager, onBack) {
+        if (this.ui?.playerUI?.showProfile) {
+            this.ui.playerUI.showProfile(player, manager, onBack, { backLabel: "⬅️ Retour aux tactiques" });
+        } else {
+            this.showPlayerActions(this.ui.tactics, manager, player, player.poste);
+        }
+    }
+
     createPlayerCard(
         player,
         type,
@@ -2294,6 +2311,7 @@ class TacticsUI {
             </span>
 
             ⭐ ${player.note}
+            ${this.getPlayerConditionMarkup(player)}
 
         `;
 
@@ -2328,32 +2346,7 @@ class TacticsUI {
                 }
 
 
-                if (
-                    type ===
-                    "substitute"
-                ) {
-
-                    this.showSubstituteActions(
-                        tactics,
-                        manager,
-                        player
-                    );
-
-                }
-
-
-                if (
-                    type ===
-                    "reserve"
-                ) {
-
-                    this.showReserveActions(
-                        tactics,
-                        manager,
-                        player
-                    );
-
-                }
+                this.openPlayerProfile(player, manager, () => this.show(tactics, manager));
 
             }
         );
