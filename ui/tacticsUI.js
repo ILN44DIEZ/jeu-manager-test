@@ -298,7 +298,7 @@ class TacticsUI {
                         "<span class=\"player-position\">" +
                         slot.poste +
                         "</span>" +
-                        this.getPlayerConditionMarkup(selectedPlayer);
+                        this.getPlayerConditionMarkup(selectedPlayer, "markup");
 
 
                     /*
@@ -2217,34 +2217,49 @@ class TacticsUI {
         return days > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury));
     }
 
+    // Toutes les vues lisent le même objet joueur de l’effectif.
     getCanonicalPlayer(player) {
-        const roster = (typeof game !== "undefined" && Array.isArray(game.players))
-            ? game.players
-            : (Array.isArray(this.ui?.game?.players) ? this.ui.game.players : []);
-        const normalize = value => String(value || "").normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
-        const fullName = value => normalize([
-            value?.prenom ?? value?.firstName ?? value?.firstname ?? "",
-            value?.nom ?? value?.lastName ?? value?.lastname ?? ""
-        ].filter(Boolean).join(" ") || value?.name || value?.fullName || value?.nomComplet);
-        return roster.find(candidate =>
-            (player?.id != null && candidate?.id != null && String(player.id) === String(candidate.id)) ||
-            (fullName(player) && fullName(player) === fullName(candidate))
-        ) || player || {};
+        const roster = (typeof game !== "undefined" && Array.isArray(game.players)) ? game.players : [];
+        if (!player) return {};
+        const keyOf = value => {
+            if (!value) return "";
+            if (value.id !== undefined && value.id !== null) return "id:" + String(value.id);
+            const normalize = text => String(text || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase().replace(/\s+/g, " ");
+            const name = normalize([value.prenom ?? value.firstName ?? value.firstname ?? "", value.nom ?? value.lastName ?? value.lastname ?? ""].filter(Boolean).join(" ") || value.name || value.fullName || value.nomComplet);
+            return name ? "name:" + name : "";
+        };
+        const key = keyOf(player);
+        return roster.find(candidate => key && keyOf(candidate) === key) || player;
     }
 
-    getPlayerConditionMarkup(player) {
+    getPlayerConditionValues(player) {
         const current = this.getCanonicalPlayer(player);
-        if (this.isPlayerInjured(current)) {
-            return '<div class="tactics-condition injured" aria-label="Joueur blessé">🤕</div>';
+        const read = (value, fallback) => { const n = Number(value); return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : fallback; };
+        const injury = String(current.blessure ?? current.injury ?? "").trim().toLowerCase();
+        const injuryDays = Math.max(0, Number(current.joursBlessure ?? current.injuryDays) || 0);
+        return { player: current, injured: injuryDays > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury)), injuryDays, form: read(current.forme ?? current.form ?? current.moral, 70), fatigue: read(current.fatigue ?? current.currentFatigue, 0), fitness: read(current.conditionPhysique ?? current.fitness ?? current.condition, 100) };
+    }
+
+    getPlayerConditionMarkup(player, mode = "card") {
+        const status = this.getPlayerConditionValues(player);
+        const cardMode = mode === "card";
+        const condition = document.createElement("div");
+        condition.className = "tactics-condition" + (cardMode ? " tactics-card-condition" : "");
+        if (status.injured) {
+            condition.classList.add("injured");
+            condition.setAttribute("aria-label", "Joueur blessé" + (status.injuryDays ? " — " + status.injuryDays + " jour(s) restant(s)" : ""));
+            condition.textContent = "🤕" + (status.injuryDays ? " " + status.injuryDays + " j" : "");
+        } else {
+            condition.setAttribute("aria-label", "Forme " + status.form + ", fatigue " + status.fatigue);
+            const form = document.createElement("span"); form.className = "condition-form"; form.textContent = "▰ " + status.form;
+            const fatigue = document.createElement("span"); fatigue.className = "condition-fatigue"; fatigue.textContent = "♥ " + status.fatigue;
+            condition.append(form, fatigue);
         }
-        const readNumber = (value, fallback) => {
-            const parsed = Number(value);
-            return Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : fallback;
-        };
-        const form = readNumber(current.forme ?? current.form ?? current.moral, 70);
-        const fatigue = readNumber(current.fatigue ?? current.currentFatigue, 0);
-        return '<div class="tactics-condition" aria-label="Forme et fatigue" style="color:#fff!important;background:rgba(10,45,20,.92);border:1px solid rgba(255,255,255,.25);border-radius:5px;padding:2px 4px;box-sizing:border-box"><span class="condition-form" style="color:#8dffad!important;font-weight:800">▰ ' + form + '</span><span class="condition-fatigue" style="color:#ff9aa5!important;font-weight:800">♥ ' + fatigue + '</span></div>';
+        Object.assign(condition.style, { display: "inline-flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "7px", padding: cardMode ? "3px 7px" : "2px 4px", boxSizing: "border-box", borderRadius: "6px", border: "1px solid rgba(141,255,173,.28)", background: status.injured ? "rgba(90,20,20,.45)" : "rgba(10,45,20,.55)", color: "#fff", fontSize: cardMode ? "12px" : "10px", fontWeight: "800", lineHeight: "1.1", whiteSpace: "nowrap" });
+        if (status.injured) condition.style.borderColor = "rgba(255,141,155,.4)";
+        const form = condition.querySelector(".condition-form"); if (form) form.style.color = "#8dffad";
+        const fatigue = condition.querySelector(".condition-fatigue"); if (fatigue) fatigue.style.color = "#ff9aa5";
+        return mode === "markup" ? condition.outerHTML : condition;
     }
 
     openPlayerProfile(player, manager, onBack) {
@@ -2256,87 +2271,34 @@ class TacticsUI {
     }
 
     createPlayerCard(player, type, tactics, manager) {
+        const current = this.getCanonicalPlayer(player);
+        const status = this.getPlayerConditionValues(current);
         const card = document.createElement("div");
         card.className = "tactics-player-card";
-        card.dataset.playerKey = tactics.getPlayerKey(player);
+        card.dataset.playerKey = tactics.getPlayerKey(current);
         card.dataset.playerType = type;
         card.dataset.wasDragged = "false";
-
         const name = document.createElement("strong");
         name.className = "tactics-card-name";
-        name.textContent = [player.prenom, player.nom].filter(Boolean).join(" ");
-
+        name.textContent = [current.prenom ?? current.firstName, current.nom ?? current.lastName].filter(Boolean).join(" ");
         const position = document.createElement("span");
         position.className = "tactics-card-position";
-        position.textContent = player.poste || player.position || "—";
-
+        position.textContent = current.poste || current.position || "—";
         const rating = document.createElement("div");
         rating.className = "tactics-card-rating";
-        rating.textContent = "⭐ " + (player.note ?? player.rating ?? "—");
+        rating.textContent = "⭐ " + (current.note ?? current.overall ?? current.rating ?? "—");
         card.append(name, position, rating);
-
-        // Force un empilement compact : aucun espace vertical artificiel entre poste, note et condition.
-        Object.assign(card.style, {
-            display: "flex", flexDirection: "column", alignItems: "center",
-            justifyContent: "center", gap: "4px", height: "auto", minHeight: "0",
-            padding: "12px 8px", boxSizing: "border-box"
-        });
-        Object.assign(name.style, {
-            display: "block", margin: "0", padding: "0", lineHeight: "1.2",
-            minHeight: "0", flex: "0 0 auto"
-        });
-        Object.assign(position.style, {
-            display: "block", margin: "0", padding: "0", lineHeight: "1.15",
-            minHeight: "0", flex: "0 0 auto"
-        });
-        Object.assign(rating.style, {
-            display: "block", margin: "0", padding: "0", lineHeight: "1.15",
-            minHeight: "0", flex: "0 0 auto"
-        });
-
-        const condition = document.createElement("div");
-        condition.className = "tactics-condition tactics-card-condition";
-        const current = this.getCanonicalPlayer(player);
-        if (this.isPlayerInjured(current)) {
-            condition.classList.add("injured");
-            condition.setAttribute("aria-label", "Joueur blessé");
-            condition.textContent = "🤕";
-        } else {
-            const readNumber = (value, fallback) => {
-                const parsed = Number(value);
-                return Number.isFinite(parsed) ? Math.max(0, Math.min(100, parsed)) : fallback;
-            };
-            condition.setAttribute("aria-label", "Forme et fatigue");
-            const formValue = document.createElement("span");
-            formValue.className = "condition-form";
-            formValue.textContent = "▰ " + readNumber(current.forme ?? current.form ?? current.moral, 70);
-            const fatigueValue = document.createElement("span");
-            fatigueValue.className = "condition-fatigue";
-            fatigueValue.textContent = "♥ " + readNumber(current.fatigue ?? current.currentFatigue, 0);
-            condition.append(formValue, fatigueValue);
-        }
-        card.appendChild(condition);
-
-        Object.assign(condition.style, {
-            position: "static", display: "flex", flexDirection: "row",
-            justifyContent: "center", alignItems: "center", alignSelf: "stretch",
-            gap: "7px", width: "100%", minHeight: "18px", margin: "2px 0 0",
-            padding: "3px 4px", boxSizing: "border-box", borderRadius: "5px",
-            background: "rgba(10, 45, 20, 0.88)", color: "#ffffff",
-            fontSize: "12px", fontWeight: "700", lineHeight: "1.1",
-            whiteSpace: "nowrap", overflow: "visible"
-        });
-        if (condition.classList.contains("injured")) {
-            Object.assign(condition.style, { display: "block", background: "transparent", fontSize: "15px", padding: "0" });
-        }
+        Object.assign(card.style, { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px", height: "auto", minHeight: "0", padding: "12px 8px", boxSizing: "border-box" });
+        Object.assign(name.style, { display: "block", width: "100%", margin: "0", padding: "0", lineHeight: "1.2", minHeight: "0", flex: "0 0 auto", overflowWrap: "anywhere" });
+        Object.assign(position.style, { display: "block", margin: "0", padding: "0", lineHeight: "1.15", minHeight: "0", flex: "0 0 auto" });
+        Object.assign(rating.style, { display: "block", margin: "0", padding: "0", lineHeight: "1.15", minHeight: "0", flex: "0 0 auto", fontSize: "17px" });
+        card.appendChild(this.getPlayerConditionMarkup(current, "card"));
         card.style.touchAction = "none";
-        this.enableCardDrag(card, player, type, tactics, manager);
+        if (status.injured) { card.style.border = "1px solid #b94a48"; card.style.background = "rgba(120,30,30,.13)"; }
+        this.enableCardDrag(card, current, type, tactics, manager);
         card.addEventListener("click", () => {
-            if (card.dataset.wasDragged === "true") {
-                card.dataset.wasDragged = "false";
-                return;
-            }
-            this.openPlayerProfile(player, manager, () => this.show(tactics, manager));
+            if (card.dataset.wasDragged === "true") { card.dataset.wasDragged = "false"; return; }
+            this.openPlayerProfile(current, manager, () => this.show(tactics, manager));
         });
         return card;
     }
