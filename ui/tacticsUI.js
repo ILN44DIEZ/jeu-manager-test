@@ -334,10 +334,19 @@ class TacticsUI {
                      * COULEUR
                      */
 
+                    const wrongGoalkeeperPosition =
+                        this.isGoalkeeper(selectedPlayer) !== this.isGoalkeeperSlot(slot.poste);
+
                     this.applyPositionColor(
                         player,
-                        positionStatus
+                        wrongGoalkeeperPosition ? "red" : positionStatus
                     );
+
+                    if (wrongGoalkeeperPosition) {
+                        player.title = this.isGoalkeeper(selectedPlayer)
+                            ? "⚠️ Un gardien ne peut pas jouer à ce poste de champ."
+                            : "⚠️ Un joueur de champ ne peut pas jouer gardien.";
+                    }
 
 
                     /*
@@ -451,6 +460,15 @@ class TacticsUI {
     /* ================================================= */
     /* COULEUR POSITIONNEMENT */
     /* ================================================= */
+
+    isGoalkeeper(player) {
+        const position = String(player?.poste || player?.position || "").trim().toUpperCase();
+        return ["GB", "GK", "G", "GARDIEN", "GOALKEEPER"].includes(position);
+    }
+
+    isGoalkeeperSlot(position) {
+        return ["GB", "GK", "G", "GARDIEN", "GOALKEEPER"].includes(String(position || "").trim().toUpperCase());
+    }
 
     applyPositionColor(
         element,
