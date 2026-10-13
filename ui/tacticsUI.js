@@ -554,10 +554,20 @@ class TacticsUI {
         element.dataset.wasDragged =
             "false";
 
+        element.style.webkitUserSelect = "none";
+        element.style.userSelect = "none";
+        element.style.webkitTouchCallout = "none";
+        element.style.touchAction = "none";
+        element.setAttribute("draggable", "false");
+        element.addEventListener("selectstart", event => event.preventDefault());
+        element.addEventListener("dragstart", event => event.preventDefault());
+
 
         element.addEventListener(
             "pointerdown",
             event => {
+
+                event.preventDefault();
 
                 this.draggingElement =
                     element;
@@ -672,14 +682,11 @@ class TacticsUI {
                     "starter"
                 ) {
 
-                    this.movePitchPlayer(
-                        element,
-                        event
-                    );
+                    // Le clone flottant suit le doigt ; le joueur original reste sur le terrain jusqu'au dépôt.
 
                 }
 
-                if (dragging && this.dragGhost) {
+                if (this.isDragging && this.dragGhost) {
                     this.dragGhost.style.left = event.clientX + "px";
                     this.dragGhost.style.top = event.clientY + "px";
 
