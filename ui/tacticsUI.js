@@ -1724,19 +1724,13 @@ class TacticsUI {
 
         /*
          * REMPLAÇANT → RÉSERVISTE
+         * Accepte le dépôt sur la zone vide ou directement sur une carte.
          */
-
         if (
-            target.type ===
-            "reserves"
+            target.type === "reserves" ||
+            target.type === "reserve-player"
         ) {
-
-            tactics.removeSubstitute(
-                tactics.getPlayerKey(
-                    player
-                )
-            );
-
+            tactics.removeSubstitute(tactics.getPlayerKey(player));
         }
 
 
@@ -2015,63 +2009,25 @@ class TacticsUI {
 
         /*
          * RÉSERVISTE → REMPLAÇANT PRÉCIS
+         * Si le banc est plein, échange les deux joueurs au lieu de bloquer :
+         * le remplaçant déplacé devient réserviste et le réserviste prend sa place.
          */
-
-        if (
-            target.type ===
-            "substitute-player"
-        ) {
-
-            if (
-                tactics.substitutes.length >=
-                9
-            ) {
-
-                this.showMessageTemporary(
-                    "⚠️ Les 9 places du banc sont déjà occupées."
-                );
-
-
-                this.resetDrag();
-
-                return;
-
-            }
-
-
-            const index =
-                tactics.substitutes.findIndex(
-                    substitute =>
-                        tactics.getPlayerKey(
-                            substitute
-                        ) ===
-                        target.key
-                );
-
-
-            if (
-                index !== -1
-            ) {
-
-                tactics.substitutes.splice(
-                    index,
-                    0,
-                    player
-                );
-
-            }
-
-
-            this.resetDrag();
-
-
-            this.show(
-                tactics,
-                manager
+        if (target.type === "substitute-player") {
+            const index = tactics.substitutes.findIndex(
+                substitute => tactics.getPlayerKey(substitute) === target.key
             );
 
-            return;
+            if (index !== -1) {
+                if (tactics.substitutes.length >= 9) {
+                    tactics.substitutes[index] = player;
+                } else {
+                    tactics.substitutes.splice(index, 0, player);
+                }
+            }
 
+            this.resetDrag();
+            this.show(tactics, manager);
+            return;
         }
 
 
