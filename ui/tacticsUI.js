@@ -2218,8 +2218,7 @@ class TacticsUI {
     }
 
     getPlayerConditionMarkup(player) {
-        // Lire les valeurs depuis la même source que l'écran Effectif (game.players),
-        // car la composition tactique peut contenir une ancienne copie du joueur.
+        // Valeurs canoniques partagées avec l'écran Effectif.
         const roster = (typeof game !== "undefined" && Array.isArray(game.players))
             ? game.players
             : (Array.isArray(this.ui?.game?.players) ? this.ui.game.players : []);
@@ -2235,7 +2234,7 @@ class TacticsUI {
         );
         const current = canonical || player || {};
         if (this.isPlayerInjured(current)) {
-            return '<div class="tactics-condition injured" aria-label="Joueur blessé" style="margin:2px auto 0;font-size:12px;line-height:1">🤕</div>';
+            return '<div class="tactics-condition injured" aria-label="Joueur blessé">🤕</div>';
         }
         const readNumber = (value, fallback) => {
             const parsed = Number(value);
@@ -2243,7 +2242,7 @@ class TacticsUI {
         };
         const form = readNumber(current.forme ?? current.form ?? current.moral, 70);
         const fatigue = readNumber(current.fatigue ?? current.currentFatigue, 0);
-        return '<div class="tactics-condition" aria-label="Forme et fatigue" style="display:flex;justify-content:center;align-items:center;gap:5px;margin:2px auto 0;padding:2px 5px;font-size:11px;line-height:1.1;white-space:nowrap;width:max-content;max-width:100%;box-sizing:border-box"><span class="condition-form">▰ ' + form + '</span><span class="condition-fatigue">♥ ' + fatigue + '</span></div>';
+        return '<div class="tactics-condition" aria-label="Forme et fatigue"><span class="condition-form">▰ ' + form + '</span><span class="condition-fatigue">♥ ' + fatigue + '</span></div>';
     }
 
     openPlayerProfile(player, manager, onBack) {
