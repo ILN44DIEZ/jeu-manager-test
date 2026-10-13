@@ -2232,15 +2232,23 @@ class TacticsUI {
         return roster.find(candidate => key && keyOf(candidate) === key) || player;
     }
 
+    getEnergyColor(value) {
+        const energy = Math.max(0, Math.min(100, Number(value) || 0));
+        if (energy >= 70) return "#35C759";
+        if (energy >= 40) return "#F5C542";
+        if (energy >= 20) return "#FF8C42";
+        return "#FF453A";
+    }
+
     getPlayerConditionValues(player) {
         const current = this.getCanonicalPlayer(player);
         const read = (value, fallback) => { const n = Number(value); return Number.isFinite(n) ? Math.max(0, Math.min(100, n)) : fallback; };
         const injury = String(current.blessure ?? current.injury ?? "").trim().toLowerCase();
         const injuryDays = Math.max(0, Number(current.joursBlessure ?? current.injuryDays) || 0);
-        return { player: current, injured: injuryDays > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury)), injuryDays, form: read(current.forme ?? current.form ?? current.moral, 70), fatigue: read(current.fatigue ?? current.currentFatigue, 0), fitness: read(current.conditionPhysique ?? current.fitness ?? current.condition, 100) };
-    }
-
-    getPlayerConditionMarkup(player, mode = "card") {
+        const fatigue = read(current.fatigue ?? current.currentFatigue, 0);
+        const energy = read(current.energy ?? current.energie, Math.max(0, 100 - fatigue));
+        return { player: current, injured: injuryDays > 0 || (injury !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injury)), injuryDays, form: read(current.forme ?? current.form ?? current.moral, 70), energy, energyColor: this.getEnergyColor(energy) };
+    }    getPlayerConditionMarkup(player, mode = "card") {
         const status = this.getPlayerConditionValues(player);
         const cardMode = mode === "card";
         const condition = document.createElement("div");
@@ -2250,15 +2258,16 @@ class TacticsUI {
             condition.setAttribute("aria-label", "Joueur blessé" + (status.injuryDays ? " — " + status.injuryDays + " jour(s) restant(s)" : ""));
             condition.textContent = "🤕" + (status.injuryDays ? " " + status.injuryDays + " j" : "");
         } else {
-            condition.setAttribute("aria-label", "Forme " + status.form + ", fatigue " + status.fatigue);
+            condition.setAttribute("aria-label", "Forme " + status.form + ", énergie " + status.energy + "%");
             const form = document.createElement("span"); form.className = "condition-form"; form.textContent = "▰ " + status.form;
-            const fatigue = document.createElement("span"); fatigue.className = "condition-fatigue"; fatigue.textContent = "♥ " + status.fatigue;
-            condition.append(form, fatigue);
+            const energy = document.createElement("span"); energy.className = "condition-energy"; energy.textContent = "⚡ " + status.energy;
+            energy.style.color = status.energyColor;
+            condition.append(form, energy);
         }
         Object.assign(condition.style, { display: "inline-flex", flexDirection: "row", justifyContent: "center", alignItems: "center", gap: "7px", padding: cardMode ? "3px 7px" : "2px 4px", boxSizing: "border-box", borderRadius: "6px", border: "1px solid rgba(141,255,173,.28)", background: status.injured ? "rgba(90,20,20,.45)" : "rgba(10,45,20,.55)", color: "#fff", fontSize: cardMode ? "12px" : "10px", fontWeight: "800", lineHeight: "1.1", whiteSpace: "nowrap" });
         if (status.injured) condition.style.borderColor = "rgba(255,141,155,.4)";
         const form = condition.querySelector(".condition-form"); if (form) form.style.color = "#8dffad";
-        const fatigue = condition.querySelector(".condition-fatigue"); if (fatigue) fatigue.style.color = "#ff9aa5";
+        const fatigue = condition.querySelector(".condition-energy"); if (fatigue) fatigue.style.color = "#ff9aa5";
         return mode === "markup" ? condition.outerHTML : condition;
     }
 
