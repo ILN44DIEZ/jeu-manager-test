@@ -12,7 +12,7 @@ game.currentMatchday = 0;
 /* CHOIX DU CLUB */
 /* ================================================= */
 
-function chooseClub(club) {
+function chooseClub(club, managerName = "") {
 
     game.currentSaveSlot = null;
 
@@ -61,7 +61,7 @@ function chooseClub(club) {
 
     game.manager.startCareer(
 
-        "Nouvel Entraîneur",
+        String(managerName || [game.pendingManagerFirstName || "", game.pendingManagerLastName || ""].filter(Boolean).join(" ") || "Nouvel Entraîneur").trim(),
 
         game.club
 
