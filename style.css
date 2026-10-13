@@ -389,3 +389,40 @@ textarea,
 .tactics-player-card .tactics-condition .condition-form { color: #72f39a; }
 .tactics-player-card .tactics-condition .condition-fatigue { color: #ff8d9b; }
 .tactics-player-card .tactics-condition.injured { display: block; font-size: 15px; padding-top: 0; }
+
+/* Indicateurs tactiques : contraste renforcé et disposition compacte. */
+.pitch-player .tactics-condition:not(.injured) {
+    background: rgba(10, 45, 20, 0.88) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 6px;
+    padding: 3px 5px;
+    gap: 5px;
+    font-size: 10px;
+    line-height: 1.1;
+    box-sizing: border-box;
+}
+.pitch-player .tactics-condition .condition-form {
+    color: #8dffad !important;
+    font-weight: 800;
+}
+.pitch-player .tactics-condition .condition-fatigue {
+    color: #ff9aa5 !important;
+    font-weight: 800;
+}
+.tactics-player-card .tactics-condition:not(.injured) {
+    min-height: 18px;
+    background: rgba(10, 45, 20, 0.45);
+    border-radius: 5px;
+    padding: 3px 4px;
+    gap: 7px;
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    overflow: visible;
+}
+.tactics-player-card .tactics-condition.injured {
+    background: transparent;
+    color: #ffffff;
+}
+
