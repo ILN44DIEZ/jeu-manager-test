@@ -4179,6 +4179,15 @@ const removeButton =
         `;
 
 
+        // Indicateurs compacts sous la note, identiques à ceux du terrain.
+        card.appendChild(this.getPlayerConditionMarkup(player, "card"));
+        Object.assign(card.style, { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px", height: "auto", minHeight: "0", padding: "12px 8px", boxSizing: "border-box" });
+        const nameNode = card.querySelector(".tactics-card-name") || card.querySelector("strong");
+        const positionNode = card.querySelector(".tactics-card-position") || card.querySelector("span");
+        const ratingNode = card.querySelector(".tactics-card-rating");
+        [nameNode, positionNode, ratingNode].filter(Boolean).forEach(node => { node.style.display = "block"; node.style.margin = "0"; node.style.padding = "0"; node.style.minHeight = "0"; node.style.flex = "0 0 auto"; node.style.lineHeight = "1.2"; });
+        if (nameNode) { nameNode.style.width = "100%"; nameNode.style.overflowWrap = "anywhere"; }
+        if (ratingNode) ratingNode.style.fontSize = "17px";
         card.style.touchAction =
             "none";
 
@@ -5241,6 +5250,15 @@ const removeButton =
         `;
 
 
+        // Indicateurs compacts sous la note, identiques à ceux du terrain.
+        card.appendChild(this.getPlayerConditionMarkup(player, "card"));
+        Object.assign(card.style, { display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "4px", height: "auto", minHeight: "0", padding: "12px 8px", boxSizing: "border-box" });
+        const nameNode = card.querySelector(".tactics-card-name") || card.querySelector("strong");
+        const positionNode = card.querySelector(".tactics-card-position") || card.querySelector("span");
+        const ratingNode = card.querySelector(".tactics-card-rating");
+        [nameNode, positionNode, ratingNode].filter(Boolean).forEach(node => { node.style.display = "block"; node.style.margin = "0"; node.style.padding = "0"; node.style.minHeight = "0"; node.style.flex = "0 0 auto"; node.style.lineHeight = "1.2"; });
+        if (nameNode) { nameNode.style.width = "100%"; nameNode.style.overflowWrap = "anywhere"; }
+        if (ratingNode) ratingNode.style.fontSize = "17px";
         card.style.touchAction =
             "none";
 
