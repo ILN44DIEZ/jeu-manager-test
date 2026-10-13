@@ -2244,7 +2244,7 @@ class TacticsUI {
         };
         const form = readNumber(current.forme ?? current.form ?? current.moral, 70);
         const fatigue = readNumber(current.fatigue ?? current.currentFatigue, 0);
-        return '<div class="tactics-condition" aria-label="Forme et fatigue"><span class="condition-form">▰ ' + form + '</span><span class="condition-fatigue">♥ ' + fatigue + '</span></div>';
+        return '<div class="tactics-condition" aria-label="Forme et fatigue" style="color:#fff!important;background:rgba(10,45,20,.92);border:1px solid rgba(255,255,255,.25);border-radius:5px;padding:2px 4px;box-sizing:border-box"><span class="condition-form" style="color:#8dffad!important;font-weight:800">▰ ' + form + '</span><span class="condition-fatigue" style="color:#ff9aa5!important;font-weight:800">♥ ' + fatigue + '</span></div>';
     }
 
     openPlayerProfile(player, manager, onBack) {
@@ -2274,6 +2274,25 @@ class TacticsUI {
         rating.className = "tactics-card-rating";
         rating.textContent = "⭐ " + (player.note ?? player.rating ?? "—");
         card.append(name, position, rating);
+
+        // Force un empilement compact : aucun espace vertical artificiel entre poste, note et condition.
+        Object.assign(card.style, {
+            display: "flex", flexDirection: "column", alignItems: "center",
+            justifyContent: "center", gap: "4px", height: "auto", minHeight: "0",
+            padding: "12px 8px", boxSizing: "border-box"
+        });
+        Object.assign(name.style, {
+            display: "block", margin: "0", padding: "0", lineHeight: "1.2",
+            minHeight: "0", flex: "0 0 auto"
+        });
+        Object.assign(position.style, {
+            display: "block", margin: "0", padding: "0", lineHeight: "1.15",
+            minHeight: "0", flex: "0 0 auto"
+        });
+        Object.assign(rating.style, {
+            display: "block", margin: "0", padding: "0", lineHeight: "1.15",
+            minHeight: "0", flex: "0 0 auto"
+        });
 
         const condition = document.createElement("div");
         condition.className = "tactics-condition tactics-card-condition";
