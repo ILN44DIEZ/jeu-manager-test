@@ -6,14 +6,16 @@ class PlayerUI {
 
     showProfile(player, manager, onBack, options = {}) {
         this.ui.clear();
+        const tacticsUI = this.ui?.tacticsUI;
+        player = tacticsUI?.getCanonicalPlayer ? tacticsUI.getCanonicalPlayer(player) : player;
         const fullName = [player.prenom || player.firstName || "", player.nom || player.lastName || ""].join(" ").trim() || player.name || "Fiche joueur";
-        const injured = Number(player.joursBlessure ?? player.injuryDays ?? 0) > 0 ||
-            (player.blessure && !["false", "aucune", "aucun", "0"].includes(String(player.blessure).toLowerCase()));
+        const sharedCondition = tacticsUI?.getPlayerConditionValues ? tacticsUI.getPlayerConditionValues(player) : null;
+        const injured = sharedCondition ? sharedCondition.injured : (Number(player.joursBlessure ?? player.injuryDays ?? 0) > 0 || (player.blessure && !["false", "aucune", "aucun", "0"].includes(String(player.blessure).toLowerCase())));
         const number = value => value === undefined || value === null || value === "" ? "—" : String(value);
         const money = value => value == null ? "—" : Number(value).toLocaleString("fr-FR") + " €";
-        const form = Math.max(0, Math.min(100, Number(player.forme ?? player.form ?? 70)));
-        const fatigue = Math.max(0, Math.min(100, Number(player.fatigue ?? 0)));
-        const overall = player.note ?? player.overall ?? "—";
+        const form = sharedCondition?.form ?? Math.max(0, Math.min(100, Number(player.forme ?? player.form ?? player.moral ?? 70)));
+        const fatigue = sharedCondition?.fatigue ?? Math.max(0, Math.min(100, Number(player.fatigue ?? 0)));
+        const fitness = sharedCondition?.fitness ?? Math.max(0, Math.min(100, Number(player.conditionPhysique ?? player.fitness ?? player.condition ?? 100)));        const overall = player.note ?? player.overall ?? "—";
         const potential = player.potentiel ?? player.potential ?? "—";
         const value = player.valeur ?? player.marketValue;
 
@@ -103,6 +105,7 @@ class PlayerUI {
                 } else {
                     content.append(bar("Forme",form,"#16c75b"));
                     content.append(bar("Fatigue",fatigue,"#ffb51b"));
+                    content.append(bar("Condition",fitness,"#45a6ff"));
                 }
             } else if (tab === "Stats") {
                 [["⚽ Buts",player.buts ?? player.goals],["🎯 Passes décisives",player.passes ?? player.assists],["🕒 Matchs joués",player.matchs ?? player.matchesPlayed],["⏱️ Minutes jouées",player.minutes ?? player.minutesPlayed],["🟨 Cartons jaunes",player.cartonsJaunes],["🟥 Cartons rouges",player.cartonsRouges]].forEach(([l,v])=>content.appendChild(makeRow(l,v)));
