@@ -315,3 +315,22 @@ textarea,
     user-select: text !important;
     -webkit-touch-callout: default !important;
 }
+
+
+/* Indicateurs compacts de forme/fatigue dans les tactiques. */
+.tactics-condition {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 3px;
+    font-size: 11px;
+    line-height: 1.15;
+    font-weight: 700;
+    white-space: nowrap;
+    pointer-events: none;
+}
+.tactics-condition .condition-form { color: #69e68a; }
+.tactics-condition .condition-fatigue { color: #ff7777; }
+.tactics-condition.injured { display: block; font-size: 17px; }
+.pitch-player .tactics-condition { position: relative; z-index: 2; }
