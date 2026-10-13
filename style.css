@@ -375,3 +375,17 @@ textarea,
     top: calc(100% + 15px);
 }
 .pitch-player .player-position { z-index: 2; }
+
+/* Correctifs lisibilité des conditions et cartes remplaçants/réservistes. */
+.pitch-player .tactics-condition { color: #fff !important; background: rgba(0,0,0,.72) !important; width: max-content; max-width: 92px; padding: 2px 4px; gap: 4px; font-size: 10px; font-weight: 700; text-shadow: none; }
+.pitch-player .tactics-condition .condition-form { color: #72f39a !important; }
+.pitch-player .tactics-condition .condition-fatigue { color: #ff8d9b !important; }
+.pitch-player .tactics-condition.injured { color: #fff !important; background: transparent !important; padding: 0; }
+.tactics-player-card { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 5px; min-height: 0; padding: 12px 8px; }
+.tactics-player-card .tactics-card-name { display: block; width: 100%; font-size: 16px; line-height: 1.25; overflow-wrap: anywhere; }
+.tactics-player-card .tactics-card-position { display: block; font-size: 14px; line-height: 1.2; margin: 0; }
+.tactics-player-card .tactics-card-rating { display: block; font-size: 17px; line-height: 1.2; margin: 0; }
+.tactics-player-card .tactics-condition.tactics-card-condition { display: flex; flex-direction: row; justify-content: center; align-items: center; gap: 8px; width: 100%; margin: 0; padding: 2px 0 0; font-size: 12px; line-height: 1.15; white-space: nowrap; overflow: hidden; box-sizing: border-box; }
+.tactics-player-card .tactics-condition .condition-form { color: #72f39a; }
+.tactics-player-card .tactics-condition .condition-fatigue { color: #ff8d9b; }
+.tactics-player-card .tactics-condition.injured { display: block; font-size: 15px; padding-top: 0; }
