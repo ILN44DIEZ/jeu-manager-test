@@ -55,7 +55,7 @@ button {
 
     border-radius: 12px;
 
-    overflow: hidden;
+    overflow: visible;
 
 }
 
@@ -322,28 +322,39 @@ textarea,
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 5px;
-    margin-top: 3px;
-    font-size: 11px;
-    line-height: 1.15;
+    gap: 3px;
+    margin-top: 1px;
+    font-size: 10px;
+    line-height: 1;
     font-weight: 700;
     white-space: nowrap;
     pointer-events: none;
 }
 .tactics-condition .condition-form { color: #69e68a; }
 .tactics-condition .condition-fatigue { color: #ff7777; }
+.tactics-condition.injured { display: block; font-size: 14px; }
+.tactics-condition .condition-form { color: #69e68a; }
+.tactics-condition .condition-fatigue { color: #ff7777; }
 .tactics-condition.injured { display: block; font-size: 17px; }
 .pitch-player .tactics-condition {
     position: absolute;
-    top: calc(100% + 29px);
+    top: calc(100% + 17px);
     left: 50%;
     transform: translateX(-50%);
-    z-index: 3;
-    padding: 2px 5px;
-    border-radius: 5px;
+    z-index: 4;
+    padding: 1px 4px;
+    border-radius: 4px;
     background: rgba(0,0,0,0.42);
-    font-size: 11px;
-    line-height: 1.15;
+    font-size: 10px;
+    line-height: 1;
 }
+.pitch-player .tactics-condition.injured {
+    top: calc(100% + 17px);
+    font-size: 14px;
+}
+.pitch-player.goalkeeper-slot .tactics-condition {
+    top: calc(100% + 17px);
+}
+.pitch-player .player-position { z-index: 2; }
 .pitch-player .tactics-condition.injured { top: calc(100% + 29px); }
 .pitch-player .player-position { z-index: 2; }
