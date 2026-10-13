@@ -317,44 +317,61 @@ textarea,
 }
 
 
-/* Indicateurs compacts de forme/fatigue dans les tactiques. */
-.tactics-condition {
+
+/* Indicateurs de condition visibles dans les cartes et sous chaque joueur du terrain. */
+.tactics-player-card {
     display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+}
+.tactics-player-card .tactics-condition {
+    position: static;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    margin: 2px 0 0;
+    padding: 0;
+    font-size: 11px;
+    line-height: 1.1;
+    white-space: nowrap;
+    overflow: visible;
+}
+.tactics-player-card .tactics-condition.injured {
+    display: block;
+    font-size: 15px;
+    line-height: 1.1;
+}
+.pitch-player .tactics-condition {
+    position: absolute;
+    top: calc(100% + 15px);
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: row;
     justify-content: center;
     align-items: center;
     gap: 3px;
-    margin-top: 1px;
-    font-size: 10px;
-    line-height: 1;
-    font-weight: 700;
-    white-space: nowrap;
-    pointer-events: none;
-}
-.tactics-condition .condition-form { color: #69e68a; }
-.tactics-condition .condition-fatigue { color: #ff7777; }
-.tactics-condition.injured { display: block; font-size: 14px; }
-.tactics-condition .condition-form { color: #69e68a; }
-.tactics-condition .condition-fatigue { color: #ff7777; }
-.tactics-condition.injured { display: block; font-size: 17px; }
-.pitch-player .tactics-condition {
-    position: absolute;
-    top: calc(100% + 17px);
-    left: 50%;
-    transform: translateX(-50%);
-    z-index: 4;
-    padding: 1px 4px;
+    width: max-content;
+    max-width: 100px;
+    margin: 0;
+    padding: 1px 3px;
     border-radius: 4px;
-    background: rgba(0,0,0,0.42);
+    background: rgba(0,0,0,0.55);
     font-size: 10px;
     line-height: 1;
+    white-space: nowrap;
+    z-index: 4;
 }
 .pitch-player .tactics-condition.injured {
-    top: calc(100% + 17px);
+    top: calc(100% + 15px);
+    display: block;
     font-size: 14px;
 }
 .pitch-player.goalkeeper-slot .tactics-condition {
-    top: calc(100% + 17px);
+    top: calc(100% + 15px);
 }
-.pitch-player .player-position { z-index: 2; }
-.pitch-player .tactics-condition.injured { top: calc(100% + 29px); }
 .pitch-player .player-position { z-index: 2; }
