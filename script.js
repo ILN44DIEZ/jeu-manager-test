@@ -111,7 +111,8 @@ function chooseClub(club, managerName = "") {
 
     game.calendar =
         new ChampionshipCalendar(
-            teams
+            teams,
+            data.calendarStartDate || "2026-08-15"
         );
 
 
@@ -315,6 +316,12 @@ function saveCareer(slot = 1) {
             game.calendar
                 ? game.calendar.matchdays
                 : null,
+
+        calendarStartDate:
+            game.calendar ? game.calendar.seasonStartDate : null,
+
+        calendarEvents:
+            game.calendar ? game.calendar.events : [],
 
 
         /* ========================= */
@@ -575,8 +582,11 @@ function loadCareer(slot = 1) {
         game.calendar.matchdays =
             data.calendar;
 
+        game.calendar.events = Array.isArray(data.calendarEvents) ? data.calendarEvents : [];
+        game.calendar.assignMatchdayDates();
+
         console.log(
-            "📅 Calendrier restauré."
+            "📅 Calendrier daté restauré."
         );
 
     }
@@ -590,9 +600,10 @@ function loadCareer(slot = 1) {
          */
 
         game.calendar.generateFullCalendar();
+        game.calendar.events = Array.isArray(data.calendarEvents) ? data.calendarEvents : [];
 
         console.log(
-            "📅 Nouveau calendrier généré pour ancienne sauvegarde."
+            "📅 Nouveau calendrier daté généré pour ancienne sauvegarde."
         );
 
     }
