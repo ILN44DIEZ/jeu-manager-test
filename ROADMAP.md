@@ -14,7 +14,15 @@
 - [x] Interface allégée
 - [x] Première base du calendrier daté : dates par journée, événements avec début/fin et sauvegarde des données
 
-## Prochaines étapes
+## Étape 2 — Gestion complète de l’effectif (en cours)
+- [x] Remplaçants et réservistes séparés, avec glisser-déposer dans les tactiques
+- [x] Empêcher le lancement d’un match avec des joueurs blessés sélectionnés
+- [x] Prendre en compte les titulaires choisis dans la simulation et les contributions de buteurs/passeurs
+- [x] Afficher clairement la disponibilité, la fatigue, la forme et la condition physique dans les cartes de l’effectif
+- [ ] Vérifier que les changements de composition sont correctement sauvegardés/restaurés
+- [ ] Tester le cycle complet : composition → match → fatigue/blessures → récupération → match suivant
+
+## Étapes suivantes
 1. [ ] Vérifier et corriger les données des joueurs et les liens club-joueur
 2. [ ] Faire évoluer forme, fatigue et moral après les matchs
 3. [ ] Finaliser le système temporel : date courante de carrière et progression des jours/semaines
