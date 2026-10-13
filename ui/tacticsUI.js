@@ -2637,37 +2637,7 @@ class TacticsUI {
         `;
 
 
-        const replaceButton =
-            document.createElement(
-                "button"
-            );
-
-
-        replaceButton.textContent =
-            "🔄 Remplacer";
-
-
-        replaceButton.addEventListener(
-            "click",
-            () => {
-
-                this.showReplacementList(
-                    tactics,
-                    manager,
-                    player,
-                    position
-                );
-
-            }
-        );
-
-
-        box.appendChild(
-            replaceButton
-        );
-
-
-        const removeButton =
+const removeButton =
             document.createElement(
                 "button"
             );
@@ -3628,37 +3598,7 @@ class TacticsUI {
         `;
 
 
-        const replaceButton =
-            document.createElement(
-                "button"
-            );
-
-
-        replaceButton.textContent =
-            "🔄 Remplacer";
-
-
-        replaceButton.addEventListener(
-            "click",
-            () => {
-
-                this.showReplacementList(
-                    tactics,
-                    manager,
-                    player,
-                    position
-                );
-
-            }
-        );
-
-
-        box.appendChild(
-            replaceButton
-        );
-
-
-        const removeButton =
+const removeButton =
             document.createElement(
                 "button"
             );
@@ -4615,37 +4555,7 @@ class TacticsUI {
         `;
 
 
-        const replaceButton =
-            document.createElement(
-                "button"
-            );
-
-
-        replaceButton.textContent =
-            "🔄 Remplacer";
-
-
-        replaceButton.addEventListener(
-            "click",
-            () => {
-
-                this.showReplacementList(
-                    tactics,
-                    manager,
-                    player,
-                    position
-                );
-
-            }
-        );
-
-
-        box.appendChild(
-            replaceButton
-        );
-
-
-        const removeButton =
+const removeButton =
             document.createElement(
                 "button"
             );
@@ -5707,37 +5617,7 @@ class TacticsUI {
         `;
 
 
-        const replaceButton =
-            document.createElement(
-                "button"
-            );
-
-
-        replaceButton.textContent =
-            "🔄 Remplacer";
-
-
-        replaceButton.addEventListener(
-            "click",
-            () => {
-
-                this.showReplacementList(
-                    tactics,
-                    manager,
-                    player,
-                    position
-                );
-
-            }
-        );
-
-
-        box.appendChild(
-            replaceButton
-        );
-
-
-        const removeButton =
+const removeButton =
             document.createElement(
                 "button"
             );
