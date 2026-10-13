@@ -13,7 +13,15 @@ Cette roadmap suit le même ordre de priorité que le fichier principal `ROADMAP
 - [x] Sauvegardes multiples
 - [x] Base du calendrier daté et des événements (dates par journée, dates de début/fin des événements, persistance)
 
-## Ordre de développement
+## Étape 2 — Gestion complète de l’effectif (en cours)
+- [x] Séparer titulaires, remplaçants et réservistes dans les tactiques
+- [x] Bloquer le match si un joueur blessé est sélectionné
+- [x] Utiliser le onze choisi pour les contributions de match
+- [x] Montrer disponibilité, fatigue, forme et condition physique sur les cartes de l’effectif
+- [ ] Vérifier la sauvegarde/restauration de la composition
+- [ ] Tester le cycle composition → match → fatigue/blessures → récupération
+
+## Étapes suivantes
 1. [ ] Vérifier les données des joueurs et les liens club-joueur
 2. [ ] Améliorer forme, fatigue et moral
 3. [ ] Finaliser le système temporel et la date courante de carrière
