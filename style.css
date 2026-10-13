@@ -426,3 +426,39 @@ textarea,
     color: #ffffff;
 }
 
+
+
+/* Indicateurs de forme/fatigue : ligne compacte visible sous la note sur les cartes. */
+.tactics-player-card .tactics-card-condition {
+    display: flex !important;
+    position: static !important;
+    flex: 0 0 auto !important;
+    align-self: stretch !important;
+    justify-content: center !important;
+    align-items: center !important;
+    flex-direction: row !important;
+    gap: 7px !important;
+    width: 100% !important;
+    min-height: 18px !important;
+    margin: 2px 0 0 !important;
+    padding: 3px 4px !important;
+    box-sizing: border-box !important;
+    border-radius: 5px !important;
+    background: rgba(10, 45, 20, .88) !important;
+    color: #fff !important;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    line-height: 1.1 !important;
+    white-space: nowrap !important;
+    overflow: visible !important;
+}
+.tactics-player-card .tactics-card-condition .condition-form { color: #8dffad !important; }
+.tactics-player-card .tactics-card-condition .condition-fatigue { color: #ff9aa5 !important; }
+.tactics-player-card .tactics-card-condition.injured {
+    display: block !important;
+    min-height: 18px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    color: #fff !important;
+    font-size: 15px !important;
+}
