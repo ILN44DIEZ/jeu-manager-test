@@ -249,13 +249,15 @@ button {
 
 .tactics-player-card {
 
-    width: 90%;
+    width: 100%;
 
-    max-width: 420px;
+    max-width: none;
 
-    margin: 8px auto;
+    min-width: 0;
 
-    padding: 12px;
+    margin: 0;
+
+    padding: 10px 6px;
 
     box-sizing: border-box;
 
