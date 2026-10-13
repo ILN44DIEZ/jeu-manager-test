@@ -512,3 +512,7 @@ textarea,
 /* Cartes remplaçants/réservistes : supprimer le saut de ligne après le nom. */
 .tactics-substitutes-zone .tactics-player-card br,
 .tactics-reserves-zone .tactics-player-card br { display: none !important; }
+
+
+/* Couleur d’énergie unifiée sur terrain, cartes et fiche joueur. */
+.tactics-condition .condition-energy, .player-condition-indicators .condition-energy { font-weight: 800; }
