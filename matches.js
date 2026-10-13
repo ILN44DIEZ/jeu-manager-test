@@ -79,7 +79,9 @@ class MatchEngine {
         // Sinon, choisir automatiquement jusqu'à 11 joueurs aptes pour les clubs IA.
         const source = Array.isArray(selected)
             ? selected
-            : squad.filter(player => !this.isInjured(player)).slice(0, 11);
+            : squad.filter(player => !this.isInjured(player))
+                .sort((a, b) => this.getPlayerRating(b) - this.getPlayerRating(a))
+                .slice(0, 11);
 
         const resolveToSquad = candidate => {
             if (!candidate) return null;
@@ -423,13 +425,47 @@ class MatchEngine {
         return effectiveGoals;
     }
 
+    getPlayerRating(player) {
+        const rating = Number(player && (player.note ?? player.rating ?? player.overall));
+        return Number.isFinite(rating) && rating > 0 ? Math.max(1, Math.min(99, rating)) : 60;
+    }
+
+    getTeamStrength(teamName) {
+        const players = this.getEligibleMatchPlayers(teamName);
+        if (!players.length) return 60;
+        const ratings = players.map(player => this.getPlayerRating(player));
+        return ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length;
+    }
+
+    getExpectedGoals(teamName, opponentName, isHome) {
+        const strength = this.getTeamStrength(teamName);
+        const opponentStrength = this.getTeamStrength(opponentName);
+        // L'écart de niveau influence nettement les occasions, sans rendre le résultat certain.
+        const difference = Math.max(-30, Math.min(30, strength - opponentStrength));
+        const homeBonus = isHome ? 0.12 : 0;
+        const fatiguePenalty = this.getTeamFatiguePenalty(teamName);
+        const expected = 1.35 * Math.exp(difference / 23) + homeBonus;
+        return Math.max(0.20, Math.min(3.10, expected * (1 - fatiguePenalty)));
+    }
+
+    sampleGoals(expectedGoals) {
+        // Approximation de Poisson : les scores restent variables, mais les équipes fortes
+        // obtiennent en moyenne davantage de buts et de chances de gagner.
+        const limit = Math.exp(-Math.max(0.05, expectedGoals));
+        let product = 1;
+        let goals = 0;
+        do {
+            goals++;
+            product *= Math.random();
+        } while (product > limit && goals < 8);
+        return Math.max(0, goals - 1);
+    }
+
     simulateMatch(homeTeam, awayTeam) {
-        const rawHomeGoals = Math.floor(Math.random() * 5);
-        const rawAwayGoals = Math.floor(Math.random() * 5);
-        const homePenalty = this.getTeamFatiguePenalty(homeTeam);
-        const awayPenalty = this.getTeamFatiguePenalty(awayTeam);
-        const homeGoals = this.applyFatigueToGoals(rawHomeGoals, homePenalty);
-        const awayGoals = this.applyFatigueToGoals(rawAwayGoals, awayPenalty);
+        const expectedHomeGoals = this.getExpectedGoals(homeTeam, awayTeam, true);
+        const expectedAwayGoals = this.getExpectedGoals(awayTeam, homeTeam, false);
+        const homeGoals = this.sampleGoals(expectedHomeGoals);
+        const awayGoals = this.sampleGoals(expectedAwayGoals);
 
         const events =
             this.generateGoalEvents(
