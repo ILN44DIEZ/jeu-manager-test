@@ -462,3 +462,37 @@ textarea,
     color: #fff !important;
     font-size: 15px !important;
 }
+
+
+/* Correctif robuste : indicateurs du terrain toujours contrastés, cartes sans espace vertical fantôme. */
+.pitch-player .tactics-condition,
+.pitch-player .tactics-condition span {
+    color: #ffffff !important;
+    text-shadow: none !important;
+}
+.pitch-player .tactics-condition .condition-form {
+    color: #8dffad !important;
+}
+.pitch-player .tactics-condition .condition-fatigue {
+    color: #ff9aa5 !important;
+}
+.tactics-player-card {
+    height: auto !important;
+    min-height: 0 !important;
+    justify-content: center !important;
+    align-content: start !important;
+    row-gap: 4px !important;
+}
+.tactics-player-card > .tactics-card-name,
+.tactics-player-card > .tactics-card-position,
+.tactics-player-card > .tactics-card-rating,
+.tactics-player-card > .tactics-card-condition {
+    position: static !important;
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    transform: none !important;
+}
+.tactics-player-card > .tactics-card-condition {
+    margin-top: 2px !important;
+}
