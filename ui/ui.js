@@ -3881,6 +3881,7 @@ if (match.played && match.result) {
         this.showMessage("🏟️ Club : " + manager.clubName);
         this.showMessage("💰 Budget disponible : " + Number(manager.budget || 0).toLocaleString("fr-FR") + " €");
 
+        const savedFilters = this.transferMarketFilters || {};
         const clubs = game.data?.clubs || [];
         const leagues = [...new Set(clubs.map(club => club.ligue).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr"));
         const filters = document.createElement("div");
@@ -3938,7 +3939,6 @@ if (match.played && match.result) {
         agePanel.style.gap = "8px";
         filters.appendChild(agePanel);
 
-        const savedFilters = this.transferMarketFilters || {};
         let minAge = Number.isFinite(Number(savedFilters.minAge)) ? Number(savedFilters.minAge) : 15;
         let maxAge = Number.isFinite(Number(savedFilters.maxAge)) ? Number(savedFilters.maxAge) : 40;
         minAge = Math.max(15, Math.min(40, minAge));
