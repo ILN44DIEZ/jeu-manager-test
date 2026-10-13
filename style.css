@@ -333,4 +333,17 @@ textarea,
 .tactics-condition .condition-form { color: #69e68a; }
 .tactics-condition .condition-fatigue { color: #ff7777; }
 .tactics-condition.injured { display: block; font-size: 17px; }
-.pitch-player .tactics-condition { position: relative; z-index: 2; }
+.pitch-player .tactics-condition {
+    position: absolute;
+    top: calc(100% + 29px);
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    padding: 2px 5px;
+    border-radius: 5px;
+    background: rgba(0,0,0,0.42);
+    font-size: 11px;
+    line-height: 1.15;
+}
+.pitch-player .tactics-condition.injured { top: calc(100% + 29px); }
+.pitch-player .player-position { z-index: 2; }
