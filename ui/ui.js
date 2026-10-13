@@ -3969,6 +3969,17 @@ if (match.played && match.result) {
         maxSlider.style.width = "100%";
         agePanel.appendChild(maxSlider);
 
+        const resetFiltersButton = document.createElement("button");
+        resetFiltersButton.type = "button";
+        resetFiltersButton.textContent = "↺ Réinitialiser les filtres";
+        resetFiltersButton.style.display = "block";
+        resetFiltersButton.style.width = "auto";
+        resetFiltersButton.style.margin = "8px auto 0";
+        resetFiltersButton.style.padding = "8px 14px";
+        resetFiltersButton.style.fontSize = "14px";
+        resetFiltersButton.style.borderRadius = "8px";
+        filters.appendChild(resetFiltersButton);
+
         const agePanelOpen = Boolean(savedFilters.agePanelOpen);
         agePanel.style.display = agePanelOpen ? "grid" : "none";
         ageToggle.textContent = agePanelOpen ? "🎂 Filtrer par âge ▴" : "🎂 Filtrer par âge ▾";
@@ -3977,6 +3988,21 @@ if (match.played && match.result) {
             agePanel.style.display = isHidden ? "grid" : "none";
             ageToggle.textContent = isHidden ? "🎂 Filtrer par âge ▴" : "🎂 Filtrer par âge ▾";
             saveFilters();
+        });
+
+        resetFiltersButton.addEventListener("click", () => {
+            leagueSelect.value = "";
+            search.value = "";
+            minAge = 15;
+            maxAge = 40;
+            minSlider.value = "15";
+            maxSlider.value = "40";
+            minLabel.textContent = "Âge minimum : 15 ans";
+            maxLabel.textContent = "Âge maximum : 40 ans";
+            ageValue.textContent = "Âge : 15–40 ans";
+            agePanel.style.display = "none";
+            ageToggle.textContent = "🎂 Filtrer par âge ▾";
+            render();
         });
 
         const results = document.createElement("div");
