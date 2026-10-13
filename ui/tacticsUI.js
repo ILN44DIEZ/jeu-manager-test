@@ -84,32 +84,34 @@ class TacticsUI {
             "🧠 Tactiques"
         );
 
+        // Résumé compact : formation/style et titulaires/remplaçants sur deux lignes.
+        const summary = document.createElement("div");
+        summary.style.display = "grid";
+        summary.style.gridTemplateColumns = "repeat(2, minmax(0, 1fr))";
+        summary.style.gap = "8px 12px";
+        summary.style.width = "100%";
+        summary.style.maxWidth = "620px";
+        summary.style.margin = "0 auto 16px";
+        summary.style.boxSizing = "border-box";
+        summary.style.textAlign = "left";
 
-        this.ui.showMessage(
-            "📐 Formation : " +
-            tactics.getFormation()
-        );
+        const addSummaryItem = text => {
+            const item = document.createElement("div");
+            item.textContent = text;
+            item.style.minWidth = "0";
+            item.style.padding = "4px 2px";
+            item.style.fontSize = "clamp(14px, 3.8vw, 20px)";
+            item.style.lineHeight = "1.35";
+            item.style.overflowWrap = "anywhere";
+            summary.appendChild(item);
+        };
 
+        addSummaryItem("📐 Formation : " + tactics.getFormation());
+        addSummaryItem("⚙️ Style : " + tactics.getCurrentTactic());
+        addSummaryItem("⚽ Titulaires : " + tactics.lineup.length + " / 11");
+        addSummaryItem("🪑 Remplaçants : " + tactics.substitutes.length + " / 9");
 
-        this.ui.showMessage(
-            "⚙️ Style : " +
-            tactics.getCurrentTactic()
-        );
-
-
-        this.ui.showMessage(
-            "⚽ Titulaires : " +
-            tactics.lineup.length +
-            " / 11"
-        );
-
-
-        this.ui.showMessage(
-            "🪑 Remplaçants : " +
-            tactics.substitutes.length +
-            " / 9"
-        );
-
+        this.container.appendChild(summary);
 
         this.drawPitch(
             tactics,
