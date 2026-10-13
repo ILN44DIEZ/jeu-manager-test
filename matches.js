@@ -444,8 +444,8 @@ class MatchEngine {
         const difference = Math.max(-30, Math.min(30, strength - opponentStrength));
         const homeBonus = isHome ? 0.12 : 0;
         const fatiguePenalty = this.getTeamFatiguePenalty(teamName);
-        const expected = 1.35 * Math.exp(difference / 23) + homeBonus;
-        return Math.max(0.20, Math.min(3.10, expected * (1 - fatiguePenalty)));
+        const expected = 1.25 * Math.exp(difference / 40) + homeBonus;
+        return Math.max(0.25, Math.min(2.80, expected * (1 - fatiguePenalty)));
     }
 
     sampleGoals(expectedGoals) {
