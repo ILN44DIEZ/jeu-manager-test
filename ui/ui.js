@@ -569,6 +569,17 @@ class UI {
             manager.clubName + " · " + manager.season
         );
 
+        // Date de la carrière : date de la prochaine journée non jouée.
+        const careerCalendar = game.calendar;
+        const nextDatedMatchday = careerCalendar?.matchdays?.find(day => day.played !== true && day.date);
+        const careerDate = nextDatedMatchday?.date ||
+            careerCalendar?.matchdays?.find(day => day.date)?.date;
+        if (careerDate) {
+            this.showMessage(
+                "📅 " + careerCalendar.formatDate(careerDate)
+            );
+        }
+
         this.showMessage(
             "👔 " + manager.managerName +
             (manager.league ? " · " + manager.league : "")
