@@ -3185,20 +3185,30 @@ const removeButton =
 
         card.innerHTML = `
 
-            <strong>
+            <strong class="tactics-card-name">
                 ${player.prenom ? player.prenom + " " : ""}
                 ${player.nom}
             </strong>
 
-            <br>
-
-            <span>
-                ${player.poste}
+            <span class="tactics-card-position">
+                ${player.poste || player.position || "—"}
             </span>
 
-            ⭐ ${player.note}
+            <div class="tactics-card-rating">
+                ⭐ ${player.note ?? player.rating ?? "—"}
+            </div>
 
         `;
+
+        // Les indicateurs sont ajoutés sous la note, sur une seule ligne.
+        // Cette méthode est définie plusieurs fois dans le fichier : c'est la dernière
+        // définition qui est exécutée, elle doit donc elle aussi les afficher.
+        const conditionTemplate = document.createElement("div");
+        conditionTemplate.innerHTML = this.getPlayerConditionMarkup(player);
+        if (conditionTemplate.firstElementChild) {
+            conditionTemplate.firstElementChild.classList.add("tactics-card-condition");
+            card.appendChild(conditionTemplate.firstElementChild);
+        }
 
 
         card.style.touchAction =
