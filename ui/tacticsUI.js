@@ -2253,100 +2253,44 @@ class TacticsUI {
         }
     }
 
-    createPlayerCard(
-        player,
-        type,
-        tactics,
-        manager
-    ) {
+    createPlayerCard(player, type, tactics, manager) {
+        const card = document.createElement("div");
+        card.className = "tactics-player-card";
+        card.dataset.playerKey = tactics.getPlayerKey(player);
+        card.dataset.playerType = type;
+        card.dataset.wasDragged = "false";
 
-        const card =
-            document.createElement(
-                "div"
-            );
+        const name = document.createElement("strong");
+        name.className = "tactics-card-name";
+        name.textContent = [player.prenom, player.nom].filter(Boolean).join(" ");
 
+        const position = document.createElement("span");
+        position.className = "tactics-card-position";
+        position.textContent = player.poste || player.position || "—";
 
-        card.className =
-            "tactics-player-card";
+        const rating = document.createElement("div");
+        rating.className = "tactics-card-rating";
+        rating.textContent = "⭐ " + (player.note ?? player.rating ?? "—");
+        card.append(name, position, rating);
 
+        const template = document.createElement("div");
+        template.innerHTML = this.getPlayerConditionMarkup(player);
+        if (template.firstElementChild) {
+            template.firstElementChild.classList.add("tactics-card-condition");
+            card.appendChild(template.firstElementChild);
+        }
 
-        const key =
-            tactics.getPlayerKey(
-                player
-            );
-
-
-        card.dataset.playerKey =
-            key;
-
-
-        card.dataset.playerType =
-            type;
-
-
-        card.dataset.wasDragged =
-            "false";
-
-
-        card.innerHTML = `
-
-            <strong>
-                ${player.prenom ? player.prenom + " " : ""}
-                ${player.nom}
-            </strong>
-
-            <br>
-
-            <span>
-                ${player.poste}
-            </span>
-
-            ⭐ ${player.note}
-            ${this.getPlayerConditionMarkup(player)}
-
-        `;
-
-
-        card.style.touchAction =
-            "none";
-
-
-        this.enableCardDrag(
-            card,
-            player,
-            type,
-            tactics,
-            manager
-        );
-
-
-        card.addEventListener(
-            "click",
-            () => {
-
-                if (
-                    card.dataset.wasDragged ===
-                    "true"
-                ) {
-
-                    card.dataset.wasDragged =
-                        "false";
-
-                    return;
-
-                }
-
-
-                this.openPlayerProfile(player, manager, () => this.show(tactics, manager));
-
+        card.style.touchAction = "none";
+        this.enableCardDrag(card, player, type, tactics, manager);
+        card.addEventListener("click", () => {
+            if (card.dataset.wasDragged === "true") {
+                card.dataset.wasDragged = "false";
+                return;
             }
-        );
-
-
+            this.openPlayerProfile(player, manager, () => this.show(tactics, manager));
+        });
         return card;
-
     }
-
 
     /* ================================================= */
     /* REMPLAÇANTS */
