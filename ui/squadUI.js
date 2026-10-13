@@ -430,159 +430,29 @@ class SquadUI {
     /* ================================================= */
 
     createPlayerCard(player) {
-
-        const card =
-            document.createElement(
-                "div"
-            );
-
-
-        card.className =
-            "player-card";
-
-
-        card.style.border =
-            "1px solid #ccc";
-
-
-        card.style.borderRadius =
-            "10px";
-
-
-        card.style.padding =
-            "10px";
-
-
-        card.style.margin =
-            "0";
-
-
-        card.style.cursor =
-            "pointer";
-
-
-        card.style.textAlign =
-            "center";
-
-
-        card.style.boxSizing =
-            "border-box";
-
-
-        card.style.minWidth =
-            "0";
-
-
-        card.style.transition =
-            "transform 0.15s";
-
-
-        /* ================================================= */
-        /* CONTENU */
-        /* ================================================= */
-
-        const injuryDays = Math.max(0, Number(player.joursBlessure ?? player.injuryDays) || 0);
-        const injuryText = String(player.blessure ?? player.injury ?? "").trim().toLowerCase();
-        const injured = injuryDays > 0 ||
-            (injuryText !== "" && !["false", "aucune", "aucun", "null", "0"].includes(injuryText));
-        const fatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
-        const form = Math.max(0, Math.min(100, Number(player.forme ?? player.form ?? 70) || 0));
-        const fitness = Math.max(0, Math.min(100, Number(player.fitness ?? player.condition ?? 100) || 0));
-
-        if (injured) {
-            card.style.border = "2px solid #e05252";
-            card.style.background = "rgba(224, 82, 82, 0.12)";
-        } else if (fatigue >= 80) {
-            card.style.border = "2px solid #e0a33a";
-        }
-
-        card.innerHTML = `
-
-            <strong>
-                ${player.prenom ? player.prenom + " " : ""}
-                ${player.nom || player.lastName || "Joueur sans nom"}
-            </strong>
-
-            <br>
-
-            ${player.poste || player.position || "?"}
-            • ⭐ ${player.note ?? player.overall ?? "—"}
-
-            <br>
-
-            🎂 ${player.age ?? "—"} ans
-
-            <br>
-
-            💶 ${Number(player.valeur ?? player.value ?? 0).toLocaleString("fr-FR")} €
-
-            <br>
-
-            ${injured
-                ? "🚑 Blessé" + (injuryDays > 0 ? " · " + injuryDays + " j" : "")
-                : "✅ Disponible"}
-
-            <br>
-
-            😮‍💨 Fatigue ${fatigue}% · 💪 Forme ${form}% · ⚡ Condition ${fitness}%
-
-        `;
-
-
-        /* ================================================= */
-        /* EFFET SOURIS */
-        /* ================================================= */
-
-        card.addEventListener(
-            "mouseenter",
-            () => {
-
-                card.style.transform =
-                    "scale(1.02)";
-
-            }
-        );
-
-
-        card.addEventListener(
-            "mouseleave",
-            () => {
-
-                card.style.transform =
-                    "scale(1)";
-
-            }
-        );
-
-
-        /* ================================================= */
-        /* CLIC */
-        /* ================================================= */
-
-        card.addEventListener(
-
-            "click",
-
-            () => {
-
-                this.showPlayerProfile(
-
-                    player,
-
-                    this.currentManager
-
-                );
-
-            }
-
-        );
-
-
+        const current = this.ui?.tacticsUI?.getCanonicalPlayer ? this.ui.tacticsUI.getCanonicalPlayer(player) : player;
+        const status = this.ui?.tacticsUI?.getPlayerConditionValues ? this.ui.tacticsUI.getPlayerConditionValues(current) : {
+            injured: Number(current.joursBlessure ?? current.injuryDays) > 0 || !!current.blessure,
+            injuryDays: Number(current.joursBlessure ?? current.injuryDays) || 0,
+            form: Math.max(0, Math.min(100, Number(current.forme ?? current.form ?? current.moral ?? 70))),
+            fatigue: Math.max(0, Math.min(100, Number(current.fatigue) || 0)),
+            fitness: Math.max(0, Math.min(100, Number(current.conditionPhysique ?? current.fitness ?? current.condition ?? 100)))
+        };
+        const card = document.createElement("div"); card.className = "player-card";
+        Object.assign(card.style, { border: status.injured ? "2px solid #e05252" : "1px solid #ccc", background: status.injured ? "rgba(224,82,82,.12)" : "", borderRadius: "10px", padding: "10px", margin: "0", cursor: "pointer", textAlign: "center", boxSizing: "border-box", minWidth: "0", transition: "transform .15s" });
+        const name = [current.prenom ? current.prenom + " " : "", current.nom || current.lastName || "Joueur sans nom"].join("");
+        card.innerHTML = "<strong>" + name + "</strong><br>" + (current.poste || current.position || "?") + " • ⭐ " + (current.note ?? current.overall ?? current.rating ?? "—") + "<br>🎂 " + (current.age ?? "—") + " ans<br>💶 " + Number(current.valeur ?? current.value ?? 0).toLocaleString("fr-FR") + " €<br>" + (status.injured ? "🤕 Blessé" + (status.injuryDays ? " · " + status.injuryDays + " j" : "") : "✅ Disponible") + "<br>";
+        const indicators = document.createElement("span"); indicators.className = "player-condition-indicators";
+        indicators.style.cssText = "display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:3px 7px;border:1px solid rgba(141,255,173,.25);border-radius:6px;background:rgba(10,45,20,.55);font-weight:800;white-space:nowrap";
+        const form = document.createElement("span"); form.style.color = "#8dffad"; form.textContent = "▰ " + status.form;
+        const fatigue = document.createElement("span"); fatigue.style.color = "#ff9aa5"; fatigue.textContent = "♥ " + status.fatigue;
+        indicators.append(form, fatigue); card.append(indicators, document.createElement("br"));
+        const fitness = document.createElement("span"); fitness.textContent = "⚡ Condition " + status.fitness + "%"; card.appendChild(fitness);
+        card.addEventListener("mouseenter", () => { card.style.transform = "scale(1.02)"; });
+        card.addEventListener("mouseleave", () => { card.style.transform = "scale(1)"; });
+        card.addEventListener("click", () => this.showPlayerProfile(current, this.currentManager));
         return card;
-
     }
-
-
 
     /* ================================================= */
     /* FICHE JOUEUR */
