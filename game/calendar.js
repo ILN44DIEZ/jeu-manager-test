@@ -243,553 +243,83 @@ class ChampionshipCalendar {
     /* ================================================= */
 
     balanceHomeAway() {
-        const firstHalf = this.matchdays;
-        if (!firstHalf.length || !this.teams.length) return this.matchdays;
+        const rounds = this.matchdays;
+        if (!rounds.length || this.teams.length < 2) return this.matchdays;
 
+        const maxAttempts = 50000;
         const maxConsecutive = 2;
-        const teamIndex = new Map(this.teams.map((team, index) => [team, index]));
-        const originalOrientations = firstHalf.map(day =>
-            day.matches.map(match => [match.home, match.away])
-        );
 
-        const scoreSchedule = (days, returnDays = []) => {
-            const runs = new Map(this.teams.map(team => [team, { last: null, count: 0 }]));
-            let totalPenalty = 0;
-            let worstRun = 0;
-            let teamsWithLongRuns = 0;
-            const teamsOverLimit = new Set();
-            const evaluateDay = day => {
-                day.matches.forEach(match => {
-                    for (const [team, venue] of [[match.home, "H"], [match.away, "A"]]) {
-                        const state = runs.get(team);
-                        if (!state) continue;
-                        state.count = state.last === venue ? state.count + 1 : 1;
-                        state.last = venue;
-                        worstRun = Math.max(worstRun, state.count);
-                        if (state.count > maxConsecutive) {
-                            teamsOverLimit.add(team);
-                            // Priorité aux séries les plus longues, puis au nombre
-                            // total de journées excédentaires.
-                            totalPenalty += (state.count - maxConsecutive) ** 2 * 10;
-                        }
-                    }
-                });
-            };
-            days.forEach(evaluateDay);
-            returnDays.forEach(evaluateDay);
-            teamsWithLongRuns = teamsOverLimit.size;
-            return totalPenalty * 10000 + teamsWithLongRuns * 100 + worstRun;
-        };
-
-        const applyOrientations = orientations => {
-            firstHalf.forEach((day, dayIndex) => {
-                day.matches.forEach((match, matchIndex) => {
-                    const [home, away] = orientations[dayIndex][matchIndex];
-                    match.home = home;
-                    match.away = away;
-                });
-            });
-        };
-
-        const makeReturnDays = () => firstHalf.map(day => ({
-            day: day.day,
-            matches: day.matches.map(match => ({
-                home: match.away,
-                away: match.home,
-                played: false,
-                result: null
-            })),
-            played: false,
-            results: []
-        }));
-
-        const orderReturns = returnDays => {
-            const state = new Map(this.teams.map(team => [team, { last: null, count: 0 }]));
-            const applyDay = day => day.matches.forEach(match => {
-                for (const [team, venue] of [[match.home, "H"], [match.away, "A"]]) {
-                    const item = state.get(team);
-                    if (!item) continue;
-                    item.count = item.last === venue ? item.count + 1 : 1;
-                    item.last = venue;
-                }
-            });
-            firstHalf.forEach(applyDay);
-            const remaining = [...returnDays];
-            const ordered = [];
-            while (remaining.length) {
-                let bestIndex = 0;
-                let bestPenalty = Infinity;
-                remaining.forEach((day, index) => {
-                    let penalty = 0;
-                    day.matches.forEach(match => {
-                        const homeState = state.get(match.home);
-                        const awayState = state.get(match.away);
-                        if (homeState?.last === "H") penalty += Math.max(0, homeState.count + 1 - maxConsecutive) ** 2;
-                        if (awayState?.last === "A") penalty += Math.max(0, awayState.count + 1 - maxConsecutive) ** 2;
-                    });
-                    penalty += Math.random() * 0.01;
-                    if (penalty < bestPenalty) {
-                        bestPenalty = penalty;
-                        bestIndex = index;
-                    }
-                });
-                const [chosen] = remaining.splice(bestIndex, 1);
-                ordered.push(chosen);
-                applyDay(chosen);
-            }
-            return ordered;
-        };
-
-        // Recherche multi-départs : on conserve la meilleure orientation des matchs
-        // aller selon le score des séries sur l'ensemble aller + retour.
-        let bestOrientations = originalOrientations.map(day => day.map(pair => [...pair]));
-        let bestReturnOrder = null;
-        let bestScore = Infinity;
-        const attempts = 24;
-        const flipsPerAttempt = Math.max(120, this.teams.length * 10);
-
-        for (let attempt = 0; attempt < attempts; attempt++) {
-            const candidate = originalOrientations.map(day => day.map(pair => [...pair]));
-            if (attempt > 0) {
-                candidate.forEach(day => day.forEach(pair => {
-                    if (Math.random() < 0.5) [pair[0], pair[1]] = [pair[1], pair[0]];
-                }));
-            }
-
-            applyOrientations(candidate);
-            let candidateReturns = orderReturns(makeReturnDays());
-            let candidateScore = scoreSchedule(firstHalf, candidateReturns);
-
-            // Évaluer aussi l'état initial de chaque départ : une bonne solution
-            // ne doit pas être ignorée si aucune mutation ne l'améliore ensuite.
-            if (candidateScore < bestScore) {
-                bestScore = candidateScore;
-                bestOrientations = candidate.map(day => day.map(pair => [...pair]));
-                bestReturnOrder = candidateReturns.map(day => day.day);
-            }
-
-            for (let iteration = 0; iteration < flipsPerAttempt; iteration++) {
-                // Tester des inversions simples, doubles et triples. Les matchs
-                // choisis sont distincts pour éviter les mouvements qui s'annulent.
-                const moves = [];
-                const moveCount = iteration % 12 === 11 ? 3 : iteration % 4 === 3 ? 2 : 1;
-                const available = [];
-                candidate.forEach((day, dayIndex) => day.forEach((match, matchIndex) => {
-                    available.push([dayIndex, matchIndex]);
-                }));
-                for (let move = 0; move < moveCount && available.length; move++) {
-                    const picked = Math.floor(Math.random() * available.length);
-                    moves.push(available.splice(picked, 1)[0]);
-                }
-                if (!moves.length) continue;
-
-                moves.forEach(([dayIndex, matchIndex]) => {
-                    [candidate[dayIndex][matchIndex][0], candidate[dayIndex][matchIndex][1]] =
-                        [candidate[dayIndex][matchIndex][1], candidate[dayIndex][matchIndex][0]];
-                });
-
-                applyOrientations(candidate);
-                const trialReturns = orderReturns(makeReturnDays());
-                const trialScore = scoreSchedule(firstHalf, trialReturns);
-
-                // Recuit simulé également sur les orientations aller :
-                // accepter parfois une solution moins bonne aide à sortir
-                // des minima locaux. La température suit l'échelle du score.
-                const orientationTemperature = Math.max(
-                    1000,
-                    250000 * (1 - iteration / Math.max(1, flipsPerAttempt))
-                );
-                const acceptTrial = trialScore <= candidateScore ||
-                    Math.random() < Math.exp((candidateScore - trialScore) / orientationTemperature);
-
-                if (acceptTrial) {
-                    candidateReturns = trialReturns;
-                    candidateScore = trialScore;
-                } else {
-                    moves.forEach(([dayIndex, matchIndex]) => {
-                        [candidate[dayIndex][matchIndex][0], candidate[dayIndex][matchIndex][1]] =
-                            [candidate[dayIndex][matchIndex][1], candidate[dayIndex][matchIndex][0]];
-                    });
-                }
-
-                if (candidateScore < bestScore) {
-                    bestScore = candidateScore;
-                    bestOrientations = candidate.map(day => day.map(pair => [...pair]));
-                    bestReturnOrder = candidateReturns.map(day => day.day);
-                }
-            }
-        }
-
-        applyOrientations(bestOrientations);
-
-        // Optimisation dédiée de l'ordre des journées retour. La recherche
-        // gloutonne fournit un point de départ, puis des échanges de journées
-        // entières sont testés et seule la meilleure solution est conservée.
-        const returnDays = makeReturnDays();
-        const returnDayByNumber = new Map(returnDays.map(day => [day.day, day]));
-        let orderedReturns = Array.isArray(bestReturnOrder) && bestReturnOrder.length === returnDays.length
-            ? bestReturnOrder.map(dayNumber => returnDayByNumber.get(dayNumber)).filter(Boolean)
-            : orderReturns(returnDays);
-
-        // Repli défensif si un numéro de journée est absent ou dupliqué.
-        if (orderedReturns.length !== returnDays.length) {
-            orderedReturns = orderReturns(returnDays);
-        }
-
-        let returnOrderScore = scoreSchedule(firstHalf, orderedReturns);
-        let bestOptimizedReturnOrder = orderedReturns.map(day => day.day);
-        let currentOrder = [...orderedReturns];
-        let currentScore = returnOrderScore;
-        const returnOrderAttempts = Math.max(1800, this.teams.length * 180);
-
-        for (let iteration = 0; iteration < returnOrderAttempts; iteration++) {
-            if (currentOrder.length < 2) break;
-
-            const trialOrder = [...currentOrder];
-            const moveType = Math.random();
-            const firstIndex = Math.floor(Math.random() * trialOrder.length);
-            let secondIndex = Math.floor(Math.random() * trialOrder.length);
-            while (secondIndex === firstIndex) {
-                secondIndex = Math.floor(Math.random() * trialOrder.length);
-            }
-
-            if (moveType < 0.55) {
-                // Échange de deux journées.
-                [trialOrder[firstIndex], trialOrder[secondIndex]] =
-                    [trialOrder[secondIndex], trialOrder[firstIndex]];
-            } else if (moveType < 0.85) {
-                // Déplacer une journée à une autre position.
-                const [movedDay] = trialOrder.splice(firstIndex, 1);
-                trialOrder.splice(secondIndex, 0, movedDay);
-            } else {
-                // Inverser un segment complet de journées.
-                const start = Math.min(firstIndex, secondIndex);
-                const end = Math.max(firstIndex, secondIndex);
-                const segment = trialOrder.slice(start, end + 1).reverse();
-                trialOrder.splice(start, segment.length, ...segment);
-            }
-
-            const trialScore = scoreSchedule(firstHalf, trialOrder);
-            const temperature = Math.max(1000, 500000 * (1 - iteration / returnOrderAttempts));
-            const acceptWorse = Math.random() < Math.exp((currentScore - trialScore) / temperature);
-
-            if (trialScore < returnOrderScore) {
-                returnOrderScore = trialScore;
-                bestOptimizedReturnOrder = trialOrder.map(day => day.day);
-            }
-
-            if (trialScore <= currentScore || acceptWorse) {
-                currentOrder = trialOrder;
-                currentScore = trialScore;
-            }
-        }
-
-        // Recherche conjointe : l'orientation des matchs aller et l'ordre
-        // des retours sont optimisés ensemble. Les deux décisions s'influencent :
-        // changer seulement l'une d'elles peut bloquer la recherche dans un minimum local.
-        let jointOrientations = bestOrientations.map(day => day.map(pair => [...pair]));
-        let jointOrder = bestOptimizedReturnOrder.map(dayNumber => returnDayByNumber.get(dayNumber));
-        let jointScore = scoreSchedule(firstHalf, jointOrder);
-        let bestJointScore = jointScore;
-        let bestJointOrientations = jointOrientations.map(day => day.map(pair => [...pair]));
-        let bestJointOrder = jointOrder.map(day => day.day);
-        const jointAttempts = Math.max(3200, this.teams.length * 180);
-
-        for (let iteration = 0; iteration < jointAttempts; iteration++) {
-            const trialOrientations = jointOrientations.map(day => day.map(pair => [...pair]));
-            const trialOrderNumbers = jointOrder.map(day => day.day);
-            const fixtureCount = iteration % 5 === 4 ? 2 : 1;
-            const fixtures = [];
-            const allFixtures = [];
-            trialOrientations.forEach((day, dayIndex) =>
-                day.forEach((pair, matchIndex) => allFixtures.push([dayIndex, matchIndex]))
-            );
-            for (let i = 0; i < fixtureCount && allFixtures.length; i++) {
-                fixtures.push(allFixtures.splice(
-                    Math.floor(Math.random() * allFixtures.length), 1
-                )[0]);
-            }
-            fixtures.forEach(([dayIndex, matchIndex]) => {
-                [trialOrientations[dayIndex][matchIndex][0],
-                 trialOrientations[dayIndex][matchIndex][1]] =
-                [trialOrientations[dayIndex][matchIndex][1],
-                 trialOrientations[dayIndex][matchIndex][0]];
-            });
-
-            // Échange, déplacement ou inversion d'un segment de journées retour.
-            if (trialOrderNumbers.length > 1) {
-                let a = Math.floor(Math.random() * trialOrderNumbers.length);
-                let b = Math.floor(Math.random() * trialOrderNumbers.length);
-                while (b === a) b = Math.floor(Math.random() * trialOrderNumbers.length);
-                const move = Math.random();
-                if (move < 0.5) {
-                    [trialOrderNumbers[a], trialOrderNumbers[b]] =
-                        [trialOrderNumbers[b], trialOrderNumbers[a]];
-                } else if (move < 0.8) {
-                    const [moved] = trialOrderNumbers.splice(a, 1);
-                    trialOrderNumbers.splice(b, 0, moved);
-                } else {
-                    const start = Math.min(a, b);
-                    const end = Math.max(a, b);
-                    const segment = trialOrderNumbers.slice(start, end + 1).reverse();
-                    trialOrderNumbers.splice(start, segment.length, ...segment);
-                }
-            }
-
-            applyOrientations(trialOrientations);
-            const trialReturnByNumber = new Map(makeReturnDays().map(day => [day.day, day]));
-            const trialReturns = trialOrderNumbers.map(dayNumber =>
-                trialReturnByNumber.get(dayNumber)
-            ).filter(Boolean);
-            const trialScore = scoreSchedule(firstHalf, trialReturns);
-            const temperature = Math.max(250, 350000 * (1 - iteration / jointAttempts));
-            const accept = trialScore <= jointScore ||
-                Math.random() < Math.exp((jointScore - trialScore) / temperature);
-
-            if (accept) {
-                jointOrientations = trialOrientations;
-                jointOrder = trialReturns;
-                jointScore = trialScore;
-            } else {
-                applyOrientations(jointOrientations);
-            }
-
-            if (trialScore < bestJointScore) {
-                bestJointScore = trialScore;
-                bestJointOrientations = trialOrientations.map(day => day.map(pair => [...pair]));
-                bestJointOrder = trialOrderNumbers.slice();
-            }
-        }
-
-        // Réparation ciblée : repérer les équipes qui dépassent la limite,
-        // puis modifier en priorité l'orientation d'un match appartenant à leur série.
-        // Cela explore des mouvements utiles au lieu de retourner des matchs au hasard.
-        let repairOrientations = bestJointOrientations.map(day => day.map(pair => [...pair]));
-        let repairOrder = bestJointOrder.slice();
-        let repairScore = bestJointScore;
-        let bestRepairScore = repairScore;
-        let bestRepairOrientations = repairOrientations.map(day => day.map(pair => [...pair]));
-        let bestRepairOrder = repairOrder.slice();
-        const repairAttempts = Math.max(4800, this.teams.length * 280);
-
-        const findLongRunFixtures = (orientations, returnOrderNumbers) => {
-            const venueHistory = new Map(this.teams.map(team => [team, []]));
-            const appendDay = day => day.matches.forEach(match => {
-                venueHistory.get(match.home)?.push({ venue: "H", dayNumber: day.day });
-                venueHistory.get(match.away)?.push({ venue: "A", dayNumber: day.day });
-            });
-            applyOrientations(orientations);
-            firstHalf.forEach(appendDay);
-            const returnMap = new Map(makeReturnDays().map(day => [day.day, day]));
-            returnOrderNumbers.forEach(dayNumber => {
-                const day = returnMap.get(dayNumber);
-                if (day) appendDay(day);
-            });
-            const candidates = [];
-            venueHistory.forEach((history, team) => {
-                let start = 0;
-                while (start < history.length) {
-                    let end = start + 1;
-                    while (end < history.length && history[end].venue === history[start].venue) end++;
-                    if (end - start > maxConsecutive) {
-                        for (let index = start + maxConsecutive; index < end; index++) {
-                            const item = history[index];
-                            const firstHalfDay = firstHalf.find(day => day.day === item.dayNumber);
-                            const sourceDay = firstHalfDay || returnMap.get(item.dayNumber);
-                            if (!sourceDay) continue;
-                            const fixtureIndex = sourceDay.matches.findIndex(match =>
-                                match.home === team || match.away === team
-                            );
-                            if (fixtureIndex >= 0) {
-                                const originalDayNumber = firstHalfDay
-                                    ? firstHalfDay.day
-                                    : sourceDay.day;
-                                candidates.push([originalDayNumber, fixtureIndex]);
-                            }
-                        }
-                    }
-                    start = end;
-                }
-            });
-            return candidates;
-        };
-
-        for (let iteration = 0; iteration < repairAttempts; iteration++) {
-            applyOrientations(repairOrientations);
-            const candidates = findLongRunFixtures(repairOrientations, repairOrder);
-            if (!candidates.length) {
-                bestRepairScore = 0;
-                bestRepairOrientations = repairOrientations.map(day => day.map(pair => [...pair]));
-                bestRepairOrder = repairOrder.slice();
-                break;
-            }
-
-            const trialOrientations = repairOrientations.map(day => day.map(pair => [...pair]));
-            const [dayNumber, fixtureIndex] = candidates[Math.floor(Math.random() * candidates.length)];
-            const dayIndex = firstHalf.findIndex(day => day.day === dayNumber);
-            if (dayIndex < 0 || !trialOrientations[dayIndex]?.[fixtureIndex]) continue;
-            [trialOrientations[dayIndex][fixtureIndex][0],
-             trialOrientations[dayIndex][fixtureIndex][1]] =
-            [trialOrientations[dayIndex][fixtureIndex][1],
-             trialOrientations[dayIndex][fixtureIndex][0]];
-
-            let trialOrderNumbers = repairOrder.slice();
-            // Parfois déplacer une journée retour en même temps permet de casser
-            // une série sans dégrader l'équilibre des autres clubs.
-            if (Math.random() < 0.35 && trialOrderNumbers.length > 1) {
-                const from = Math.floor(Math.random() * trialOrderNumbers.length);
-                let to = Math.floor(Math.random() * trialOrderNumbers.length);
-                while (to === from) to = Math.floor(Math.random() * trialOrderNumbers.length);
-                const [moved] = trialOrderNumbers.splice(from, 1);
-                trialOrderNumbers.splice(to, 0, moved);
-            }
-
-            applyOrientations(trialOrientations);
-            const trialMap = new Map(makeReturnDays().map(day => [day.day, day]));
-            const trialReturns = trialOrderNumbers.map(number => trialMap.get(number)).filter(Boolean);
-            const trialScore = scoreSchedule(firstHalf, trialReturns);
-            const temperature = Math.max(250, 350000 * (1 - iteration / repairAttempts));
-            const accept = trialScore <= repairScore ||
-                Math.random() < Math.exp((repairScore - trialScore) / temperature);
-
-            if (accept) {
-                repairOrientations = trialOrientations;
-                repairOrder = trialOrderNumbers;
-                repairScore = trialScore;
-            }
-
-            if (trialScore < bestRepairScore) {
-                bestRepairScore = trialScore;
-                bestRepairOrientations = trialOrientations.map(day => day.map(pair => [...pair]));
-                bestRepairOrder = trialOrderNumbers.slice();
-            }
-        }
-
-        // Recherche sous contraintes de l'ordre des retours : une journée n'est
-        // ajoutée que si elle ne crée aucune série de plus de deux matchs.
-        const buildConstrainedReturnOrder = (orientations, nodeLimit = 180000) => {
-            applyOrientations(orientations);
-            const returnDays = makeReturnDays();
+        // Chaque tentative construit l'aller de zéro. Pour chaque match, on
+        // ne conserve que les orientations compatibles avec les deux dernières
+        // apparitions des équipes concernées. En cas d'impasse, on recommence.
+        for (let attempt = 0; attempt < maxAttempts; attempt++) {
             const history = new Map(this.teams.map(team => [team, []]));
-            const append = day => day.matches.forEach(match => {
-                history.get(match.home)?.push("H");
-                history.get(match.away)?.push("A");
-            });
-            firstHalf.forEach(append);
-            // Un ordre retour ne peut pas corriger une série déjà présente à l'aller.
-            for (const values of history.values()) {
-                let run = 1;
-                for (let i = 1; i < values.length; i++) {
-                    run = values[i] === values[i - 1] ? run + 1 : 1;
-                    if (run > maxConsecutive) return { order: null, complete: false, visited: 0 };
-                }
-            }
-            const ordered = [];
-            const remaining = returnDays.slice();
-            let visited = 0;
-            const canAppend = day => {
+            const orientations = [];
+            let failed = false;
+
+            for (const day of rounds) {
+                const dayOrientations = [];
+
                 for (const match of day.matches) {
-                    for (const [team, venue] of [[match.home, "H"], [match.away, "A"]]) {
-                        const values = history.get(team);
-                        const length = values.length;
-                        if (length >= 2 && values[length - 1] === venue && values[length - 2] === venue) return false;
-                    }
-                }
-                return true;
-            };
-            const add = day => day.matches.forEach(match => {
-                history.get(match.home).push("H");
-                history.get(match.away).push("A");
-            });
-            const remove = day => day.matches.forEach(match => {
-                history.get(match.home).pop();
-                history.get(match.away).pop();
-            });
-            const search = () => {
-                if (!remaining.length) return true;
-                if (++visited > nodeLimit) return false;
-                const candidates = remaining
-                    .map((day, index) => ({ day, index, score: day.matches.reduce((sum, match) => {
-                        const h = history.get(match.home), a = history.get(match.away);
-                        return sum + (h.length && h[h.length - 1] === "H" ? 1 : 0)
-                            + (a.length && a[a.length - 1] === "A" ? 1 : 0);
-                    }, 0) }))
-                    .filter(item => canAppend(item.day))
-                    .sort((a, b) => a.score - b.score);
-                for (const candidate of candidates) {
-                    const [day] = remaining.splice(candidate.index, 1);
-                    ordered.push(day);
-                    add(day);
-                    if (search()) return true;
-                    remove(day);
-                    ordered.pop();
-                    remaining.splice(candidate.index, 0, day);
-                }
-                return false;
-            };
-            return search()
-                ? { order: ordered.map(day => day.day), complete: true, visited }
-                : { order: null, complete: false, visited };
-        };
+                    const teamA = match.home;
+                    const teamB = match.away;
+                    const options = [
+                        [teamA, teamB],
+                        [teamB, teamA]
+                    ].filter(([home, away]) => {
+                        const homeHistory = history.get(home);
+                        const awayHistory = history.get(away);
+                        const homeMustSwitch = homeHistory.length >= maxConsecutive &&
+                            homeHistory.slice(-maxConsecutive).every(venue => venue === "H");
+                        const awayMustSwitch = awayHistory.length >= maxConsecutive &&
+                            awayHistory.slice(-maxConsecutive).every(venue => venue === "A");
+                        return !homeMustSwitch && !awayMustSwitch;
+                    });
 
-        const constrainedResult = buildConstrainedReturnOrder(bestRepairOrientations);
-        if (constrainedResult.complete) {
-            bestRepairOrder = constrainedResult.order;
-            bestRepairScore = 0;
+                    if (!options.length) {
+                        failed = true;
+                        break;
+                    }
+
+                    // Si les deux orientations sont valides, le choix aléatoire
+                    // diversifie les tentatives sans casser les contraintes.
+                    const [home, away] = options[Math.floor(Math.random() * options.length)];
+                    dayOrientations.push([home, away]);
+                }
+
+                if (failed) break;
+
+                dayOrientations.forEach(([home, away]) => {
+                    history.get(home).push("H");
+                    history.get(away).push("A");
+                });
+                orientations.push(dayOrientations);
+            }
+
+            if (failed) continue;
+
+            // La deuxième moitié sera jouée dans l'ordre inverse des journées
+            // aller, avec les stades inversés. Cela inverse aussi la séquence
+            // domicile/extérieur de chaque équipe : les séries restent limitées
+            // à deux, et la jonction entre les deux moitiés change de stade.
+            rounds.forEach((day, dayIndex) => {
+                day.matches.forEach((match, matchIndex) => {
+                    match.home = orientations[dayIndex][matchIndex][0];
+                    match.away = orientations[dayIndex][matchIndex][1];
+                });
+            });
+
+            this._optimizedReturnDayOrder = rounds.map(day => day.day).reverse();
+            return this.matchdays;
         }
 
-        // Descente locale déterministe : tester toutes les inversions simples
-        // et tous les échanges de journées retour, sans accepter de régression.
-        let finalOrientations = bestRepairOrientations.map(day => day.map(pair => [...pair]));
-        let finalOrder = bestRepairOrder.slice();
-        applyOrientations(finalOrientations);
-        const scoreOrder = numbers => {
-            const returnMap = new Map(makeReturnDays().map(day => [day.day, day]));
-            return scoreSchedule(firstHalf, numbers.map(number => returnMap.get(number)).filter(Boolean));
-        };
-        let finalScore = scoreOrder(finalOrder);
-        for (let pass = 0; pass < 30 && finalScore > 0; pass++) {
-            let improved = false;
-            for (let d = 0; d < finalOrientations.length && !improved; d++) {
-                for (let m = 0; m < finalOrientations[d].length && !improved; m++) {
-                    const trial = finalOrientations.map(day => day.map(pair => [...pair]));
-                    [trial[d][m][0], trial[d][m][1]] = [trial[d][m][1], trial[d][m][0]];
-                    applyOrientations(trial);
-                    const score = scoreOrder(finalOrder);
-                    if (score < finalScore) {
-                        finalOrientations = trial;
-                        finalScore = score;
-                        improved = true;
-                    } else {
-                        applyOrientations(finalOrientations);
-                    }
-                }
-            }
-            if (improved) continue;
-            outerSwap:
-            for (let a = 0; a < finalOrder.length; a++) {
-                for (let b = a + 1; b < finalOrder.length; b++) {
-                    const trialOrder = finalOrder.slice();
-                    [trialOrder[a], trialOrder[b]] = [trialOrder[b], trialOrder[a]];
-                    const score = scoreOrder(trialOrder);
-                    if (score < finalScore) {
-                        finalOrder = trialOrder;
-                        finalScore = score;
-                        improved = true;
-                        break outerSwap;
-                    }
-                }
-            }
-            if (!improved) break;
-        }
-
-        // Restaurer le meilleur état trouvé et transmettre son ordre retour.
-        applyOrientations(finalOrientations);
-        bestOptimizedReturnOrder = finalOrder;
-        this._optimizedReturnDayOrder = bestOptimizedReturnOrder;
-        return this.matchdays;
+        // Ne pas prétendre que la contrainte est satisfaite si aucun calendrier
+        // n'a été trouvé dans la limite prévue.
+        throw new Error(
+            "Impossible de construire un calendrier sans séries de plus de deux matchs à domicile ou à l'extérieur après " +
+            maxAttempts + " tentatives."
+        );
     }
-
 
     /* ================================================= */
     /* INVERSER DOMICILE / EXTÉRIEUR */
