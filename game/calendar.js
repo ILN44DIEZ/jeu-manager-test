@@ -405,7 +405,39 @@ class ChampionshipCalendar {
         }
 
         applyOrientations(bestOrientations);
-        this._optimizedReturnDayOrder = bestReturnOrder;
+
+        // Optimisation dédiée de l'ordre des journées retour. La recherche
+        // gloutonne fournit un point de départ, puis des échanges de journées
+        // entières sont testés et seule la meilleure solution est conservée.
+        const returnDays = makeReturnDays();
+        let orderedReturns = orderReturns(returnDays);
+        let returnOrderScore = scoreSchedule(firstHalf, orderedReturns);
+        let bestOptimizedReturnOrder = orderedReturns.map(day => day.day);
+        const returnOrderAttempts = Math.max(500, this.teams.length * 50);
+
+        for (let iteration = 0; iteration < returnOrderAttempts; iteration++) {
+            if (orderedReturns.length < 2) break;
+
+            const firstIndex = Math.floor(Math.random() * orderedReturns.length);
+            let secondIndex = Math.floor(Math.random() * (orderedReturns.length - 1));
+            if (secondIndex >= firstIndex) secondIndex++;
+
+            [orderedReturns[firstIndex], orderedReturns[secondIndex]] =
+                [orderedReturns[secondIndex], orderedReturns[firstIndex]];
+
+            const trialScore = scoreSchedule(firstHalf, orderedReturns);
+            if (trialScore < returnOrderScore) {
+                returnOrderScore = trialScore;
+                bestOptimizedReturnOrder = orderedReturns.map(day => day.day);
+            } else {
+                [orderedReturns[firstIndex], orderedReturns[secondIndex]] =
+                    [orderedReturns[secondIndex], orderedReturns[firstIndex]];
+            }
+        }
+
+        // Le meilleur ordre global est mémorisé pour que la génération du
+        // calendrier retour utilise exactement la solution évaluée.
+        this._optimizedReturnDayOrder = bestOptimizedReturnOrder;
         return this.matchdays;
     }
 
