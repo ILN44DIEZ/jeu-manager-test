@@ -98,24 +98,28 @@ class Player {
 
     train(attribute, intensity = 1) {
 
-        if (!this.attributes[attribute]) return;
+        // Certains attributs sont imbriqués (ex. statistiques du gardien).
+        // Ne jamais appliquer une addition numérique à un objet.
+        if (typeof this.attributes?.[attribute] !== "number" ||
+            !Number.isFinite(this.attributes[attribute]) ||
+            !Number.isFinite(Number(intensity))) {
+            return false;
+        }
 
-        let improvement = 0.1 * intensity;
+        let improvement = 0.1 * Number(intensity);
 
         if (this.age < 23) {
             improvement *= 1.5;
         }
 
-        this.attributes[attribute] += improvement;
-
-
-        if (this.attributes[attribute] > 99) {
-            this.attributes[attribute] = 99;
-        }
-
+        this.attributes[attribute] = Math.max(
+            1,
+            Math.min(99, this.attributes[attribute] + improvement)
+        );
 
         this.calculateOverall();
         this.updateMarketValue();
+        return true;
     }
 
 
@@ -150,27 +154,20 @@ class Player {
 
 
 
-    developPotential() {
+        const trainableAttributes = Object.keys(this.attributes).filter(
+            attribute => typeof this.attributes[attribute] === "number" &&
+                Number.isFinite(this.attributes[attribute])
+        );
 
-        if (this.age >= 30) return;
+        if (!trainableAttributes.length) return;
 
-        let chance = Math.random();
-
-
-        if (chance > 0.5 &&
-            this.overall < this.potential) {
-
-            this.train(
-                Object.keys(this.attributes)
-                [Math.floor(
-                    Math.random() *
-                    Object.keys(this.attributes).length
-                )],
-                1
-            );
+        const chance = Math.random();
+        if (chance > 0.5 && this.overall < this.potential) {
+            const attribute = trainableAttributes[
+                Math.floor(Math.random() * trainableAttributes.length)
+            ];
+            this.train(attribute, 1);
         }
-    }
-
 
 
     ageUp() {
