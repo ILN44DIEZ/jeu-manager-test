@@ -252,7 +252,7 @@ class UI {
                 border-top: 1px solid rgba(126, 151, 170, .13);
             }
             body.manager-has-bottom-nav #game {
-                padding-bottom: calc(105px + env(safe-area-inset-bottom, 0px)) !important;
+                padding-bottom: calc(150px + env(safe-area-inset-bottom, 0px)) !important;
             }
             @media (max-width: 360px) {
                 #manager-bottom-nav {
@@ -2147,6 +2147,7 @@ this.showMessage(
 
     showChampionship() {
 
+        this.setBottomNavigationVisible(true, "competitions");
         this.clear();
 
 
@@ -3046,6 +3047,7 @@ if (match.played && match.result) {
 
     showCalendar() {
 
+        this.setBottomNavigationVisible(true, "matches");
         this.clear();
 
 
