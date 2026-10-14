@@ -273,11 +273,10 @@ class ChampionshipCalendar {
          * journées aller ici.
          */
 
-        const firstHalf =
-            this.matchdays.slice(
-                0,
-                this.teams.length - 1
-            );
+        // Une ligue paire a N-1 journées aller ; une ligue impaire
+        // ajoute une équipe fictive et en compte N.
+        const firstHalfLength = this.matchdays.length;
+        const firstHalf = this.matchdays.slice(0, firstHalfLength);
 
 
         firstHalf.forEach(
@@ -466,49 +465,53 @@ class ChampionshipCalendar {
 
 
         /*
-         * Mélange uniquement les journées
-         * retour.
-         *
-         * Elles resteront toutes après
-         * la 19e journée.
+         * Ordonner les journées retour en limitant les séries de
+         * plus de deux matchs consécutifs à domicile ou à l'extérieur.
+         * Les affiches restent inversées par rapport à l'aller : seul
+         * l'ordre des journées retour change.
          */
+        const teamState = {};
+        this.teams.forEach(team => {
+            teamState[team] = { last: null, consecutive: 0 };
+        });
 
-        for (
-            let i =
-                returnMatches.length - 1;
+        const updateStateForDay = day => {
+            day.matches.forEach(match => {
+                this.updateTeamState(teamState[match.home], "home");
+                this.updateTeamState(teamState[match.away], "away");
+            });
+        };
 
-            i > 0;
+        firstHalf.forEach(updateStateForDay);
+        const orderedReturns = [];
+        const remainingReturns = [...returnMatches];
 
-            i--
-        ) {
+        while (remainingReturns.length) {
+            let bestIndex = 0;
+            let bestPenalty = Infinity;
 
-            const randomIndex =
-                Math.floor(
-                    Math.random() *
-                    (i + 1)
-                );
+            remainingReturns.forEach((day, index) => {
+                let penalty = 0;
+                day.matches.forEach(match => {
+                    const homeState = teamState[match.home];
+                    const awayState = teamState[match.away];
+                    if (homeState?.last === "home" && homeState.consecutive >= 2) penalty += 1;
+                    if (awayState?.last === "away" && awayState.consecutive >= 2) penalty += 1;
+                });
+                // Départager les journées équivalentes de manière aléatoire.
+                penalty += Math.random() * 0.25;
+                if (penalty < bestPenalty) {
+                    bestPenalty = penalty;
+                    bestIndex = index;
+                }
+            });
 
-
-            const temp =
-                returnMatches[i];
-
-
-            returnMatches[i] =
-                returnMatches[
-                    randomIndex
-                ];
-
-
-            returnMatches[
-                randomIndex
-            ] =
-                temp;
-
+            const [chosenDay] = remainingReturns.splice(bestIndex, 1);
+            orderedReturns.push(chosenDay);
+            updateStateForDay(chosenDay);
         }
 
-
-        const firstHalfLength =
-            firstHalf.length;
+        const firstHalfLength = firstHalf.length;
 
 
         returnMatches.forEach(
