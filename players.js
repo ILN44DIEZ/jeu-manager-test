@@ -154,6 +154,10 @@ class Player {
 
 
 
+    developPotential() {
+
+        if (this.age >= 30) return;
+
         const trainableAttributes = Object.keys(this.attributes).filter(
             attribute => typeof this.attributes[attribute] === "number" &&
                 Number.isFinite(this.attributes[attribute])
@@ -168,6 +172,7 @@ class Player {
             ];
             this.train(attribute, 1);
         }
+    }
 
 
     ageUp() {
