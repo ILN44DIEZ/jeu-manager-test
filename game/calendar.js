@@ -493,7 +493,7 @@ class ChampionshipCalendar {
         let bestJointScore = jointScore;
         let bestJointOrientations = jointOrientations.map(day => day.map(pair => [...pair]));
         let bestJointOrder = jointOrder.map(day => day.day);
-        const jointAttempts = Math.max(1600, this.teams.length * 100);
+        const jointAttempts = Math.max(3200, this.teams.length * 180);
 
         for (let iteration = 0; iteration < jointAttempts; iteration++) {
             const trialOrientations = jointOrientations.map(day => day.map(pair => [...pair]));
@@ -570,7 +570,7 @@ class ChampionshipCalendar {
         let bestRepairScore = repairScore;
         let bestRepairOrientations = repairOrientations.map(day => day.map(pair => [...pair]));
         let bestRepairOrder = repairOrder.slice();
-        const repairAttempts = Math.max(1200, this.teams.length * 90);
+        const repairAttempts = Math.max(4800, this.teams.length * 280);
 
         const findLongRunFixtures = (orientations, returnOrderNumbers) => {
             const venueHistory = new Map(this.teams.map(team => [team, []]));
