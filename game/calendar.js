@@ -542,7 +542,7 @@ class ChampionshipCalendar {
                 trialReturnByNumber.get(dayNumber)
             ).filter(Boolean);
             const trialScore = scoreSchedule(firstHalf, trialReturns);
-            const temperature = Math.max(0.5, 80 * (1 - iteration / jointAttempts));
+            const temperature = Math.max(250, 350000 * (1 - iteration / jointAttempts));
             const accept = trialScore <= jointScore ||
                 Math.random() < Math.exp((jointScore - trialScore) / temperature);
 
@@ -648,7 +648,7 @@ class ChampionshipCalendar {
             const trialMap = new Map(makeReturnDays().map(day => [day.day, day]));
             const trialReturns = trialOrderNumbers.map(number => trialMap.get(number)).filter(Boolean);
             const trialScore = scoreSchedule(firstHalf, trialReturns);
-            const temperature = Math.max(0.25, 30 * (1 - iteration / repairAttempts));
+            const temperature = Math.max(250, 350000 * (1 - iteration / repairAttempts));
             const accept = trialScore <= repairScore ||
                 Math.random() < Math.exp((repairScore - trialScore) / temperature);
 
