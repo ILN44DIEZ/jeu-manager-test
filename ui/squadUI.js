@@ -20,6 +20,7 @@ class SquadUI {
     clear() {
 
         this.container.innerHTML = "";
+        this.container.classList.remove("manager-dashboard");
 
     }
 
@@ -32,6 +33,7 @@ class SquadUI {
     showClubPlayers(players, manager) {
 
         this.currentManager = manager;
+        this.ui.setBottomNavigationVisible(true, "squad");
         this.clear();
         this.ui.showTitle("👥 Effectif " + manager.clubName);
 
