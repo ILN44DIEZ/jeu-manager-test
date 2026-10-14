@@ -243,50 +243,143 @@ class ChampionshipCalendar {
     /* ================================================= */
 
     balanceHomeAway() {
+        const firstHalf = this.matchdays;
+        if (!firstHalf.length || !this.teams.length) return this.matchdays;
+
         const maxConsecutive = 2;
-        const teamState = {};
+        const teamIndex = new Map(this.teams.map((team, index) => [team, index]));
+        const originalOrientations = firstHalf.map(day =>
+            day.matches.map(match => [match.home, match.away])
+        );
 
-        this.teams.forEach(team => {
-            teamState[team] = { last: null, consecutive: 0 };
-        });
-
-        // À ce stade, matchdays ne contient que la phase aller.
-        // Pour chaque match, choisir l'orientation qui pénalise le moins
-        // les séries déjà en cours pour les deux équipes.
-        const firstHalf = this.matchdays.slice();
-
-        const projectedPenalty = (state, location) => {
-            if (!state) return 0;
-            const nextRun = state.last === location
-                ? state.consecutive + 1
-                : 1;
-            return Math.max(0, nextRun - maxConsecutive) ** 2;
+        const scoreSchedule = (days, returnDays = []) => {
+            const runs = new Map(this.teams.map(team => [team, { last: null, count: 0 }]));
+            let totalPenalty = 0;
+            let worstRun = 0;
+            const evaluateDay = day => {
+                day.matches.forEach(match => {
+                    for (const [team, venue] of [[match.home, "H"], [match.away, "A"]]) {
+                        const state = runs.get(team);
+                        if (!state) continue;
+                        state.count = state.last === venue ? state.count + 1 : 1;
+                        state.last = venue;
+                        worstRun = Math.max(worstRun, state.count);
+                        if (state.count > maxConsecutive) {
+                            totalPenalty += (state.count - maxConsecutive) ** 2 * 10;
+                        }
+                    }
+                });
+            };
+            days.forEach(evaluateDay);
+            returnDays.forEach(evaluateDay);
+            return totalPenalty * 100 + worstRun;
         };
 
-        firstHalf.forEach(day => {
-            day.matches.forEach(match => {
-                const originalHome = match.home;
-                const originalAway = match.away;
-                const homeState = teamState[originalHome];
-                const awayState = teamState[originalAway];
+        const applyOrientations = orientations => {
+            firstHalf.forEach((day, dayIndex) => {
+                day.matches.forEach((match, matchIndex) => {
+                    const [home, away] = orientations[dayIndex][matchIndex];
+                    match.home = home;
+                    match.away = away;
+                });
+            });
+        };
 
-                const keepPenalty =
-                    projectedPenalty(homeState, "home") +
-                    projectedPenalty(awayState, "away");
-                const swapPenalty =
-                    projectedPenalty(awayState, "home") +
-                    projectedPenalty(homeState, "away");
+        const makeReturnDays = () => firstHalf.map(day => ({
+            day: day.day,
+            matches: day.matches.map(match => ({
+                home: match.away,
+                away: match.home,
+                played: false,
+                result: null
+            })),
+            played: false,
+            results: []
+        }));
 
-                if (swapPenalty < keepPenalty ||
-                    (swapPenalty === keepPenalty && Math.random() < 0.5)) {
-                    this.swapMatch(match);
+        const orderReturns = returnDays => {
+            const state = new Map(this.teams.map(team => [team, { last: null, count: 0 }]));
+            const applyDay = day => day.matches.forEach(match => {
+                for (const [team, venue] of [[match.home, "H"], [match.away, "A"]]) {
+                    const item = state.get(team);
+                    if (!item) continue;
+                    item.count = item.last === venue ? item.count + 1 : 1;
+                    item.last = venue;
+                }
+            });
+            firstHalf.forEach(applyDay);
+            const remaining = [...returnDays];
+            const ordered = [];
+            while (remaining.length) {
+                let bestIndex = 0;
+                let bestPenalty = Infinity;
+                remaining.forEach((day, index) => {
+                    let penalty = 0;
+                    day.matches.forEach(match => {
+                        const homeState = state.get(match.home);
+                        const awayState = state.get(match.away);
+                        if (homeState?.last === "H") penalty += Math.max(0, homeState.count + 1 - maxConsecutive) ** 2;
+                        if (awayState?.last === "A") penalty += Math.max(0, awayState.count + 1 - maxConsecutive) ** 2;
+                    });
+                    penalty += Math.random() * 0.01;
+                    if (penalty < bestPenalty) {
+                        bestPenalty = penalty;
+                        bestIndex = index;
+                    }
+                });
+                const [chosen] = remaining.splice(bestIndex, 1);
+                ordered.push(chosen);
+                applyDay(chosen);
+            }
+            return ordered;
+        };
+
+        // Recherche multi-départs : on conserve la meilleure orientation des matchs
+        // aller selon le score des séries sur l'ensemble aller + retour.
+        let bestOrientations = originalOrientations.map(day => day.map(pair => [...pair]));
+        let bestScore = Infinity;
+        const attempts = 24;
+        const flipsPerAttempt = Math.max(80, this.teams.length * this.teams.length * 3);
+
+        for (let attempt = 0; attempt < attempts; attempt++) {
+            const candidate = originalOrientations.map(day => day.map(pair => [...pair]));
+            if (attempt > 0) {
+                candidate.forEach(day => day.forEach(pair => {
+                    if (Math.random() < 0.5) [pair[0], pair[1]] = [pair[1], pair[0]];
+                }));
+            }
+
+            applyOrientations(candidate);
+            let candidateReturns = orderReturns(makeReturnDays());
+            let candidateScore = scoreSchedule(firstHalf, candidateReturns);
+
+            for (let iteration = 0; iteration < flipsPerAttempt; iteration++) {
+                const dayIndex = Math.floor(Math.random() * candidate.length);
+                if (!candidate[dayIndex].length) continue;
+                const matchIndex = Math.floor(Math.random() * candidate[dayIndex].length);
+                [candidate[dayIndex][matchIndex][0], candidate[dayIndex][matchIndex][1]] =
+                    [candidate[dayIndex][matchIndex][1], candidate[dayIndex][matchIndex][0]];
+
+                applyOrientations(candidate);
+                const trialReturns = orderReturns(makeReturnDays());
+                const trialScore = scoreSchedule(firstHalf, trialReturns);
+
+                if (trialScore <= candidateScore || Math.random() < 0.015) {
+                    candidateReturns = trialReturns;
+                    candidateScore = trialScore;
+                } else {
+                    [candidate[dayIndex][matchIndex][0], candidate[dayIndex][matchIndex][1]] =
+                        [candidate[dayIndex][matchIndex][1], candidate[dayIndex][matchIndex][0]];
                 }
 
-                this.updateTeamState(teamState[match.home], "home");
-                this.updateTeamState(teamState[match.away], "away");
-            });
-        });
+                if (candidateScore < bestScore) {
+                    bestScore = candidateScore;
+                    bestOrientations = candidate.map(day => day.map(pair => [...pair]));
+                }
+            }
+        }
 
+        applyOrientations(bestOrientations);
         return this.matchdays;
     }
 
