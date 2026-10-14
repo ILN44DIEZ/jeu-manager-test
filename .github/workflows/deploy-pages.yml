@@ -161,6 +161,68 @@ jobs:
           console.log("OK — 100 simulations de matchs et test anti-double simulation.");
           NODE
 
+      - name: Test standings integrity
+        run: |
+          node --check standings.js
+          node <<'NODE'
+          const fs = require("node:fs");
+          const vm = require("node:vm");
+          const source = fs.readFileSync("standings.js", "utf8");
+          vm.runInThisContext(source + "\n;globalThis.__StandingsForTests = Standings;");
+          const StandingsForTests = globalThis.__StandingsForTests;
+          const table = new StandingsForTests(["A", "B", "C"]);
+
+          if (table.update({ homeTeam: "A", awayTeam: "B", homeGoals: 2, awayGoals: 0 }) !== true) {
+            throw new Error("Un résultat valide a été refusé");
+          }
+          if (table.update({ homeTeam: "B", awayTeam: "C", homeGoals: 1, awayGoals: 1 }) !== true) {
+            throw new Error("Un match nul valide a été refusé");
+          }
+          if (table.update({ homeTeam: "C", awayTeam: "A", homeGoals: 3, awayGoals: 1 }) !== true) {
+            throw new Error("Une victoire extérieure valide a été refusée");
+          }
+
+          const a = table.getTeam("A");
+          const b = table.getTeam("B");
+          const c = table.getTeam("C");
+          if (a.played !== 2 || a.points !== 3 || a.goalsFor !== 3 || a.goalsAgainst !== 3) {
+            throw new Error("Statistiques de A incorrectes");
+          }
+          if (b.played !== 2 || b.points !== 1 || b.draws !== 1 || b.losses !== 1) {
+            throw new Error("Statistiques de B incorrectes");
+          }
+          if (c.played !== 2 || c.points !== 4 || c.wins !== 1 || c.draws !== 1) {
+            throw new Error("Statistiques de C incorrectes");
+          }
+
+          const before = JSON.stringify(table.getTable());
+          const invalid = [
+            null,
+            {},
+            { homeTeam: "A", awayTeam: "A", homeGoals: 1, awayGoals: 0 },
+            { homeTeam: "A", awayTeam: "B", homeGoals: -1, awayGoals: 0 },
+            { homeTeam: "A", awayTeam: "B", homeGoals: 1.5, awayGoals: 0 },
+            { homeTeam: "Unknown", awayTeam: "B", homeGoals: 1, awayGoals: 0 }
+          ];
+          for (const result of invalid) {
+            if (table.update(result) !== false) {
+              throw new Error("Un résultat invalide a été accepté");
+            }
+          }
+          if (JSON.stringify(table.getTable()) !== before) {
+            throw new Error("Le classement a changé après un résultat invalide");
+          }
+
+          for (let i = 0; i < 7; i++) {
+            table.update({ homeTeam: "A", awayTeam: "B", homeGoals: 1, awayGoals: 0 });
+          }
+          if (table.getTeam("A").form.length !== 5 || table.getTeam("B").form.length !== 5) {
+            throw new Error("La forme doit être limitée aux cinq derniers matchs");
+          }
+
+          console.log("OK — classement, points, différence de buts, forme et rejets d'entrées invalides.");
+          NODE
+
       - name: Generate build version
         env:
           GH_TOKEN: ${{ github.token }}
