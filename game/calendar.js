@@ -339,8 +339,8 @@ class ChampionshipCalendar {
         let bestOrientations = originalOrientations.map(day => day.map(pair => [...pair]));
         let bestReturnOrder = null;
         let bestScore = Infinity;
-        const attempts = 16;
-        const flipsPerAttempt = Math.max(80, this.teams.length * 7);
+        const attempts = 24;
+        const flipsPerAttempt = Math.max(120, this.teams.length * 10);
 
         for (let attempt = 0; attempt < attempts; attempt++) {
             const candidate = originalOrientations.map(day => day.map(pair => [...pair]));
@@ -363,15 +363,17 @@ class ChampionshipCalendar {
             }
 
             for (let iteration = 0; iteration < flipsPerAttempt; iteration++) {
-                // La plupart des mouvements inversent un match ; régulièrement,
-                // on inverse deux matchs ensemble pour sortir des minima locaux.
+                // Tester des inversions simples, doubles et triples. Les matchs
+                // choisis sont distincts pour éviter les mouvements qui s'annulent.
                 const moves = [];
-                const moveCount = iteration % 4 === 3 ? 2 : 1;
-                for (let move = 0; move < moveCount; move++) {
-                    const dayIndex = Math.floor(Math.random() * candidate.length);
-                    if (!candidate[dayIndex].length) continue;
-                    const matchIndex = Math.floor(Math.random() * candidate[dayIndex].length);
-                    moves.push([dayIndex, matchIndex]);
+                const moveCount = iteration % 12 === 11 ? 3 : iteration % 4 === 3 ? 2 : 1;
+                const available = [];
+                candidate.forEach((day, dayIndex) => day.forEach((match, matchIndex) => {
+                    available.push([dayIndex, matchIndex]);
+                }));
+                for (let move = 0; move < moveCount && available.length; move++) {
+                    const picked = Math.floor(Math.random() * available.length);
+                    moves.push(available.splice(picked, 1)[0]);
                 }
                 if (!moves.length) continue;
 
