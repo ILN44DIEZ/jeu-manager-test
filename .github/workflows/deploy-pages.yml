@@ -273,6 +273,45 @@ jobs:
             " joueurs : liens, champs obligatoires et postes vérifiés.");
           NODE
 
+      - name: Test player training safety
+        run: |
+          node --check players.js
+          node <<'NODE'
+          const fs = require("node:fs");
+          const vm = require("node:vm");
+          const source = fs.readFileSync("players.js", "utf8");
+          vm.runInThisContext(source + "\n;globalThis.__PlayerClassForTests = Player;");
+          const PlayerForTests = globalThis.__PlayerClassForTests;
+          const player = new PlayerForTests({
+            age: 20,
+            attributes: { speed: 98.95, goalkeeper: { reflexes: 10 } }
+          });
+
+          const goalkeeperBefore = JSON.stringify(player.attributes.goalkeeper);
+          if (player.train("goalkeeper", 1) !== false) {
+            throw new Error("L'entraînement a accepté un attribut gardien imbriqué.");
+          }
+          if (JSON.stringify(player.attributes.goalkeeper) !== goalkeeperBefore) {
+            throw new Error("L'objet des attributs gardien a été altéré.");
+          }
+          if (player.train("speed", 1) !== true || player.attributes.speed !== 99) {
+            throw new Error("L'entraînement numérique ou la limite de 99 est incorrect.");
+          }
+          if (player.train("unknown", 1) !== false) {
+            throw new Error("L'entraînement a accepté un attribut inconnu.");
+          }
+
+          const previousSpeed = player.attributes.speed;
+          player.developPotential();
+          if (!Number.isFinite(player.attributes.speed) ||
+              typeof player.attributes.goalkeeper !== "object" ||
+              player.attributes.speed < previousSpeed) {
+            throw new Error("Le développement du potentiel a corrompu les attributs.");
+          }
+
+          console.log("OK — entraînement numérique, limites d'attributs et attributs gardien préservés.");
+          NODE
+
       - name: Generate build version
         env:
           GH_TOKEN: ${{ github.token }}
