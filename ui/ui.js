@@ -32,6 +32,9 @@ class UI {
         this.currentLeagueMatchday =
             0;
 
+        this.currentManagerView = null;
+        this.initBottomNavigation();
+
     }
 
 
@@ -144,11 +147,234 @@ class UI {
 
 
     /* ================================================= */
+    /* NAVIGATION MOBILE */
+    /* ================================================= */
+
+    initBottomNavigation() {
+        if (this.bottomNav) return;
+
+        const style = document.createElement("style");
+        style.id = "manager-bottom-nav-styles";
+        style.textContent = `
+            #manager-bottom-nav {
+                position: fixed;
+                z-index: 10000;
+                left: 10px;
+                right: 10px;
+                bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+                display: none;
+                grid-template-columns: repeat(5, minmax(0, 1fr));
+                gap: 2px;
+                padding: 7px 5px 6px;
+                border: 1px solid rgba(126, 151, 170, .22);
+                border-radius: 17px;
+                background: rgba(10, 24, 35, .96);
+                box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
+                backdrop-filter: blur(18px);
+                -webkit-backdrop-filter: blur(18px);
+                box-sizing: border-box;
+            }
+            #manager-bottom-nav .manager-nav-item {
+                appearance: none;
+                -webkit-appearance: none;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                min-width: 0;
+                width: 100%;
+                min-height: 48px;
+                margin: 0;
+                padding: 5px 1px;
+                border: 0;
+                border-radius: 10px;
+                background: transparent;
+                color: #91a4b3;
+                font: inherit;
+                box-shadow: none;
+                line-height: 1;
+                cursor: pointer;
+            }
+            #manager-bottom-nav .manager-nav-icon {
+                display: block;
+                font-size: 19px;
+                line-height: 1;
+            }
+            #manager-bottom-nav .manager-nav-label {
+                display: block;
+                max-width: 100%;
+                white-space: nowrap;
+                word-break: keep-all;
+                overflow-wrap: normal;
+                font-size: clamp(9px, 2.55vw, 11px);
+                line-height: 1.1;
+                font-weight: 600;
+                letter-spacing: -.15px;
+            }
+            #manager-bottom-nav .manager-nav-item.is-active {
+                color: #35e68a;
+                background: rgba(36, 214, 127, .09);
+            }
+            #manager-bottom-nav .manager-nav-item:focus-visible,
+            #manager-plus-panel button:focus-visible {
+                outline: 2px solid #35e68a;
+                outline-offset: 2px;
+            }
+            #manager-plus-panel {
+                position: fixed;
+                z-index: 10001;
+                right: 12px;
+                bottom: calc(78px + env(safe-area-inset-bottom, 0px));
+                display: none;
+                width: min(220px, calc(100vw - 24px));
+                padding: 7px;
+                border: 1px solid #2b4050;
+                border-radius: 13px;
+                background: #10202c;
+                box-shadow: 0 8px 28px rgba(0, 0, 0, .4);
+                box-sizing: border-box;
+            }
+            #manager-plus-panel button {
+                display: block;
+                width: 100%;
+                margin: 0;
+                padding: 12px;
+                border: 0;
+                border-radius: 8px;
+                background: transparent;
+                color: #e5eef4;
+                text-align: left;
+                font-size: 13px;
+                box-shadow: none;
+            }
+            #manager-plus-panel button + button {
+                border-top: 1px solid rgba(126, 151, 170, .13);
+            }
+            body.manager-has-bottom-nav #game {
+                padding-bottom: calc(105px + env(safe-area-inset-bottom, 0px)) !important;
+            }
+            @media (max-width: 360px) {
+                #manager-bottom-nav {
+                    left: 6px;
+                    right: 6px;
+                    padding-left: 3px;
+                    padding-right: 3px;
+                }
+                #manager-bottom-nav .manager-nav-icon { font-size: 18px; }
+                #manager-bottom-nav .manager-nav-label { font-size: 9px; letter-spacing: -.3px; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        const nav = document.createElement("nav");
+        nav.id = "manager-bottom-nav";
+        nav.setAttribute("aria-label", "Navigation principale");
+
+        const items = [
+            { id: "home", icon: "⌂", label: "Accueil", action: () => {
+                if (this.currentManagerView) this.showManager(this.currentManagerView);
+            }},
+            { id: "squad", icon: "♟", label: "Effectif", action: () => {
+                if (this.currentManagerView) {
+                    this.setBottomNavigationVisible(true, "squad");
+                    this.squadUI.showClubPlayers(game.players, this.currentManagerView);
+                }
+            }},
+            { id: "matches", icon: "▣", label: "Matchs", action: () => {
+                this.setBottomNavigationVisible(true, "matches");
+                this.showCalendar();
+            }},
+            { id: "competitions", icon: "🏆", label: "Compétitions", action: () => {
+                this.setBottomNavigationVisible(true, "competitions");
+                this.showChampionship();
+            }},
+            { id: "more", icon: "•••", label: "Plus", action: () => {
+                this.toggleBottomMoreMenu();
+            }}
+        ];
+
+        items.forEach(item => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "manager-nav-item";
+            button.dataset.nav = item.id;
+            button.setAttribute("aria-label", item.label);
+            button.innerHTML = '<span class="manager-nav-icon" aria-hidden="true"></span><span class="manager-nav-label"></span>';
+            button.querySelector(".manager-nav-icon").textContent = item.icon;
+            button.querySelector(".manager-nav-label").textContent = item.label;
+            button.addEventListener("click", item.action);
+            nav.appendChild(button);
+        });
+
+        document.body.appendChild(nav);
+        this.bottomNav = nav;
+
+        const panel = document.createElement("div");
+        panel.id = "manager-plus-panel";
+        panel.setAttribute("aria-label", "Autres fonctions de la carrière");
+        const plusActions = [
+            ["🧠 Tactiques", () => {
+                if (this.currentManagerView) this.tacticsUI.show(game.tactics, this.currentManagerView);
+                this.setBottomNavigationVisible(true, "more");
+            }],
+            ["🏋️ Entraînement", () => {
+                if (this.currentManagerView) this.showTraining(this.currentManagerView);
+                this.setBottomNavigationVisible(true, "more");
+            }],
+            ["↔️ Marché des transferts", () => {
+                if (this.currentManagerView) this.showTransferMarket(this.currentManagerView);
+                this.setBottomNavigationVisible(true, "more");
+            }],
+            ["💾 Sauvegarder", () => {
+                if (this.currentManagerView) this.saveCurrentCareer(this.currentManagerView);
+                this.setBottomNavigationVisible(true, "more");
+            }]
+        ];
+        plusActions.forEach(([label, action]) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = label;
+            button.addEventListener("click", () => {
+                panel.style.display = "none";
+                action();
+            });
+            panel.appendChild(button);
+        });
+        document.body.appendChild(panel);
+        this.bottomMorePanel = panel;
+    }
+
+    setBottomNavigationVisible(visible, active = null) {
+        if (!this.bottomNav) return;
+        this.bottomNav.style.display = visible ? "grid" : "none";
+        if (this.bottomMorePanel && !visible) this.bottomMorePanel.style.display = "none";
+        document.body.classList.toggle("manager-has-bottom-nav", Boolean(visible));
+        if (active) {
+            this.bottomNav.querySelectorAll(".manager-nav-item").forEach(button => {
+                const selected = button.dataset.nav === active;
+                button.classList.toggle("is-active", selected);
+                if (selected) button.setAttribute("aria-current", "page");
+                else button.removeAttribute("aria-current");
+            });
+        }
+    }
+
+    toggleBottomMoreMenu() {
+        if (!this.bottomMorePanel || !this.bottomNav || this.bottomNav.style.display === "none") return;
+        const opening = this.bottomMorePanel.style.display !== "block";
+        this.bottomMorePanel.style.display = opening ? "block" : "none";
+        this.setBottomNavigationVisible(true, "more");
+    }
+
+
+    /* ================================================= */
     /* MENU PRINCIPAL */
     /* ================================================= */
 
     showMainMenu() {
 
+        this.setBottomNavigationVisible(false);
         this.clear();
 
 
@@ -540,6 +766,8 @@ class UI {
 
     showManager(manager) {
 
+        this.currentManagerView = manager;
+        this.setBottomNavigationVisible(true, "home");
         this.clear();
         this.container.classList.add("manager-dashboard");
 
