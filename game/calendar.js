@@ -428,8 +428,12 @@ class ChampionshipCalendar {
                 day.matches.forEach(match => {
                     const homeState = teamState[match.home];
                     const awayState = teamState[match.away];
-                    if (homeState?.last === "home" && homeState.consecutive >= 2) penalty += 1;
-                    if (awayState?.last === "away" && awayState.consecutive >= 2) penalty += 1;
+                    if (homeState?.last === "home") {
+                        penalty += Math.max(0, homeState.consecutive + 1 - 2) ** 2;
+                    }
+                    if (awayState?.last === "away") {
+                        penalty += Math.max(0, awayState.consecutive + 1 - 2) ** 2;
+                    }
                 });
                 // Départager les journées équivalentes de manière aléatoire.
                 penalty += Math.random() * 0.25;
