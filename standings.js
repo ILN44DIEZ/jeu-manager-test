@@ -48,175 +48,66 @@ class Standings {
     /* ================================================= */
 
     update(match) {
-
-        const home =
-            this.table.find(
-                team =>
-                    team.team ===
-                    match.homeTeam
-            );
-
-
-        const away =
-            this.table.find(
-                team =>
-                    team.team ===
-                    match.awayTeam
-            );
-
-
-        if (
-            !home ||
-            !away
-        ) {
-
-            return;
-
+        // Refuser les résultats incomplets ou incohérents pour éviter de
+        // contaminer le classement avec des valeurs NaN ou un match fictif.
+        if (!match ||
+            typeof match.homeTeam !== "string" ||
+            typeof match.awayTeam !== "string" ||
+            !match.homeTeam.trim() ||
+            !match.awayTeam.trim() ||
+            match.homeTeam === match.awayTeam) {
+            return false;
         }
 
+        const homeGoals = Number(match.homeGoals);
+        const awayGoals = Number(match.awayGoals);
+        if (!Number.isInteger(homeGoals) || homeGoals < 0 ||
+            !Number.isInteger(awayGoals) || awayGoals < 0) {
+            return false;
+        }
 
-        /* ========================= */
-        /* MATCH JOUÉ */
-        /* ========================= */
+        const home = this.table.find(team => team.team === match.homeTeam);
+        const away = this.table.find(team => team.team === match.awayTeam);
+        if (!home || !away || home === away) {
+            return false;
+        }
 
         home.played++;
-
         away.played++;
 
+        home.goalsFor += homeGoals;
+        home.goalsAgainst += awayGoals;
+        away.goalsFor += awayGoals;
+        away.goalsAgainst += homeGoals;
 
-        /* ========================= */
-        /* BUTS */
-        /* ========================= */
+        home.goalDifference = home.goalsFor - home.goalsAgainst;
+        away.goalDifference = away.goalsFor - away.goalsAgainst;
 
-        home.goalsFor +=
-            match.homeGoals;
-
-        home.goalsAgainst +=
-            match.awayGoals;
-
-
-        away.goalsFor +=
-            match.awayGoals;
-
-        away.goalsAgainst +=
-            match.homeGoals;
-
-
-        /* ========================= */
-        /* DIFFÉRENCE DE BUTS */
-        /* ========================= */
-
-        home.goalDifference =
-            home.goalsFor -
-            home.goalsAgainst;
-
-
-        away.goalDifference =
-            away.goalsFor -
-            away.goalsAgainst;
-
-
-        /* ========================= */
-        /* VICTOIRE DOMICILE */
-        /* ========================= */
-
-        if (
-            match.homeGoals >
-            match.awayGoals
-        ) {
-
+        if (homeGoals > awayGoals) {
             home.wins++;
-
             home.points += 3;
-
-
             away.losses++;
-
-
-            home.form.push(
-                "V"
-            );
-
-            away.form.push(
-                "D"
-            );
-
-        }
-
-
-        /* ========================= */
-        /* VICTOIRE EXTÉRIEURE */
-        /* ========================= */
-
-        else if (
-            match.homeGoals <
-            match.awayGoals
-        ) {
-
+            home.form.push("V");
+            away.form.push("D");
+        } else if (homeGoals < awayGoals) {
             away.wins++;
-
             away.points += 3;
-
-
             home.losses++;
-
-
-            away.form.push(
-                "V"
-            );
-
-            home.form.push(
-                "D"
-            );
-
-        }
-
-
-        /* ========================= */
-        /* MATCH NUL */
-        /* ========================= */
-
-        else {
-
+            away.form.push("V");
+            home.form.push("D");
+        } else {
             home.draws++;
-
             away.draws++;
-
-
             home.points++;
-
             away.points++;
-
-
-            home.form.push(
-                "N"
-            );
-
-            away.form.push(
-                "N"
-            );
-
+            home.form.push("N");
+            away.form.push("N");
         }
 
-
-        /* ========================= */
-        /* 5 DERNIERS MATCHS */
-        /* ========================= */
-
-        home.form =
-            home.form.slice(-5);
-
-
-        away.form =
-            away.form.slice(-5);
-
-
-        /* ========================= */
-        /* CLASSEMENT */
-        /* ========================= */
-
+        home.form = home.form.slice(-5);
+        away.form = away.form.slice(-5);
         this.sortTable();
-
+        return true;
     }
 
 
