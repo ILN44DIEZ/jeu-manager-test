@@ -43,6 +43,7 @@ class UI {
     clear() {
 
         this.container.innerHTML = "";
+        this.container.classList.remove("manager-dashboard");
 
     }
 
@@ -533,6 +534,7 @@ class UI {
     showManager(manager) {
 
         this.clear();
+        this.container.classList.add("manager-dashboard");
 
 
         if (manager.logo) {
