@@ -1169,7 +1169,11 @@ class UI {
                 const injuryCooldownActive = lastInjurySeason === currentSeason &&
                     Number.isFinite(lastInjuryDay) && lastInjuryDay > 0 &&
                     (Number(game.currentMatchday) || 0) - lastInjuryDay < 4;
-                const injuryChance = Math.min(0.07, 0.015 + Math.max(0, currentFatigue - 55) * 0.0007);
+                // La forme influence le risque : à 100, réduction de 25 % ;
+                // à 0, pas de réduction. La fatigue conserve son effet habituel.
+                const currentForm = Math.max(0, Math.min(100, Number(player.forme) || 0));
+                const formRiskMultiplier = 1 - (0.25 * currentForm / 100);
+                const injuryChance = Math.min(0.07, 0.015 + Math.max(0, currentFatigue - 55) * 0.0007) * formRiskMultiplier;
                 if (!injuryCooldownActive && Math.random() < injuryChance) {
                     const duration = 1 + Math.floor(Math.random() * 4);
                     player.derniereBlessureJour = Number(game.currentMatchday) || 0;
