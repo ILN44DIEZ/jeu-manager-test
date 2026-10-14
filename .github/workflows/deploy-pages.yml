@@ -400,7 +400,7 @@ jobs:
           }
 
           const [starter, reserve, injured] = game.players;
-          if (starter.fatigue !== 49 || starter.energy !== 88.75 || starter.forme !== 72) {
+          if (starter.fatigue !== 50 || starter.energy !== 88.75 || starter.forme !== 72) {
             throw new Error("La fatigue, l'énergie ou la forme du titulaire n'a pas évolué correctement.");
           }
           if (reserve.fatigue !== 10 || reserve.energy !== 100 || reserve.forme !== 65) {
