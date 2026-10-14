@@ -460,7 +460,7 @@ class ChampionshipCalendar {
             }
 
             const trialScore = scoreSchedule(firstHalf, trialOrder);
-            const temperature = Math.max(25, 5000 * (1 - iteration / returnOrderAttempts));
+            const temperature = Math.max(1000, 500000 * (1 - iteration / returnOrderAttempts));
             const acceptWorse = Math.random() < Math.exp((currentScore - trialScore) / temperature);
 
             if (trialScore < returnOrderScore) {
