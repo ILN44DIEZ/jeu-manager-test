@@ -223,6 +223,56 @@ jobs:
           console.log("OK — classement, points, différence de buts, forme et rejets d'entrées invalides.");
           NODE
 
+      - name: Test player and club data integrity
+        run: |
+          node <<'NODE'
+          const fs = require("node:fs");
+          const clubs = JSON.parse(fs.readFileSync("data/clubs.json", "utf8"));
+          const players = JSON.parse(fs.readFileSync("data/players.json", "utf8"));
+          if (!Array.isArray(clubs) || !Array.isArray(players)) {
+            throw new Error("Les fichiers de clubs et de joueurs doivent contenir des listes.");
+          }
+
+          const clubNames = clubs.map(club => club.nom);
+          if (clubNames.some(name => !name) || new Set(clubNames).size !== clubNames.length) {
+            throw new Error("Nom de club absent ou dupliqué.");
+          }
+          const knownClubs = new Set(clubNames);
+          const unlinkedPlayers = players.filter(player => !player.club || !knownClubs.has(player.club));
+          if (unlinkedPlayers.length) {
+            throw new Error(unlinkedPlayers.length + " joueur(s) lié(s) à un club absent de clubs.json : " +
+              unlinkedPlayers.slice(0, 10).map(player => (player.prenom || "") + " " +
+                (player.nom || "") + " [" + (player.club || "club absent") + "]").join(", "));
+          }
+
+          const requiredFields = [
+            "prenom", "nom", "club", "poste", "age", "nationalite",
+            "taille", "poids", "numero", "pied", "note", "potentiel",
+            "forme", "moral", "fatigue", "blessure", "joursBlessure",
+            "valeur", "salaire", "contratFin", "role", "experience",
+            "cartonsJaunes", "cartonsRouges", "buts", "passes",
+            "matchs", "minutes", "cleanSheets", "centreFormation",
+            "retraite", "pret", "clubPret", "suspendu", "joursSuspension"
+          ];
+          const incomplete = players.filter(player =>
+            requiredFields.some(field => !Object.prototype.hasOwnProperty.call(player, field))
+          );
+          const validPositions = new Set([
+            "GB", "G", "DD", "DG", "DC", "DCD", "DCG", "MDC",
+            "MC", "MOC", "MD", "MG", "AD", "AG", "BU"
+          ]);
+          const invalidPositions = players.filter(player => !validPositions.has(player.poste));
+          const emptyClubs = clubs.filter(club => !players.some(player => player.club === club.nom));
+          if (incomplete.length || invalidPositions.length || emptyClubs.length) {
+            throw new Error("Données joueurs à corriger : " + incomplete.length +
+              " joueur(s) incomplet(s), " + invalidPositions.length +
+              " poste(s) invalide(s), " + emptyClubs.length + " club(s) sans joueur.");
+          }
+
+          console.log("OK — " + clubs.length + " clubs et " + players.length +
+            " joueurs : liens, champs obligatoires et postes vérifiés.");
+          NODE
+
       - name: Generate build version
         env:
           GH_TOKEN: ${{ github.token }}
