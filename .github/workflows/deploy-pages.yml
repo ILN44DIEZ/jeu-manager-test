@@ -25,6 +25,56 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Test calendar generation
+        run: |
+          node --check game/calendar.js
+          node <<'NODE'
+          const fs = require("node:fs");
+          const vm = require("node:vm");
+
+          const source = fs.readFileSync("game/calendar.js", "utf8");
+          vm.runInThisContext(source + "\n;globalThis.__CalendarForTests = ChampionshipCalendar;");
+          const Calendar = globalThis.__CalendarForTests;
+          const clubs = JSON.parse(fs.readFileSync("data/clubs.json", "utf8"));
+          const leagues = new Map();
+
+          for (const club of clubs) {
+            if (!leagues.has(club.ligue)) leagues.set(club.ligue, []);
+            leagues.get(club.ligue).push(club.nom);
+          }
+
+          const expected = {
+            "Premier League": { teams: 20, days: 38, matches: 380 },
+            "Liga": { teams: 19, days: 38, matches: 342 },
+            "Serie A": { teams: 20, days: 38, matches: 380 },
+            "Bundesliga": { teams: 18, days: 34, matches: 306 },
+            "Ligue 1": { teams: 20, days: 38, matches: 380 }
+          };
+
+          for (const [name, spec] of Object.entries(expected)) {
+            const teams = leagues.get(name);
+            if (!teams || teams.length !== spec.teams) {
+              throw new Error(name + ": nombre d'équipes inattendu");
+            }
+
+            for (let trial = 1; trial <= 5; trial++) {
+              const calendar = new Calendar(teams, "2026-08-15");
+              calendar.generateFullCalendar();
+              const validation = calendar.validateCalendar();
+              if (!validation.valid) {
+                throw new Error(name + " essai " + trial + ": " + validation.errors.join(" | "));
+              }
+              if (calendar.matchdays.length !== spec.days ||
+                  validation.summary.matches !== spec.matches) {
+                throw new Error(name + ": nombre de journées ou de matchs incorrect");
+              }
+            }
+
+            console.log("OK — " + name + " : " + spec.days +
+              " journées, " + spec.matches + " matchs, 5 générations validées.");
+          }
+          NODE
+
       - name: Generate build version
         env:
           GH_TOKEN: ${{ github.token }}
