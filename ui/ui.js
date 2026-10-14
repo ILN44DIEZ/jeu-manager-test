@@ -90,6 +90,13 @@ class UI {
         button.textContent =
             text;
 
+        if (/jouer le prochain match/i.test(text)) {
+            button.classList.add("dashboard-primary");
+        } else if (/retour au menu/i.test(text)) {
+            button.classList.add("dashboard-back");
+        } else if (/effectif|entraînement|marché des transferts|tactiques|championnat|calendrier|sauvegarder/i.test(text)) {
+            button.classList.add("dashboard-action");
+        }
 
         button.addEventListener(
             "click",
