@@ -665,9 +665,54 @@ class ChampionshipCalendar {
             }
         }
 
+        // Descente locale déterministe : tester toutes les inversions simples
+        // et tous les échanges de journées retour, sans accepter de régression.
+        let finalOrientations = bestRepairOrientations.map(day => day.map(pair => [...pair]));
+        let finalOrder = bestRepairOrder.slice();
+        applyOrientations(finalOrientations);
+        const scoreOrder = numbers => {
+            const returnMap = new Map(makeReturnDays().map(day => [day.day, day]));
+            return scoreSchedule(firstHalf, numbers.map(number => returnMap.get(number)).filter(Boolean));
+        };
+        let finalScore = scoreOrder(finalOrder);
+        for (let pass = 0; pass < 30 && finalScore > 0; pass++) {
+            let improved = false;
+            for (let d = 0; d < finalOrientations.length && !improved; d++) {
+                for (let m = 0; m < finalOrientations[d].length && !improved; m++) {
+                    const trial = finalOrientations.map(day => day.map(pair => [...pair]));
+                    [trial[d][m][0], trial[d][m][1]] = [trial[d][m][1], trial[d][m][0]];
+                    applyOrientations(trial);
+                    const score = scoreOrder(finalOrder);
+                    if (score < finalScore) {
+                        finalOrientations = trial;
+                        finalScore = score;
+                        improved = true;
+                    } else {
+                        applyOrientations(finalOrientations);
+                    }
+                }
+            }
+            if (improved) continue;
+            outerSwap:
+            for (let a = 0; a < finalOrder.length; a++) {
+                for (let b = a + 1; b < finalOrder.length; b++) {
+                    const trialOrder = finalOrder.slice();
+                    [trialOrder[a], trialOrder[b]] = [trialOrder[b], trialOrder[a]];
+                    const score = scoreOrder(trialOrder);
+                    if (score < finalScore) {
+                        finalOrder = trialOrder;
+                        finalScore = score;
+                        improved = true;
+                        break outerSwap;
+                    }
+                }
+            }
+            if (!improved) break;
+        }
+
         // Restaurer le meilleur état trouvé et transmettre son ordre retour.
-        applyOrientations(bestRepairOrientations);
-        bestOptimizedReturnOrder = bestRepairOrder;
+        applyOrientations(finalOrientations);
+        bestOptimizedReturnOrder = finalOrder;
         this._optimizedReturnDayOrder = bestOptimizedReturnOrder;
         return this.matchdays;
     }
