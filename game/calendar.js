@@ -484,8 +484,86 @@ class ChampionshipCalendar {
             }
         }
 
-        // Le meilleur ordre global est mémorisé pour que la génération du
-        // calendrier retour utilise exactement la solution évaluée.
+        // Recherche conjointe : l'orientation des matchs aller et l'ordre
+        // des retours sont optimisés ensemble. Les deux décisions s'influencent :
+        // changer seulement l'une d'elles peut bloquer la recherche dans un minimum local.
+        let jointOrientations = bestOrientations.map(day => day.map(pair => [...pair]));
+        let jointOrder = bestOptimizedReturnOrder.map(dayNumber => returnDayByNumber.get(dayNumber));
+        let jointScore = scoreSchedule(firstHalf, jointOrder);
+        let bestJointScore = jointScore;
+        let bestJointOrientations = jointOrientations.map(day => day.map(pair => [...pair]));
+        let bestJointOrder = jointOrder.map(day => day.day);
+        const jointAttempts = Math.max(1600, this.teams.length * 100);
+
+        for (let iteration = 0; iteration < jointAttempts; iteration++) {
+            const trialOrientations = jointOrientations.map(day => day.map(pair => [...pair]));
+            const trialOrderNumbers = jointOrder.map(day => day.day);
+            const fixtureCount = iteration % 5 === 4 ? 2 : 1;
+            const fixtures = [];
+            const allFixtures = [];
+            trialOrientations.forEach((day, dayIndex) =>
+                day.forEach((pair, matchIndex) => allFixtures.push([dayIndex, matchIndex]))
+            );
+            for (let i = 0; i < fixtureCount && allFixtures.length; i++) {
+                fixtures.push(allFixtures.splice(
+                    Math.floor(Math.random() * allFixtures.length), 1
+                )[0]);
+            }
+            fixtures.forEach(([dayIndex, matchIndex]) => {
+                [trialOrientations[dayIndex][matchIndex][0],
+                 trialOrientations[dayIndex][matchIndex][1]] =
+                [trialOrientations[dayIndex][matchIndex][1],
+                 trialOrientations[dayIndex][matchIndex][0]];
+            });
+
+            // Échange, déplacement ou inversion d'un segment de journées retour.
+            if (trialOrderNumbers.length > 1) {
+                let a = Math.floor(Math.random() * trialOrderNumbers.length);
+                let b = Math.floor(Math.random() * trialOrderNumbers.length);
+                while (b === a) b = Math.floor(Math.random() * trialOrderNumbers.length);
+                const move = Math.random();
+                if (move < 0.5) {
+                    [trialOrderNumbers[a], trialOrderNumbers[b]] =
+                        [trialOrderNumbers[b], trialOrderNumbers[a]];
+                } else if (move < 0.8) {
+                    const [moved] = trialOrderNumbers.splice(a, 1);
+                    trialOrderNumbers.splice(b, 0, moved);
+                } else {
+                    const start = Math.min(a, b);
+                    const end = Math.max(a, b);
+                    const segment = trialOrderNumbers.slice(start, end + 1).reverse();
+                    trialOrderNumbers.splice(start, segment.length, ...segment);
+                }
+            }
+
+            applyOrientations(trialOrientations);
+            const trialReturnByNumber = new Map(makeReturnDays().map(day => [day.day, day]));
+            const trialReturns = trialOrderNumbers.map(dayNumber =>
+                trialReturnByNumber.get(dayNumber)
+            ).filter(Boolean);
+            const trialScore = scoreSchedule(firstHalf, trialReturns);
+            const temperature = Math.max(0.5, 80 * (1 - iteration / jointAttempts));
+            const accept = trialScore <= jointScore ||
+                Math.random() < Math.exp((jointScore - trialScore) / temperature);
+
+            if (accept) {
+                jointOrientations = trialOrientations;
+                jointOrder = trialReturns;
+                jointScore = trialScore;
+            } else {
+                applyOrientations(jointOrientations);
+            }
+
+            if (trialScore < bestJointScore) {
+                bestJointScore = trialScore;
+                bestJointOrientations = trialOrientations.map(day => day.map(pair => [...pair]));
+                bestJointOrder = trialOrderNumbers.slice();
+            }
+        }
+
+        // Restaurer le meilleur état conjoint trouvé.
+        applyOrientations(bestJointOrientations);
+        bestOptimizedReturnOrder = bestJointOrder;
         this._optimizedReturnDayOrder = bestOptimizedReturnOrder;
         return this.matchdays;
     }
