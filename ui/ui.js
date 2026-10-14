@@ -1144,7 +1144,7 @@ class UI {
             if (played) {
                 player.fatigue = Math.min(100, fatigue + 10 + Math.floor(Math.random() * 11));
                 // Perte d'énergie réduite de 25 % : 15 devient environ 11 points.
-                player.energy = Math.max(0, energy - 11);
+                player.energy = Math.max(0, energy - 11.25);
                 // La forme suit le résultat collectif et une performance individuelle légère.
                 const individualChange = (Math.random() < 0.5 ? 1 : -1) * (1 + Math.floor(Math.random() * 3));
                 player.forme = Math.max(0, Math.min(100, form + resultFormChange + individualChange));
