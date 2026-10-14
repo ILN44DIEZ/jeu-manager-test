@@ -933,3 +933,30 @@ body {
         padding: 9px 10px;
     }
 }
+
+
+/* Correctif accueil : boutons alignés et retour non flottant */
+#game.manager-dashboard > button,
+#game.manager-dashboard > button:not(:first-of-type),
+#game.manager-dashboard > button:last-of-type {
+    display: block !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 8px 0 !important;
+    box-sizing: border-box;
+    text-align: left;
+}
+
+#game.manager-dashboard > button:first-of-type {
+    width: 100% !important;
+    margin: 14px 0 12px !important;
+    text-align: center;
+}
+
+#game.manager-dashboard > button:last-of-type {
+    margin-top: 18px !important;
+    text-align: center;
+}
