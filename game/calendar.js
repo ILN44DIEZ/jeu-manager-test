@@ -410,28 +410,61 @@ class ChampionshipCalendar {
         // gloutonne fournit un point de départ, puis des échanges de journées
         // entières sont testés et seule la meilleure solution est conservée.
         const returnDays = makeReturnDays();
-        let orderedReturns = orderReturns(returnDays);
+        const returnDayByNumber = new Map(returnDays.map(day => [day.day, day]));
+        let orderedReturns = Array.isArray(bestReturnOrder) && bestReturnOrder.length === returnDays.length
+            ? bestReturnOrder.map(dayNumber => returnDayByNumber.get(dayNumber)).filter(Boolean)
+            : orderReturns(returnDays);
+
+        // Repli défensif si un numéro de journée est absent ou dupliqué.
+        if (orderedReturns.length !== returnDays.length) {
+            orderedReturns = orderReturns(returnDays);
+        }
+
         let returnOrderScore = scoreSchedule(firstHalf, orderedReturns);
         let bestOptimizedReturnOrder = orderedReturns.map(day => day.day);
-        const returnOrderAttempts = Math.max(500, this.teams.length * 50);
+        let currentOrder = [...orderedReturns];
+        let currentScore = returnOrderScore;
+        const returnOrderAttempts = Math.max(1800, this.teams.length * 180);
 
         for (let iteration = 0; iteration < returnOrderAttempts; iteration++) {
-            if (orderedReturns.length < 2) break;
+            if (currentOrder.length < 2) break;
 
-            const firstIndex = Math.floor(Math.random() * orderedReturns.length);
-            let secondIndex = Math.floor(Math.random() * (orderedReturns.length - 1));
-            if (secondIndex >= firstIndex) secondIndex++;
+            const trialOrder = [...currentOrder];
+            const moveType = Math.random();
+            const firstIndex = Math.floor(Math.random() * trialOrder.length);
+            let secondIndex = Math.floor(Math.random() * trialOrder.length);
+            while (secondIndex === firstIndex) {
+                secondIndex = Math.floor(Math.random() * trialOrder.length);
+            }
 
-            [orderedReturns[firstIndex], orderedReturns[secondIndex]] =
-                [orderedReturns[secondIndex], orderedReturns[firstIndex]];
+            if (moveType < 0.55) {
+                // Échange de deux journées.
+                [trialOrder[firstIndex], trialOrder[secondIndex]] =
+                    [trialOrder[secondIndex], trialOrder[firstIndex]];
+            } else if (moveType < 0.85) {
+                // Déplacer une journée à une autre position.
+                const [movedDay] = trialOrder.splice(firstIndex, 1);
+                trialOrder.splice(secondIndex, 0, movedDay);
+            } else {
+                // Inverser un segment complet de journées.
+                const start = Math.min(firstIndex, secondIndex);
+                const end = Math.max(firstIndex, secondIndex);
+                const segment = trialOrder.slice(start, end + 1).reverse();
+                trialOrder.splice(start, segment.length, ...segment);
+            }
 
-            const trialScore = scoreSchedule(firstHalf, orderedReturns);
+            const trialScore = scoreSchedule(firstHalf, trialOrder);
+            const temperature = Math.max(1, 120 - 120 * iteration / returnOrderAttempts);
+            const acceptWorse = Math.random() < Math.exp((currentScore - trialScore) / temperature);
+
             if (trialScore < returnOrderScore) {
                 returnOrderScore = trialScore;
-                bestOptimizedReturnOrder = orderedReturns.map(day => day.day);
-            } else {
-                [orderedReturns[firstIndex], orderedReturns[secondIndex]] =
-                    [orderedReturns[secondIndex], orderedReturns[firstIndex]];
+                bestOptimizedReturnOrder = trialOrder.map(day => day.day);
+            }
+
+            if (trialScore <= currentScore || acceptWorse) {
+                currentOrder = trialOrder;
+                currentScore = trialScore;
             }
         }
 
