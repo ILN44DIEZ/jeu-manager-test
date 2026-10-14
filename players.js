@@ -251,7 +251,7 @@ class Player {
 
         this.fatigue += 10;
         // Perte réduite de 25 % par rapport à l'ancienne valeur de 15 points.
-        this.energy -= 11;
+        this.energy -= 11.25;
 
 
         if (this.fatigue > 100)
