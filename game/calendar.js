@@ -514,7 +514,7 @@ class ChampionshipCalendar {
         const firstHalfLength = firstHalf.length;
 
 
-        returnMatches.forEach(
+        orderedReturns.forEach(
             (day, index) => {
 
                 day.day =
@@ -530,7 +530,7 @@ class ChampionshipCalendar {
 
             ...firstHalf,
 
-            ...returnMatches
+            ...orderedReturns
 
         ];
 
