@@ -561,9 +561,113 @@ class ChampionshipCalendar {
             }
         }
 
-        // Restaurer le meilleur état conjoint trouvé.
-        applyOrientations(bestJointOrientations);
-        bestOptimizedReturnOrder = bestJointOrder;
+        // Réparation ciblée : repérer les équipes qui dépassent la limite,
+        // puis modifier en priorité l'orientation d'un match appartenant à leur série.
+        // Cela explore des mouvements utiles au lieu de retourner des matchs au hasard.
+        let repairOrientations = bestJointOrientations.map(day => day.map(pair => [...pair]));
+        let repairOrder = bestJointOrder.slice();
+        let repairScore = bestJointScore;
+        let bestRepairScore = repairScore;
+        let bestRepairOrientations = repairOrientations.map(day => day.map(pair => [...pair]));
+        let bestRepairOrder = repairOrder.slice();
+        const repairAttempts = Math.max(1200, this.teams.length * 90);
+
+        const findLongRunFixtures = (orientations, returnOrderNumbers) => {
+            const venueHistory = new Map(this.teams.map(team => [team, []]));
+            const appendDay = day => day.matches.forEach(match => {
+                venueHistory.get(match.home)?.push({ venue: "H", dayNumber: day.day });
+                venueHistory.get(match.away)?.push({ venue: "A", dayNumber: day.day });
+            });
+            applyOrientations(orientations);
+            firstHalf.forEach(appendDay);
+            const returnMap = new Map(makeReturnDays().map(day => [day.day, day]));
+            returnOrderNumbers.forEach(dayNumber => {
+                const day = returnMap.get(dayNumber);
+                if (day) appendDay(day);
+            });
+            const candidates = [];
+            venueHistory.forEach((history, team) => {
+                let start = 0;
+                while (start < history.length) {
+                    let end = start + 1;
+                    while (end < history.length && history[end].venue === history[start].venue) end++;
+                    if (end - start > maxConsecutive) {
+                        for (let index = start + maxConsecutive; index < end; index++) {
+                            const item = history[index];
+                            const firstHalfDay = firstHalf.find(day => day.day === item.dayNumber);
+                            const sourceDay = firstHalfDay || returnMap.get(item.dayNumber);
+                            if (!sourceDay) continue;
+                            const fixtureIndex = sourceDay.matches.findIndex(match =>
+                                match.home === team || match.away === team
+                            );
+                            if (fixtureIndex >= 0) {
+                                const originalDayNumber = firstHalfDay
+                                    ? firstHalfDay.day
+                                    : sourceDay.day;
+                                candidates.push([originalDayNumber, fixtureIndex]);
+                            }
+                        }
+                    }
+                    start = end;
+                }
+            });
+            return candidates;
+        };
+
+        for (let iteration = 0; iteration < repairAttempts; iteration++) {
+            applyOrientations(repairOrientations);
+            const candidates = findLongRunFixtures(repairOrientations, repairOrder);
+            if (!candidates.length) {
+                bestRepairScore = 0;
+                bestRepairOrientations = repairOrientations.map(day => day.map(pair => [...pair]));
+                bestRepairOrder = repairOrder.slice();
+                break;
+            }
+
+            const trialOrientations = repairOrientations.map(day => day.map(pair => [...pair]));
+            const [dayNumber, fixtureIndex] = candidates[Math.floor(Math.random() * candidates.length)];
+            const dayIndex = firstHalf.findIndex(day => day.day === dayNumber);
+            if (dayIndex < 0 || !trialOrientations[dayIndex]?.[fixtureIndex]) continue;
+            [trialOrientations[dayIndex][fixtureIndex][0],
+             trialOrientations[dayIndex][fixtureIndex][1]] =
+            [trialOrientations[dayIndex][fixtureIndex][1],
+             trialOrientations[dayIndex][fixtureIndex][0]];
+
+            let trialOrderNumbers = repairOrder.slice();
+            // Parfois déplacer une journée retour en même temps permet de casser
+            // une série sans dégrader l'équilibre des autres clubs.
+            if (Math.random() < 0.35 && trialOrderNumbers.length > 1) {
+                const from = Math.floor(Math.random() * trialOrderNumbers.length);
+                let to = Math.floor(Math.random() * trialOrderNumbers.length);
+                while (to === from) to = Math.floor(Math.random() * trialOrderNumbers.length);
+                const [moved] = trialOrderNumbers.splice(from, 1);
+                trialOrderNumbers.splice(to, 0, moved);
+            }
+
+            applyOrientations(trialOrientations);
+            const trialMap = new Map(makeReturnDays().map(day => [day.day, day]));
+            const trialReturns = trialOrderNumbers.map(number => trialMap.get(number)).filter(Boolean);
+            const trialScore = scoreSchedule(firstHalf, trialReturns);
+            const temperature = Math.max(0.25, 30 * (1 - iteration / repairAttempts));
+            const accept = trialScore <= repairScore ||
+                Math.random() < Math.exp((repairScore - trialScore) / temperature);
+
+            if (accept) {
+                repairOrientations = trialOrientations;
+                repairOrder = trialOrderNumbers;
+                repairScore = trialScore;
+            }
+
+            if (trialScore < bestRepairScore) {
+                bestRepairScore = trialScore;
+                bestRepairOrientations = trialOrientations.map(day => day.map(pair => [...pair]));
+                bestRepairOrder = trialOrderNumbers.slice();
+            }
+        }
+
+        // Restaurer le meilleur état trouvé et transmettre son ordre retour.
+        applyOrientations(bestRepairOrientations);
+        bestOptimizedReturnOrder = bestRepairOrder;
         this._optimizedReturnDayOrder = bestOptimizedReturnOrder;
         return this.matchdays;
     }
