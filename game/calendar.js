@@ -665,6 +665,79 @@ class ChampionshipCalendar {
             }
         }
 
+        // Recherche sous contraintes de l'ordre des retours : une journée n'est
+        // ajoutée que si elle ne crée aucune série de plus de deux matchs.
+        const buildConstrainedReturnOrder = (orientations, nodeLimit = 180000) => {
+            applyOrientations(orientations);
+            const returnDays = makeReturnDays();
+            const history = new Map(this.teams.map(team => [team, []]));
+            const append = day => day.matches.forEach(match => {
+                history.get(match.home)?.push("H");
+                history.get(match.away)?.push("A");
+            });
+            firstHalf.forEach(append);
+            // Un ordre retour ne peut pas corriger une série déjà présente à l'aller.
+            for (const values of history.values()) {
+                let run = 1;
+                for (let i = 1; i < values.length; i++) {
+                    run = values[i] === values[i - 1] ? run + 1 : 1;
+                    if (run > maxConsecutive) return { order: null, complete: false, visited: 0 };
+                }
+            }
+            const ordered = [];
+            const remaining = returnDays.slice();
+            let visited = 0;
+            const canAppend = day => {
+                for (const match of day.matches) {
+                    for (const [team, venue] of [[match.home, "H"], [match.away, "A"]]) {
+                        const values = history.get(team);
+                        const length = values.length;
+                        if (length >= 2 && values[length - 1] === venue && values[length - 2] === venue) return false;
+                    }
+                }
+                return true;
+            };
+            const add = day => day.matches.forEach(match => {
+                history.get(match.home).push("H");
+                history.get(match.away).push("A");
+            });
+            const remove = day => day.matches.forEach(match => {
+                history.get(match.home).pop();
+                history.get(match.away).pop();
+            });
+            const search = () => {
+                if (!remaining.length) return true;
+                if (++visited > nodeLimit) return false;
+                const candidates = remaining
+                    .map((day, index) => ({ day, index, score: day.matches.reduce((sum, match) => {
+                        const h = history.get(match.home), a = history.get(match.away);
+                        return sum + (h.length && h[h.length - 1] === "H" ? 1 : 0)
+                            + (a.length && a[a.length - 1] === "A" ? 1 : 0);
+                    }, 0) }))
+                    .filter(item => canAppend(item.day))
+                    .sort((a, b) => a.score - b.score);
+                for (const candidate of candidates) {
+                    const [day] = remaining.splice(candidate.index, 1);
+                    ordered.push(day);
+                    add(day);
+                    if (search()) return true;
+                    remove(day);
+                    ordered.pop();
+                    remaining.splice(candidate.index, 0, day);
+                }
+                return false;
+            };
+            return search()
+                ? { order: ordered.map(day => day.day), complete: true, visited }
+                : { order: null, complete: false, visited };
+        };
+
+        const constrainedResult = buildConstrainedReturnOrder(bestRepairOrientations);
+        if (constrainedResult.complete) {
+            bestRepairOrder = constrainedResult.order;
+            bestRepairScore = 0;
+        }
+
         // Descente locale déterministe : tester toutes les inversions simples
         // et tous les échanges de journées retour, sans accepter de régression.
         let finalOrientations = bestRepairOrientations.map(day => day.map(pair => [...pair]));
