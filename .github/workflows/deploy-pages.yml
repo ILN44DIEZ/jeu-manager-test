@@ -368,6 +368,50 @@ jobs:
           console.log("OK — composition, remplaçants, rôles, positions, style et données de carrière restaurés.");
           NODE
 
+      - name: Test post-match fatigue, form, recovery and injuries
+        run: |
+          node --check ui/ui.js
+          node <<'NODE'
+          const fs = require("node:fs");
+          const vm = require("node:vm");
+          globalThis.game = {
+            club: { name: "Test FC" },
+            manager: { season: 1 },
+            currentMatchday: 1,
+            tactics: { lineup: [{ id: "starter" }] },
+            players: [
+              { id: "starter", fatigue: 30, energy: 100, forme: 70, joursBlessure: 0, blessure: "" },
+              { id: "reserve", fatigue: 25, energy: 90, forme: 65, joursBlessure: 0, blessure: "" },
+              { id: "injured", fatigue: 50, energy: 70, forme: 55, joursBlessure: 2, blessure: "Blessure" }
+            ]
+          };
+          const source = fs.readFileSync("ui/ui.js", "utf8");
+          vm.runInThisContext(source + "\n;globalThis.__UITestClass = UI;");
+          const UITestClass = globalThis.__UITestClass;
+          const ui = Object.create(UITestClass.prototype);
+          const originalRandom = Math.random;
+          Math.random = () => 0.99;
+          try {
+            ui.applyPostMatchPlayerCondition({
+              homeTeam: "Test FC", awayTeam: "Rival FC", homeGoals: 2, awayGoals: 0
+            });
+          } finally {
+            Math.random = originalRandom;
+          }
+
+          const [starter, reserve, injured] = game.players;
+          if (starter.fatigue !== 49 || starter.energy !== 88.75 || starter.forme !== 72) {
+            throw new Error("La fatigue, l'énergie ou la forme du titulaire n'a pas évolué correctement.");
+          }
+          if (reserve.fatigue !== 10 || reserve.energy !== 100 || reserve.forme !== 65) {
+            throw new Error("La récupération du remplaçant est incorrecte.");
+          }
+          if (injured.joursBlessure !== 1 || injured.fatigue !== 32 || injured.energy !== 88) {
+            throw new Error("La durée de blessure ou la récupération du joueur blessé est incorrecte.");
+          }
+          console.log("OK — progression du titulaire, récupération des remplaçants et décrément des blessures.");
+          NODE
+
       - name: Generate build version
         env:
           GH_TOKEN: ${{ github.token }}
