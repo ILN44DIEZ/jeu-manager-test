@@ -75,6 +75,92 @@ jobs:
           }
           NODE
 
+      - name: Test match simulation
+        run: |
+          node --check matches.js
+          node <<'NODE'
+          const fs = require("node:fs");
+          const vm = require("node:vm");
+          const source = fs.readFileSync("matches.js", "utf8");
+          vm.runInThisContext(source + "\n;globalThis.__MatchEngineForTests = MatchEngine;");
+          const MatchEngine = globalThis.__MatchEngineForTests;
+
+          const makePlayers = (prefix) => Array.from({ length: 15 }, (_, i) => ({
+            id: prefix + "-" + i,
+            prenom: prefix + "Joueur",
+            nom: String(i + 1),
+            poste: i === 0 ? "GB" : i < 5 ? "DC" : i < 10 ? "MC" : "BU",
+            note: 60 + (i % 30),
+            age: 20 + (i % 12),
+            butsSaison: 0,
+            passesDecisivesSaison: 0,
+            fatigue: 20,
+            joursBlessure: 0,
+            blessure: ""
+          }));
+
+          const homeSquad = makePlayers("HOME");
+          const awaySquad = makePlayers("AWAY");
+          const engine = new MatchEngine();
+          engine.setSquads({ Home: homeSquad, Away: awaySquad });
+          engine.setActiveLineup("Home", homeSquad.slice(0, 11));
+          engine.setActiveLineup("Away", awaySquad.slice(0, 11));
+
+          for (let trial = 1; trial <= 100; trial++) {
+            const result = engine.simulateMatch("Home", "Away");
+            if (!Number.isInteger(result.homeGoals) || result.homeGoals < 0 ||
+                !Number.isInteger(result.awayGoals) || result.awayGoals < 0) {
+              throw new Error("Score invalide à l'essai " + trial);
+            }
+            if (result.events.length !== result.homeGoals + result.awayGoals) {
+              throw new Error("Nombre d'événements différent du score à l'essai " + trial);
+            }
+            const minutes = result.events.map(event => event.minute);
+            if (new Set(minutes).size !== minutes.length ||
+                minutes.some(minute => !Number.isInteger(minute) || minute < 1 || minute > 90)) {
+              throw new Error("Minute de but invalide ou dupliquée à l'essai " + trial);
+            }
+            let homeScore = 0;
+            let awayScore = 0;
+            for (const event of result.events) {
+              if (event.team === "Home") homeScore++;
+              else if (event.team === "Away") awayScore++;
+              else throw new Error("Équipe inconnue dans un événement de but");
+              if (!event.scorer) throw new Error("Buteur absent");
+              const allowed = event.team === "Home" ? homeSquad.slice(0, 11) : awaySquad.slice(0, 11);
+              if (!allowed.some(player => player.prenom + " " + player.nom === event.scorer)) {
+                throw new Error("Buteur absent du onze actif");
+              }
+              if (event.assist && event.assist === event.scorer) {
+                throw new Error("Un joueur ne peut pas faire la passe décisive de son propre but");
+              }
+              if (event.score !== homeScore + " - " + awayScore) {
+                throw new Error("Score intermédiaire incohérent");
+              }
+            }
+            if (homeScore !== result.homeGoals || awayScore !== result.awayGoals) {
+              throw new Error("Score final incohérent avec les événements");
+            }
+          }
+
+          const matchday = {
+            day: 1,
+            played: false,
+            matches: [{ home: "Home", away: "Away", played: false, result: null }],
+            results: []
+          };
+          const first = engine.simulateMatchday(matchday);
+          const historyLength = engine.history.length;
+          const second = engine.simulateMatchday(matchday);
+          if (first[0].homeGoals !== second[0].homeGoals ||
+              first[0].awayGoals !== second[0].awayGoals ||
+              engine.history.length !== historyLength) {
+            throw new Error("Une journée déjà jouée a été simulée une deuxième fois");
+          }
+
+          console.log("OK — 100 simulations de matchs et test anti-double simulation.");
+          NODE
+
       - name: Generate build version
         env:
           GH_TOKEN: ${{ github.token }}
