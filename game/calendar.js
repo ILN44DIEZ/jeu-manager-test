@@ -243,119 +243,52 @@ class ChampionshipCalendar {
     /* ================================================= */
 
     balanceHomeAway() {
-
-        const maxConsecutive =
-            2;
-
-
+        const maxConsecutive = 2;
         const teamState = {};
 
+        this.teams.forEach(team => {
+            teamState[team] = { last: null, consecutive: 0 };
+        });
 
-        this.teams.forEach(
-            team => {
+        // À ce stade, matchdays ne contient que la phase aller.
+        // Pour chaque match, choisir l'orientation qui pénalise le moins
+        // les séries déjà en cours pour les deux équipes.
+        const firstHalf = this.matchdays.slice();
 
-                teamState[team] = {
+        const projectedPenalty = (state, location) => {
+            if (!state) return 0;
+            const nextRun = state.last === location
+                ? state.consecutive + 1
+                : 1;
+            return Math.max(0, nextRun - maxConsecutive) ** 2;
+        };
 
-                    last:
-                        null,
+        firstHalf.forEach(day => {
+            day.matches.forEach(match => {
+                const originalHome = match.home;
+                const originalAway = match.away;
+                const homeState = teamState[originalHome];
+                const awayState = teamState[originalAway];
 
-                    consecutive:
-                        0
+                const keepPenalty =
+                    projectedPenalty(homeState, "home") +
+                    projectedPenalty(awayState, "away");
+                const swapPenalty =
+                    projectedPenalty(awayState, "home") +
+                    projectedPenalty(homeState, "away");
 
-                };
+                if (swapPenalty < keepPenalty ||
+                    (swapPenalty === keepPenalty && Math.random() < 0.5)) {
+                    this.swapMatch(match);
+                }
 
-            }
-        );
-
-
-        /*
-         * On ne travaille que sur les
-         * journées aller ici.
-         */
-
-        // Une ligue paire a N-1 journées aller ; une ligue impaire
-        // ajoute une équipe fictive et en compte N.
-        const firstHalfLength = this.matchdays.length;
-        const firstHalf = this.matchdays.slice(0, firstHalfLength);
-
-
-        firstHalf.forEach(
-            day => {
-
-                day.matches.forEach(
-                    match => {
-
-                        const homeState =
-                            teamState[
-                                match.home
-                            ];
-
-
-                        const awayState =
-                            teamState[
-                                match.away
-                            ];
-
-
-                        if (
-                            homeState &&
-                            homeState.last === "home" &&
-                            homeState.consecutive >=
-                                maxConsecutive
-                        ) {
-
-                            this.swapMatch(
-                                match
-                            );
-
-                        }
-
-                        else if (
-                            awayState &&
-                            awayState.last === "away" &&
-                            awayState.consecutive >=
-                                maxConsecutive
-                        ) {
-
-                            this.swapMatch(
-                                match
-                            );
-
-                        }
-
-
-                        this.updateTeamState(
-
-                            teamState[
-                                match.home
-                            ],
-
-                            "home"
-
-                        );
-
-
-                        this.updateTeamState(
-
-                            teamState[
-                                match.away
-                            ],
-
-                            "away"
-
-                        );
-
-                    }
-                );
-
-            }
-        );
-
+                this.updateTeamState(teamState[match.home], "home");
+                this.updateTeamState(teamState[match.away], "away");
+            });
+        });
 
         return this.matchdays;
-
     }
-
 
 
     /* ================================================= */
