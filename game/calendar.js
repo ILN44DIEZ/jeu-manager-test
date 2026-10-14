@@ -256,6 +256,8 @@ class ChampionshipCalendar {
             const runs = new Map(this.teams.map(team => [team, { last: null, count: 0 }]));
             let totalPenalty = 0;
             let worstRun = 0;
+            let teamsWithLongRuns = 0;
+            const teamsOverLimit = new Set();
             const evaluateDay = day => {
                 day.matches.forEach(match => {
                     for (const [team, venue] of [[match.home, "H"], [match.away, "A"]]) {
@@ -265,6 +267,9 @@ class ChampionshipCalendar {
                         state.last = venue;
                         worstRun = Math.max(worstRun, state.count);
                         if (state.count > maxConsecutive) {
+                            teamsOverLimit.add(team);
+                            // Priorité aux séries les plus longues, puis au nombre
+                            // total de journées excédentaires.
                             totalPenalty += (state.count - maxConsecutive) ** 2 * 10;
                         }
                     }
@@ -272,7 +277,8 @@ class ChampionshipCalendar {
             };
             days.forEach(evaluateDay);
             returnDays.forEach(evaluateDay);
-            return totalPenalty * 100 + worstRun;
+            teamsWithLongRuns = teamsOverLimit.size;
+            return totalPenalty * 10000 + teamsWithLongRuns * 100 + worstRun;
         };
 
         const applyOrientations = orientations => {
