@@ -83,7 +83,7 @@ jobs:
           const vm = require("node:vm");
           const source = fs.readFileSync("matches.js", "utf8");
           vm.runInThisContext(source + "\n;globalThis.__MatchEngineForTests = MatchEngine;");
-          const MatchEngine = globalThis.__MatchEngineForTests;
+          const MatchEngineForTests = globalThis.__MatchEngineForTests;
 
           const makePlayers = (prefix) => Array.from({ length: 15 }, (_, i) => ({
             id: prefix + "-" + i,
@@ -101,7 +101,7 @@ jobs:
 
           const homeSquad = makePlayers("HOME");
           const awaySquad = makePlayers("AWAY");
-          const engine = new MatchEngine();
+          const engine = new MatchEngineForTests();
           engine.setSquads({ Home: homeSquad, Away: awaySquad });
           engine.setActiveLineup("Home", homeSquad.slice(0, 11));
           engine.setActiveLineup("Away", awaySquad.slice(0, 11));
