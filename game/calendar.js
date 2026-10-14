@@ -363,11 +363,22 @@ class ChampionshipCalendar {
             }
 
             for (let iteration = 0; iteration < flipsPerAttempt; iteration++) {
-                const dayIndex = Math.floor(Math.random() * candidate.length);
-                if (!candidate[dayIndex].length) continue;
-                const matchIndex = Math.floor(Math.random() * candidate[dayIndex].length);
-                [candidate[dayIndex][matchIndex][0], candidate[dayIndex][matchIndex][1]] =
-                    [candidate[dayIndex][matchIndex][1], candidate[dayIndex][matchIndex][0]];
+                // La plupart des mouvements inversent un match ; régulièrement,
+                // on inverse deux matchs ensemble pour sortir des minima locaux.
+                const moves = [];
+                const moveCount = iteration % 4 === 3 ? 2 : 1;
+                for (let move = 0; move < moveCount; move++) {
+                    const dayIndex = Math.floor(Math.random() * candidate.length);
+                    if (!candidate[dayIndex].length) continue;
+                    const matchIndex = Math.floor(Math.random() * candidate[dayIndex].length);
+                    moves.push([dayIndex, matchIndex]);
+                }
+                if (!moves.length) continue;
+
+                moves.forEach(([dayIndex, matchIndex]) => {
+                    [candidate[dayIndex][matchIndex][0], candidate[dayIndex][matchIndex][1]] =
+                        [candidate[dayIndex][matchIndex][1], candidate[dayIndex][matchIndex][0]];
+                });
 
                 applyOrientations(candidate);
                 const trialReturns = orderReturns(makeReturnDays());
@@ -377,8 +388,10 @@ class ChampionshipCalendar {
                     candidateReturns = trialReturns;
                     candidateScore = trialScore;
                 } else {
-                    [candidate[dayIndex][matchIndex][0], candidate[dayIndex][matchIndex][1]] =
-                        [candidate[dayIndex][matchIndex][1], candidate[dayIndex][matchIndex][0]];
+                    moves.forEach(([dayIndex, matchIndex]) => {
+                        [candidate[dayIndex][matchIndex][0], candidate[dayIndex][matchIndex][1]] =
+                            [candidate[dayIndex][matchIndex][1], candidate[dayIndex][matchIndex][0]];
+                    });
                 }
 
                 if (candidateScore < bestScore) {
