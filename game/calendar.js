@@ -580,6 +580,14 @@ class ChampionshipCalendar {
 
         this.assignMatchdayDates();
 
+        // Validation bloquante : une carrière ne doit pas démarrer avec un calendrier incohérent.
+        const validation = this.validateCalendar();
+        if (!validation.valid) {
+            throw new Error(
+                "Calendrier généré invalide : " + validation.errors.join(" | ")
+            );
+        }
+
         return this.matchdays;
 
     }
@@ -606,6 +614,7 @@ class ChampionshipCalendar {
         const homeAwayCounts = new Map();
         const seenMatchdayNumbers = new Set();
         const seenDates = new Set();
+        const venueHistory = new Map(teams.map(team => [team, []]));
         let totalMatches = 0;
 
         if (teamCount < 2) {
@@ -707,6 +716,8 @@ class ChampionshipCalendar {
 
                 const direction = home + ">>>" + away;
                 homeAwayCounts.set(direction, (homeAwayCounts.get(direction) || 0) + 1);
+                venueHistory.get(home)?.push("H");
+                venueHistory.get(away)?.push("A");
             });
 
             if (typeof day.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(day.date)) {
@@ -729,6 +740,25 @@ class ChampionshipCalendar {
                 }
             }
         });
+
+        // Vérifier les séries domicile/extérieur sur le calendrier complet.
+        // Les journées de repos (ligues à nombre impair d'équipes) ne comptent pas
+        // comme une apparition : on compare les matchs effectivement joués par chaque club.
+        for (const team of teams) {
+            const history = venueHistory.get(team) || [];
+            let previousVenue = null;
+            let consecutive = 0;
+            for (const venue of history) {
+                consecutive = venue === previousVenue ? consecutive + 1 : 1;
+                previousVenue = venue;
+                if (consecutive > 2) {
+                    errors.push(
+                        `${team} a une série de ${consecutive} matchs consécutifs à ${venue === "H" ? "domicile" : "l'extérieur"}.`
+                    );
+                    break;
+                }
+            }
+        }
 
         if (totalMatches !== expectedMatches) {
             errors.push(
