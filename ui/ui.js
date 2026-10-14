@@ -1097,7 +1097,7 @@ class UI {
     }
 
 
-    applyPostMatchPlayerCondition() {
+    applyPostMatchPlayerCondition(matchResult = null) {
         this.lastMatchInjuries = [];
         const players = Array.isArray(game.players) ? game.players : [];
         if (!players.length) return;
@@ -1132,13 +1132,28 @@ class UI {
 
             const fatigue = Math.max(0, Math.min(100, Number(player.fatigue) || 0));
             const form = Math.max(0, Math.min(100, player.forme == null ? 70 : Number(player.forme)));
+            const energy = Math.max(0, Math.min(100, player.energy == null ? 100 : Number(player.energy)));
+            let resultFormChange = 0;
+            if (matchResult && game.club) {
+                const clubIsHome = matchResult.homeTeam === game.club.name;
+                const clubGoals = Number(clubIsHome ? matchResult.homeGoals : matchResult.awayGoals) || 0;
+                const opponentGoals = Number(clubIsHome ? matchResult.awayGoals : matchResult.homeGoals) || 0;
+                resultFormChange = clubGoals > opponentGoals ? 5 : (clubGoals === opponentGoals ? 2 : -4);
+            }
+
             if (played) {
                 player.fatigue = Math.min(100, fatigue + 10 + Math.floor(Math.random() * 11));
-                player.forme = Math.max(0, form - 3);
+                // Perte d'énergie réduite de 25 % : 15 devient environ 11 points.
+                player.energy = Math.max(0, energy - 11);
+                // La forme suit le résultat collectif et une performance individuelle légère.
+                const individualChange = (Math.random() < 0.5 ? 1 : -1) * (1 + Math.floor(Math.random() * 3));
+                player.forme = Math.max(0, Math.min(100, form + resultFormChange + individualChange));
             } else {
                 // Les remplaçants récupèrent davantage que les titulaires.
                 player.fatigue = Math.max(0, fatigue - (wasInjured ? 18 : 15));
-                player.forme = Math.min(100, form + 4);
+                player.energy = Math.min(100, energy + (wasInjured ? 18 : 20));
+                // Pas de variation automatique de forme au repos.
+                player.forme = form;
             }
 
             // Une journée jouée autorise à nouveau une séance individuelle ou collective.
@@ -1447,8 +1462,8 @@ class UI {
         // Les joueurs alignés progressent aussi grâce au match, sans dépasser 0,05 par rencontre.
         this.applyPostMatchPlayerProgression();
 
-        // Gérer la fatigue et la récupération après cette journée jouée.
-        this.applyPostMatchPlayerCondition();
+        // Gérer l'énergie, la fatigue et la forme selon le résultat du match.
+        this.applyPostMatchPlayerCondition(playedClubMatch);
 
         // Sauvegarder automatiquement après chaque journée si la carrière
         // est déjà associée à un emplacement de sauvegarde.
