@@ -563,7 +563,8 @@ function loadCareer(slot = 1) {
 
     game.calendar =
         new ChampionshipCalendar(
-            teams
+            teams,
+            data.calendarStartDate || "2026-08-15"
         );
 
 
