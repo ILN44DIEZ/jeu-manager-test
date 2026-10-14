@@ -392,7 +392,17 @@ class ChampionshipCalendar {
                 const trialReturns = orderReturns(makeReturnDays());
                 const trialScore = scoreSchedule(firstHalf, trialReturns);
 
-                if (trialScore <= candidateScore || Math.random() < 0.015) {
+                // Recuit simulé également sur les orientations aller :
+                // accepter parfois une solution moins bonne aide à sortir
+                // des minima locaux. La température suit l'échelle du score.
+                const orientationTemperature = Math.max(
+                    1000,
+                    250000 * (1 - iteration / Math.max(1, flipsPerAttempt))
+                );
+                const acceptTrial = trialScore <= candidateScore ||
+                    Math.random() < Math.exp((candidateScore - trialScore) / orientationTemperature);
+
+                if (acceptTrial) {
                     candidateReturns = trialReturns;
                     candidateScore = trialScore;
                 } else {
