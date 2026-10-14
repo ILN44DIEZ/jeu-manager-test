@@ -339,8 +339,8 @@ class ChampionshipCalendar {
         let bestOrientations = originalOrientations.map(day => day.map(pair => [...pair]));
         let bestReturnOrder = null;
         let bestScore = Infinity;
-        const attempts = 12;
-        const flipsPerAttempt = Math.max(40, this.teams.length * 5);
+        const attempts = 16;
+        const flipsPerAttempt = Math.max(80, this.teams.length * 7);
 
         for (let attempt = 0; attempt < attempts; attempt++) {
             const candidate = originalOrientations.map(day => day.map(pair => [...pair]));
@@ -353,6 +353,14 @@ class ChampionshipCalendar {
             applyOrientations(candidate);
             let candidateReturns = orderReturns(makeReturnDays());
             let candidateScore = scoreSchedule(firstHalf, candidateReturns);
+
+            // Évaluer aussi l'état initial de chaque départ : une bonne solution
+            // ne doit pas être ignorée si aucune mutation ne l'améliore ensuite.
+            if (candidateScore < bestScore) {
+                bestScore = candidateScore;
+                bestOrientations = candidate.map(day => day.map(pair => [...pair]));
+                bestReturnOrder = candidateReturns.map(day => day.day);
+            }
 
             for (let iteration = 0; iteration < flipsPerAttempt; iteration++) {
                 const dayIndex = Math.floor(Math.random() * candidate.length);
