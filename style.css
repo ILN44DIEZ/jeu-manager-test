@@ -708,3 +708,134 @@ body > h1 {
         animation-iteration-count: 1 !important;
     }
 }
+
+
+/* =========================================================
+   IDENTITÉ VISUELLE FOOTBALL MANAGER — étape 1
+   Couche de présentation uniquement : aucune logique de jeu.
+   ========================================================= */
+
+:root {
+    color-scheme: dark;
+    --mc-bg: #10151b;
+    --mc-panel: #192129;
+    --mc-panel-raised: #222d37;
+    --mc-border: #394754;
+    --mc-text: #edf2f6;
+    --mc-muted: #aab7c2;
+    --mc-accent: #65c985;
+    --mc-accent-strong: #2d9a57;
+}
+
+body {
+    background: var(--mc-bg);
+    color: var(--mc-text);
+}
+
+#game h2 {
+    color: var(--mc-text);
+    padding: 0 0 10px;
+    border-bottom: 2px solid var(--mc-accent-strong);
+    text-align: center;
+}
+
+#game h3 {
+    color: #d8e7de;
+}
+
+#game button:not(.pitch-player) {
+    color: var(--mc-text);
+    background: linear-gradient(180deg, #293541 0%, #202a34 100%);
+    border: 1px solid #465665;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, .22);
+    -webkit-tap-highlight-color: transparent;
+}
+
+#game button:not(.pitch-player):hover {
+    background: linear-gradient(180deg, #344553 0%, #273641 100%);
+    border-color: var(--mc-accent);
+}
+
+#game button:not(.pitch-player):focus-visible,
+#game input:focus-visible,
+#game select:focus-visible,
+#game textarea:focus-visible,
+#game [role="button"]:focus-visible {
+    outline: 2px solid var(--mc-accent);
+    outline-offset: 2px;
+}
+
+#game button:not(.pitch-player):active {
+    transform: translateY(1px);
+}
+
+#game input,
+#game select,
+#game textarea {
+    color: var(--mc-text);
+    background: #151c23;
+    border: 1px solid var(--mc-border);
+    border-radius: 7px;
+}
+
+#game input::placeholder,
+#game textarea::placeholder {
+    color: #91a0ac;
+}
+
+#game table {
+    border-collapse: collapse;
+    color: var(--mc-text);
+}
+
+#game th {
+    color: #dff5e5;
+    background: #24352d;
+}
+
+#game td,
+#game th {
+    padding: 8px 10px;
+    border-bottom: 1px solid #35424d;
+}
+
+#game tr:nth-child(even) td {
+    background: rgba(255, 255, 255, .025);
+}
+
+#game a {
+    color: #8fe0a8;
+}
+
+#game hr {
+    border: 0;
+    border-top: 1px solid var(--mc-border);
+}
+
+.save-slot {
+    background: var(--mc-panel);
+    border-color: var(--mc-border);
+    color: var(--mc-text);
+}
+
+@media (max-width: 600px) {
+    #game h2 {
+        padding-bottom: 8px;
+    }
+
+    #game td,
+    #game th {
+        padding: 8px;
+    }
+
+    #game button:not(.pitch-player) {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, .2);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #game button:not(.pitch-player) {
+        transition: none !important;
+    }
+}
