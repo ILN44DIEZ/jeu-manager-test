@@ -600,6 +600,200 @@ class ChampionshipCalendar {
 
 
     /* ================================================= */
+    /* VALIDATION DE L'INTÉGRITÉ DU CALENDRIER */
+    /* ================================================= */
+
+    validateCalendar() {
+        const errors = [];
+        const warnings = [];
+        const teams = Array.isArray(this.teams) ? this.teams : [];
+        const teamSet = new Set(teams);
+        const teamCount = teams.length;
+        const expectedFirstHalfRounds = teamCount % 2 === 0
+            ? teamCount - 1
+            : teamCount;
+        const expectedMatchdays = expectedFirstHalfRounds * 2;
+        const expectedMatches = teamCount * (teamCount - 1);
+        const expectedMatchesPerDay = Math.floor(teamCount / 2);
+        const pairCounts = new Map();
+        const homeAwayCounts = new Map();
+        const seenMatchdayNumbers = new Set();
+        const seenDates = new Set();
+        let totalMatches = 0;
+
+        if (teamCount < 2) {
+            errors.push("Il faut au moins deux équipes pour générer un championnat.");
+        }
+
+        if (teamSet.size !== teamCount) {
+            errors.push("La liste des équipes contient des noms en double.");
+        }
+
+        if (teams.some(team => typeof team !== "string" || !team.trim())) {
+            errors.push("La liste des équipes contient un nom vide ou invalide.");
+        }
+
+        if (teams.includes("Exempt")) {
+            errors.push('Le nom réservé "Exempt" ne doit pas être une vraie équipe.');
+        }
+
+        if (!Array.isArray(this.matchdays)) {
+            errors.push("La liste des journées est invalide.");
+            return {
+                valid: false,
+                errors,
+                warnings,
+                summary: {
+                    teams: teamCount,
+                    matchdays: 0,
+                    matches: 0,
+                    expectedMatchdays,
+                    expectedMatches
+                }
+            };
+        }
+
+        if (this.matchdays.length !== expectedMatchdays) {
+            errors.push(
+                `Nombre de journées incorrect : ${this.matchdays.length} trouvées, ${expectedMatchdays} attendues.`
+            );
+        }
+
+        this.matchdays.forEach((day, index) => {
+            const expectedDayNumber = index + 1;
+
+            if (day.day !== expectedDayNumber) {
+                errors.push(
+                    `Numérotation incorrecte à l'index ${index} : journée ${day.day}, attendu ${expectedDayNumber}.`
+                );
+            }
+
+            if (seenMatchdayNumbers.has(day.day)) {
+                errors.push(`La journée ${day.day} apparaît plusieurs fois.`);
+            }
+            seenMatchdayNumbers.add(day.day);
+
+            if (!Array.isArray(day.matches)) {
+                errors.push(`La journée ${day.day} ne contient pas une liste de matchs valide.`);
+                return;
+            }
+
+            if (day.matches.length !== expectedMatchesPerDay) {
+                errors.push(
+                    `Journée ${day.day} : ${day.matches.length} matchs, ${expectedMatchesPerDay} attendus.`
+                );
+            }
+
+            const teamsInDay = new Set();
+
+            day.matches.forEach((match, matchIndex) => {
+                totalMatches++;
+
+                if (!match || typeof match.home !== "string" || typeof match.away !== "string") {
+                    errors.push(`Match invalide à la journée ${day.day}, position ${matchIndex + 1}.`);
+                    return;
+                }
+
+                const { home, away } = match;
+
+                if (!teamSet.has(home) || !teamSet.has(away)) {
+                    errors.push(
+                        `Journée ${day.day} : équipe inconnue dans le match "${home} - ${away}".`
+                    );
+                    return;
+                }
+
+                if (home === away) {
+                    errors.push(`Journée ${day.day} : ${home} ne peut pas jouer contre elle-même.`);
+                    return;
+                }
+
+                for (const team of [home, away]) {
+                    if (teamsInDay.has(team)) {
+                        errors.push(`Journée ${day.day} : ${team} apparaît dans plusieurs matchs.`);
+                    }
+                    teamsInDay.add(team);
+                }
+
+                const pair = [home, away].sort().join("|||");
+                pairCounts.set(pair, (pairCounts.get(pair) || 0) + 1);
+
+                const direction = home + ">>>" + away;
+                homeAwayCounts.set(direction, (homeAwayCounts.get(direction) || 0) + 1);
+            });
+
+            if (typeof day.date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(day.date)) {
+                errors.push(`La date de la journée ${day.day} est absente ou invalide.`);
+            } else {
+                const parsedDate = new Date(day.date + "T12:00:00");
+                if (Number.isNaN(parsedDate.getTime()) ||
+                    parsedDate.toISOString().slice(0, 10) !== day.date) {
+                    errors.push(`La date "${day.date}" de la journée ${day.day} n'existe pas.`);
+                }
+
+                if (seenDates.has(day.date)) {
+                    errors.push(`La date ${day.date} est attribuée à plusieurs journées.`);
+                }
+                seenDates.add(day.date);
+
+                if (index > 0 && this.matchdays[index - 1]?.date &&
+                    day.date <= this.matchdays[index - 1].date) {
+                    errors.push("Les dates des journées ne sont pas strictement croissantes.");
+                }
+            }
+        });
+
+        if (totalMatches !== expectedMatches) {
+            errors.push(
+                `Nombre total de matchs incorrect : ${totalMatches} trouvés, ${expectedMatches} attendus.`
+            );
+        }
+
+        if (teamCount >= 2) {
+            for (let i = 0; i < teams.length; i++) {
+                for (let j = i + 1; j < teams.length; j++) {
+                    const teamA = teams[i];
+                    const teamB = teams[j];
+                    const pair = [teamA, teamB].sort().join("|||");
+                    const pairCount = pairCounts.get(pair) || 0;
+                    const aHome = homeAwayCounts.get(teamA + ">>>" + teamB) || 0;
+                    const bHome = homeAwayCounts.get(teamB + ">>>" + teamA) || 0;
+
+                    if (pairCount !== 2) {
+                        errors.push(
+                            `${teamA} et ${teamB} se rencontrent ${pairCount} fois au lieu de 2.`
+                        );
+                    }
+
+                    if (aHome !== 1 || bHome !== 1) {
+                        errors.push(
+                            `${teamA} et ${teamB} doivent se rencontrer une fois dans chaque stade (domicile/extérieur).`
+                        );
+                    }
+                }
+            }
+        }
+
+        if (errors.length > 0) {
+            warnings.push("Le calendrier doit être corrigé avant d'être considéré comme valide.");
+        }
+
+        return {
+            valid: errors.length === 0,
+            errors,
+            warnings,
+            summary: {
+                teams: teamCount,
+                matchdays: this.matchdays.length,
+                matches: totalMatches,
+                expectedMatchdays,
+                expectedMatches
+            }
+        };
+    }
+
+
+    /* ================================================= */
     /* OBTENIR UNE JOURNÉE */
     /* ================================================= */
 
