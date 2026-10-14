@@ -338,8 +338,8 @@ class ChampionshipCalendar {
         // aller selon le score des séries sur l'ensemble aller + retour.
         let bestOrientations = originalOrientations.map(day => day.map(pair => [...pair]));
         let bestScore = Infinity;
-        const attempts = 24;
-        const flipsPerAttempt = Math.max(80, this.teams.length * this.teams.length * 3);
+        const attempts = 12;
+        const flipsPerAttempt = Math.max(40, this.teams.length * 5);
 
         for (let attempt = 0; attempt < attempts; attempt++) {
             const candidate = originalOrientations.map(day => day.map(pair => [...pair]));
