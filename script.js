@@ -112,7 +112,7 @@ function chooseClub(club, managerName = "") {
     game.calendar =
         new ChampionshipCalendar(
             teams,
-            data.calendarStartDate || "2026-08-15"
+            "2026-08-15"
         );
 
 
