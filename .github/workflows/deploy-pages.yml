@@ -312,6 +312,62 @@ jobs:
           console.log("OK — entraînement numérique, limites d'attributs et attributs gardien préservés.");
           NODE
 
+      - name: Test save and tactics round-trip
+        run: |
+          node --check saves/save.js
+          node <<'NODE'
+          const fs = require("node:fs");
+          const vm = require("node:vm");
+          const storage = new Map();
+          globalThis.localStorage = {
+            setItem: (key, value) => storage.set(key, String(value)),
+            getItem: key => storage.has(key) ? storage.get(key) : null,
+            removeItem: key => storage.delete(key)
+          };
+          const source = fs.readFileSync("saves/save.js", "utf8");
+          vm.runInThisContext(source + "\n;globalThis.__SaveManagerForTests = SaveManager;");
+          const SaveManagerForTests = globalThis.__SaveManagerForTests;
+          const saves = new SaveManagerForTests();
+
+          const originalTactics = {
+            formation: "4-3-3",
+            currentTactic: "Équilibrée",
+            lineup: [{ id: "p1", prenom: "Test", nom: "Titulaire" }],
+            substitutes: [{ id: "p2", prenom: "Test", nom: "Remplaçant" }],
+            roles: { p1: "Capitaine" },
+            positions: { p1: "BU_1" },
+            style: { mentality: "Équilibrée", pressing: 55, tempo: 60, possession: 50 }
+          };
+          const serialized = saves.getTacticsData(originalTactics);
+          const restored = {};
+          if (!saves.loadTacticsData(restored, JSON.parse(JSON.stringify(serialized)))) {
+            throw new Error("La restauration tactique a échoué.");
+          }
+          for (const key of ["formation", "currentTactic", "lineup", "substitutes", "roles", "positions", "style"]) {
+            if (JSON.stringify(restored[key]) !== JSON.stringify(originalTactics[key])) {
+              throw new Error("La donnée tactique n'a pas été restaurée : " + key);
+            }
+          }
+
+          const gameData = {
+            club: { name: "Test FC" },
+            tactics: serialized,
+            currentMatchday: 4,
+            calendar: [{ day: 4, played: true }],
+            players: [{ id: "p1", fatigue: 37, forme: 82 }]
+          };
+          if (!saves.saveGame(1, gameData)) throw new Error("La sauvegarde n'a pas été enregistrée.");
+          const loaded = saves.loadGame(1);
+          if (!loaded || loaded.game.club.name !== "Test FC" ||
+              loaded.game.currentMatchday !== 4 ||
+              loaded.game.players[0].fatigue !== 37 ||
+              loaded.game.tactics.lineup[0].id !== "p1") {
+            throw new Error("Les données de carrière ne survivent pas au cycle sauvegarde/chargement.");
+          }
+
+          console.log("OK — composition, remplaçants, rôles, positions, style et données de carrière restaurés.");
+          NODE
+
       - name: Generate build version
         env:
           GH_TOKEN: ${{ github.token }}
