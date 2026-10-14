@@ -223,6 +223,29 @@ jobs:
           console.log("OK — classement, points, différence de buts, forme et rejets d'entrées invalides.");
           NODE
 
+      - name: Validate build resources and JavaScript syntax
+        run: |
+          # Every script referenced by index.html must exist in the published artifact.
+          grep -oE '<script[^>]+src="[^"]+"' index.html | sed -E 's/.*src="([^"]+)".*/\1/' | while IFS= read -r resource; do
+            if [ ! -f "$resource" ]; then
+              echo "::error::Missing script referenced by index.html: $resource"
+              exit 1
+            fi
+          done
+
+          # Catch syntax errors across the full JavaScript source tree.
+          while IFS= read -r file; do
+            node --check "$file"
+          done < <(find . -type f -name '*.js' ! -path './.git/*' ! -name 'build-version.js' -print)
+
+          # Keep the key new modules explicitly present in the page.
+          for resource in build-version.js ui/playerUI.js ui/squadUI.js ui/tacticsUI.js game/calendar.js matches.js standings.js players.js; do
+            grep -Fq "src=\"$resource\"" index.html || {
+              echo "::error::Expected module is not referenced by index.html: $resource"
+              exit 1
+            }
+          done
+
       - name: Generate build version
         env:
           GH_TOKEN: ${{ github.token }}
