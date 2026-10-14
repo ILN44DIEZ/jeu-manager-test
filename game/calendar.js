@@ -246,7 +246,7 @@ class ChampionshipCalendar {
         const rounds = this.matchdays;
         if (!rounds.length || this.teams.length < 2) return this.matchdays;
 
-        const maxAttempts = 50000;
+        const maxAttempts = this.teams.length >= 26 ? 500000 : 50000;
         const maxConsecutive = 2;
 
         // Chaque tentative construit l'aller de zéro. Pour chaque match, on
