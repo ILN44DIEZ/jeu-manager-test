@@ -337,6 +337,7 @@ class ChampionshipCalendar {
         // Recherche multi-départs : on conserve la meilleure orientation des matchs
         // aller selon le score des séries sur l'ensemble aller + retour.
         let bestOrientations = originalOrientations.map(day => day.map(pair => [...pair]));
+        let bestReturnOrder = null;
         let bestScore = Infinity;
         const attempts = 12;
         const flipsPerAttempt = Math.max(40, this.teams.length * 5);
@@ -375,11 +376,13 @@ class ChampionshipCalendar {
                 if (candidateScore < bestScore) {
                     bestScore = candidateScore;
                     bestOrientations = candidate.map(day => day.map(pair => [...pair]));
+                    bestReturnOrder = candidateReturns.map(day => day.day);
                 }
             }
         }
 
         applyOrientations(bestOrientations);
+        this._optimizedReturnDayOrder = bestReturnOrder;
         return this.matchdays;
     }
 
@@ -489,6 +492,26 @@ class ChampionshipCalendar {
                 })
             );
 
+
+        // Si l'optimiseur a calculé un ordre global, réutiliser cet ordre exact
+        // au lieu de le recalculer avec une heuristique différente.
+        if (Array.isArray(this._optimizedReturnDayOrder) &&
+            this._optimizedReturnDayOrder.length === returnMatches.length) {
+            const orderIndex = new Map(
+                this._optimizedReturnDayOrder.map((dayNumber, index) => [dayNumber, index])
+            );
+            returnMatches.sort((a, b) =>
+                (orderIndex.get(a.day) ?? Infinity) - (orderIndex.get(b.day) ?? Infinity)
+            );
+            this._optimizedReturnDayOrder = null;
+
+            const firstHalfLength = firstHalf.length;
+            returnMatches.forEach((day, index) => {
+                day.day = firstHalfLength + index + 1;
+            });
+            this.matchdays = [...firstHalf, ...returnMatches];
+            return this.matchdays;
+        }
 
         /*
          * Ordonner les journées retour en limitant les séries de
