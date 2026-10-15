@@ -462,6 +462,7 @@ class UI {
 
         this.setBottomNavigationVisible(false);
         this.clear();
+        this.container.classList.add("manager-welcome");
 
 
         this.showTitle(
@@ -535,6 +536,7 @@ class UI {
     showMainSaveMenu() {
 
         this.clear();
+        this.container.classList.add("manager-saves-screen");
 
 
         this.showTitle(
