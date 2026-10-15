@@ -27,6 +27,9 @@ class TacticsUI {
 
         this.container.innerHTML = "";
         this.container.classList.remove("manager-dashboard");
+        this.container.style.display = "block";
+        this.container.style.removeProperty("grid-template-columns");
+        this.container.style.removeProperty("grid-template-rows");
 
         this.pitchElement = null;
 
@@ -42,6 +45,8 @@ class TacticsUI {
     show(tactics, manager) {
 
         this.ui.setBottomNavigationVisible(true, "more");
+        this.container.classList.remove("manager-dashboard");
+        this.container.style.display = "block";
         this.clear();
 
         // Les joueurs blessés restent visibles dans la composition et sur le banc.
