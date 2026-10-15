@@ -177,12 +177,7 @@ class UI {
                 box-sizing: border-box;
             }
             #manager-bottom-nav {
-                transition: transform .2s ease, opacity .2s ease;
-            }
-            #manager-bottom-nav.manager-nav-scroll-hidden {
-                transform: translateY(calc(100% + 24px));
-                opacity: 0;
-                pointer-events: none;
+                transition: none;
             }
             #manager-bottom-nav .manager-nav-item {
                 appearance: none;
@@ -359,30 +354,11 @@ class UI {
     initBottomNavigationScrollBehavior() {
         if (this.bottomNavScrollListenerInstalled) return;
         this.bottomNavScrollListenerInstalled = true;
-        this.lastNavigationScrollY = window.scrollY || document.documentElement.scrollTop || 0;
 
-        document.addEventListener("scroll", (event) => {
-            if (!this.bottomNav || this.bottomNav.style.display === "none") return;
-
-            const target = event.target;
-            let currentY = window.scrollY || document.documentElement.scrollTop || 0;
-            if (target instanceof Element && target !== document.documentElement && target !== document.body && target !== document) {
-                currentY = target.scrollTop || currentY;
-            }
-
-            const delta = currentY - this.lastNavigationScrollY;
-            if (Math.abs(delta) < 6) return;
-            this.lastNavigationScrollY = currentY;
-
-            // En défilement, fermer le menu Plus et masquer la barre vers le bas.
+        document.addEventListener("scroll", () => {
+            // La barre reste toujours visible. Seul le menu déroulant Plus se ferme.
             if (this.bottomMorePanel && this.bottomMorePanel.style.display === "block") {
                 this.bottomMorePanel.style.display = "none";
-            }
-
-            if (delta > 0) {
-                this.bottomNav.classList.add("manager-nav-scroll-hidden");
-            } else {
-                this.bottomNav.classList.remove("manager-nav-scroll-hidden");
             }
         }, { passive: true, capture: true });
     }
@@ -390,8 +366,6 @@ class UI {
     setBottomNavigationVisible(visible, active = null) {
         if (!this.bottomNav) return;
         this.bottomNav.style.display = visible ? "grid" : "none";
-        this.bottomNav.classList.remove("manager-nav-scroll-hidden");
-        this.lastNavigationScrollY = window.scrollY || document.documentElement.scrollTop || 0;
         if (this.bottomMorePanel && !visible) this.bottomMorePanel.style.display = "none";
         document.body.classList.toggle("manager-has-bottom-nav", Boolean(visible));
         if (active) {
