@@ -1094,3 +1094,187 @@ body,
 #manager-bottom-nav * {
     touch-action: manipulation;
 }
+
+
+/* =========================================================
+   ÉCRANS D'ENTRÉE — accueil et sauvegardes harmonisés
+   ========================================================= */
+body:has(#game.manager-welcome) > h1,
+body:has(#game.manager-saves-screen) > h1 {
+    display: none;
+}
+
+#game.manager-welcome,
+#game.manager-saves-screen {
+    width: calc(100% - 28px);
+    max-width: 560px;
+    margin: 22px auto 0;
+    box-sizing: border-box;
+    text-align: left;
+    padding-bottom: calc(30px + env(safe-area-inset-bottom, 0px));
+}
+
+#game.manager-welcome > h2,
+#game.manager-saves-screen > h2 {
+    margin: 0 0 16px;
+    padding: 8px 0 15px;
+    border-bottom: 2px solid #2bd77e;
+    color: #f1f5f8;
+    text-align: center;
+    font-size: clamp(25px, 6.5vw, 32px);
+    line-height: 1.2;
+    letter-spacing: -.5px;
+}
+
+#game.manager-welcome > p,
+#game.manager-saves-screen > p {
+    margin: 0 0 20px;
+    padding: 14px 15px;
+    border: 1px solid #243747;
+    border-radius: 12px;
+    background: linear-gradient(135deg, rgba(18, 38, 52, .96), rgba(12, 26, 37, .92));
+    color: #c5d2dc;
+    font-size: 15px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+#game.manager-welcome > button:not(.manager-return-sticky),
+#game.manager-saves-screen > button:not(.manager-return-sticky) {
+    display: block;
+    width: 100%;
+    min-height: 64px;
+    margin: 12px 0;
+    padding: 16px;
+    box-sizing: border-box;
+    border: 1px solid #30495b;
+    border-radius: 13px;
+    background: linear-gradient(135deg, #172b3a, #101f2b);
+    color: #edf4f8;
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.3;
+    text-align: left;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, .16);
+    transition: border-color .18s ease, background .18s ease, transform .18s ease;
+}
+
+#game.manager-welcome > button:not(.manager-return-sticky):first-of-type {
+    border-color: #1dcf78;
+    background: linear-gradient(115deg, #123a31, #123044 75%, #153b35);
+    box-shadow: inset 0 0 0 1px rgba(43, 215, 126, .08);
+}
+
+#game.manager-welcome > button:not(.manager-return-sticky):active,
+#game.manager-saves-screen > button:not(.manager-return-sticky):active {
+    transform: scale(.99);
+}
+
+#game.manager-saves-screen {
+    margin-top: 12px;
+}
+
+#game.manager-saves-screen > .manager-return-sticky {
+    position: static !important;
+    display: inline-block !important;
+    width: auto !important;
+    min-height: 42px !important;
+    margin: 0 0 12px !important;
+    padding: 10px 13px !important;
+    border: 1px solid #30495b !important;
+    border-radius: 10px !important;
+    background: #172b3a !important;
+    color: #eaf2f7 !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    text-align: left !important;
+}
+
+#game.manager-saves-screen .save-slot {
+    margin: 12px 0 !important;
+    padding: 0 14px 14px !important;
+    border: 1px solid #2b4050 !important;
+    border-radius: 14px;
+    background: linear-gradient(145deg, #152633, #101b25) !important;
+    color: #e8f0f5;
+    overflow: hidden;
+    box-shadow: 0 5px 18px rgba(0, 0, 0, .13);
+}
+
+#game.manager-saves-screen .save-slot h3 {
+    margin: 0 -14px 12px;
+    padding: 15px 14px;
+    border-bottom: 1px solid rgba(126, 151, 170, .14);
+    background: rgba(5, 15, 23, .22);
+    color: #eaf3f7;
+    font-size: 18px;
+    text-align: left;
+}
+
+#game.manager-saves-screen .save-slot p {
+    margin: 10px 0;
+    color: #bdcbd5;
+    font-size: 14px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+#game.manager-saves-screen .save-slot button {
+    display: inline-block;
+    width: calc(50% - 8px);
+    min-height: 48px;
+    margin: 10px 3px 0 0;
+    padding: 10px 8px;
+    border: 1px solid #30495b;
+    border-radius: 10px;
+    background: #142735;
+    color: #edf4f8;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.25;
+    box-sizing: border-box;
+}
+
+#game.manager-saves-screen .save-slot button:first-of-type {
+    border-color: #27d982;
+    background: rgba(20, 103, 67, .28);
+}
+
+#game.manager-saves-screen .save-slot button:last-of-type {
+    margin-right: 0;
+}
+
+@media (max-width: 380px) {
+    #game.manager-welcome,
+    #game.manager-saves-screen {
+        width: calc(100% - 22px);
+        margin-top: 14px;
+    }
+
+    #game.manager-welcome > h2,
+    #game.manager-saves-screen > h2 {
+        font-size: 24px;
+    }
+
+    #game.manager-saves-screen .save-slot {
+        padding-left: 11px !important;
+        padding-right: 11px !important;
+    }
+
+    #game.manager-saves-screen .save-slot h3 {
+        margin-left: -11px;
+        margin-right: -11px;
+    }
+
+    #game.manager-saves-screen .save-slot button {
+        font-size: 13px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #game.manager-welcome > button,
+    #game.manager-saves-screen > button,
+    #game.manager-saves-screen .save-slot button {
+        transition: none !important;
+    }
+}
