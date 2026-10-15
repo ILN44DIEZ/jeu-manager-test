@@ -46,7 +46,7 @@ class UI {
     clear() {
 
         this.container.innerHTML = "";
-        this.container.classList.remove("manager-dashboard");
+        this.container.classList.remove("manager-dashboard", "manager-welcome", "manager-saves-screen");
 
     }
 
