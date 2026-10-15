@@ -1,8 +1,8 @@
 # ⚽ Manager Career — Roadmap
 
-Ce document reprend la roadmap principale de `ROADMAP.md`. La priorité actuelle est de terminer la validation mobile avant de poursuivre les systèmes de carrière.
+Ce document reprend la roadmap principale de `ROADMAP.md`. La validation mobile des changements récents est terminée, mais le travail global sur l’interface continue.
 
-## Étape 1 — Interface mobile (terminée)
+## Étape 1A — Validation mobile (terminée)
 
 ### Réalisé
 - [x] Interface sombre et allégée, adaptée au style manager
@@ -19,6 +19,15 @@ Ce document reprend la roadmap principale de `ROADMAP.md`. La priorité actuelle
 - [x] Écrans Effectif, Matchs, Compétitions et Tactiques
 - [x] Vérification des défauts visuels et tactiles restants
 - [x] Fonctionnement de la version déployée
+
+## Étape 1B — Amélioration globale de l’interface (en cours)
+
+- [ ] Auditer les écrans un par un avec l’utilisateur
+- [ ] Recenser les défauts visuels, espacements, tailles de texte et hiérarchie de l’information
+- [ ] Harmoniser cartes, boutons, tableaux et panneaux dans le style Football Manager sombre et professionnel
+- [ ] Améliorer la densité et la lisibilité des statistiques sur iPhone
+- [ ] Harmoniser Accueil, Effectif, Matchs, Compétitions, Tactiques et les écrans du menu « Plus »
+- [ ] Tester chaque amélioration sur iPhone et confirmer le déploiement
 
 ## Étape 2 — Gestion complète de l’effectif
 
