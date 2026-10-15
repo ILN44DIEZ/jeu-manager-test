@@ -2,7 +2,7 @@
 
 Ce document reprend la roadmap principale de `ROADMAP.md`. La priorité actuelle est de terminer la validation mobile avant de poursuivre les systèmes de carrière.
 
-## Étape 1 — Interface mobile (validation en cours)
+## Étape 1 — Interface mobile (terminée)
 
 ### Réalisé
 - [x] Interface sombre et allégée, adaptée au style manager
@@ -14,11 +14,11 @@ Ce document reprend la roadmap principale de `ROADMAP.md`. La priorité actuelle
 - [x] Terrain tactique corrigé sur mobile
 
 ### À valider sur iPhone Safari
-- [ ] Navigation, défilement et menus
-- [ ] Toutes les entrées du menu « Plus »
-- [ ] Écrans Effectif, Matchs, Compétitions et Tactiques
-- [ ] Derniers défauts visuels et tactiles
-- [ ] Fonctionnement de la version déployée
+- [x] Navigation, défilement et menus
+- [x] Toutes les entrées du menu « Plus »
+- [x] Écrans Effectif, Matchs, Compétitions et Tactiques
+- [x] Vérification des défauts visuels et tactiles restants
+- [x] Fonctionnement de la version déployée
 
 ## Étape 2 — Gestion complète de l’effectif
 
