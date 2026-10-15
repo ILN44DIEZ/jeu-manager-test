@@ -1560,3 +1560,37 @@ html, body {
 #game.manager-standings-screen .standings-tabs {
     display: grid !important;
 }
+
+
+/* FIX DEFINITIF TABLEAU — la table elle-même doit s'étirer, pas seulement son parent. */
+#game.manager-standings-screen {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 14px 0 28px !important;
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    box-sizing: border-box !important;
+    position: static !important;
+    transform: none !important;
+}
+#game.manager-standings-screen .standings-table-wrap {
+    display: block !important;
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    overflow-x: visible !important;
+    box-sizing: border-box !important;
+}
+#game.manager-standings-screen table.standings-table {
+    display: table !important;
+    width: 100% !important;
+    min-width: 100% !important;
+    max-width: none !important;
+    table-layout: fixed !important;
+    margin: 0 !important;
+    box-sizing: border-box !important;
+}
+#game.manager-standings-screen table.standings-table thead,
+#game.manager-standings-screen table.standings-table tbody {
+    width: 100% !important;
+}
