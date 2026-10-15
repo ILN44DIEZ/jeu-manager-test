@@ -118,13 +118,15 @@ class UI {
             button.style.borderRadius = "8px";
             button.style.margin = "0";
             button.style.textAlign = "left";
-            button.style.position = "fixed";
-            button.style.top = "calc(env(safe-area-inset-top, 0px) + 58px)";
-            button.style.left = "12px";
-            button.style.zIndex = "9999";
+            // Le bouton reste dans le flux : il ne doit pas recouvrir le titre.
+            button.style.position = "static";
+            button.style.top = "auto";
+            button.style.left = "auto";
+            button.style.zIndex = "auto";
             button.style.width = "auto";
-            button.style.maxWidth = "calc(100vw - 24px)";
-            button.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.35)";
+            button.style.maxWidth = "100%";
+            button.style.boxShadow = "none";
+            button.style.margin = "0 0 12px";
 
             this.container.insertBefore(
                 button,
@@ -766,6 +768,8 @@ class UI {
 
     showManager(manager) {
 
+        this.container.style.removeProperty("display");
+        this.container.style.removeProperty("grid-template-columns");
         this.currentManagerView = manager;
         this.setBottomNavigationVisible(true, "home");
         this.clear();
