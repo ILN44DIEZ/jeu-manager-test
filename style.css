@@ -1505,3 +1505,25 @@ body:has(#game.manager-saves-screen) > h1 {
     #game.manager-standings-screen .standings-table td { padding: 11px 2px; }
     #game.manager-standings-screen .standings-table .standings-team-name { padding-left: 5px; }
 }
+
+
+/* Correctif final : le classement utilise toute la largeur du viewport mobile. */
+#game.manager-standings-screen {
+    position: relative !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: calc(100vw - 20px) !important;
+    max-width: none !important;
+    margin: 12px 0 0 !important;
+    box-sizing: border-box !important;
+}
+#game.manager-standings-screen .standings-table-wrap,
+#game.manager-standings-screen .standings-table {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+}
+#game.manager-standings-screen .standings-table {
+    table-layout: fixed !important;
+}
