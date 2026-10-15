@@ -1,53 +1,82 @@
 # ⚽ Manager Career — Roadmap
 
-## Déjà en place
-- [x] Choix de la ligue et du club
-- [x] Fiche carrière et budget
-- [x] Base de clubs et joueurs
-- [x] Effectif avec recherche, filtres et fiches joueurs
-- [x] Formations et tactiques
-- [x] Calendrier du championnat et simulation des matchs
-- [x] Classement et forme récente (V N D à l’horizontale)
-- [x] Marché des transferts avec négociations
-- [x] Sauvegarde de carrière
-- [x] Après un match, accès direct à la journée jouée
-- [x] Interface allégée
-- [x] Première base du calendrier daté : dates par journée, événements avec début/fin et sauvegarde des données
+Cette feuille de route définit les priorités de développement. On avance par petites étapes, on teste chaque changement et on préserve les fonctionnalités déjà opérationnelles.
 
-## Étape 2 — Gestion complète de l’effectif (en cours)
-- [x] Remplaçants et réservistes séparés, avec glisser-déposer dans les tactiques
-- [x] Empêcher le lancement d’un match avec des joueurs blessés sélectionnés
-- [x] Prendre en compte les titulaires choisis dans la simulation et les contributions de buteurs/passeurs
-- [x] Afficher clairement la disponibilité, la fatigue, la forme et la condition physique dans les cartes de l’effectif
-- [ ] Vérifier que les changements de composition sont correctement sauvegardés/restaurés
+## Étape 1 — Finaliser et valider l’interface mobile (priorité actuelle)
+
+### Déjà réalisé
+- [x] Interface assombrie et allégée, dans un style manager de football
+- [x] Navigation inférieure entre les principales catégories
+- [x] Indicateur vert animé entre les catégories
+- [x] Menu « Plus » qui se ferme au défilement ou lors du changement de catégorie
+- [x] Retour en haut de page lors du changement de catégorie
+- [x] Bouton de retour collant en haut de l’écran
+- [x] Désactivation du zoom sur l’interface
+- [x] Correction du terrain tactique sur mobile
+
+### Validation restante
+- [ ] Tester sur iPhone Safari les menus, la navigation et le défilement
+- [ ] Vérifier toutes les entrées du menu « Plus »
+- [ ] Vérifier les écrans Effectif, Matchs, Compétitions et Tactiques
+- [ ] Corriger les éventuels défauts visuels ou problèmes tactiles restants
+- [ ] Confirmer que la dernière version déployée fonctionne correctement
+
+## Étape 2 — Terminer la gestion de l’effectif
+
+### Déjà réalisé
+- [x] Séparer titulaires, remplaçants et réservistes dans les tactiques
+- [x] Glisser-déposer des joueurs dans la composition
+- [x] Bloquer le match si un joueur blessé est sélectionné
+- [x] Utiliser le onze choisi pour les contributions de match
+- [x] Afficher disponibilité, fatigue, forme et condition physique sur les cartes de l’effectif
+
+### À vérifier
+- [ ] Vérifier la sauvegarde et la restauration de la composition
 - [ ] Tester le cycle complet : composition → match → fatigue/blessures → récupération → match suivant
+- [ ] Vérifier les données des joueurs et les liens club-joueur
 
-## Étapes suivantes
-1. [ ] Vérifier et corriger les données des joueurs et les liens club-joueur
-2. [ ] Faire évoluer forme, fatigue et moral après les matchs
-3. [ ] Finaliser le système temporel : date courante de carrière et progression des jours/semaines
-4. [ ] Ajouter les périodes de transferts d’été et d’hiver, avec dates d’ouverture et de fermeture
-5. [ ] Gérer les trêves internationales et les convocations
-6. [ ] Compléter le calendrier des indisponibilités : durée des blessures, suspensions et retour des joueurs
-7. [ ] Gérer contrats, salaires et fins de contrat
-8. [ ] Ajouter le centre de formation et la progression des jeunes
-9. [ ] Améliorer les statistiques et l’historique des saisons
+## Étape 3 — Approfondir le mercato et les transferts
 
-## Calendrier et événements — à développer
-- [ ] Définir une date de début et de fin de saison, ainsi que la date actuelle de la carrière
-- [ ] Faire avancer la date de façon cohérente après les matchs et les événements
-- [ ] Éviter que toutes les journées soient automatiquement espacées d’une semaine lorsque le calendrier réel du jeu sera développé
-- [ ] Programmer les fenêtres de transferts et bloquer/autoriser les transferts selon les dates
-- [ ] Ajouter les trêves internationales, les convocations et les effets sur les effectifs
-- [ ] Programmer les tirages au sort, dates de coupes, finales et compétitions européennes
+### Base existante
+- [x] Marché des transferts avec négociations
+- [x] Budget de carrière
+
+### À développer
+- [ ] Finaliser la date courante de carrière et la progression du temps
+- [ ] Définir les dates de début et de fin de saison
+- [ ] Ajouter les fenêtres de transferts d’été et d’hiver
+- [ ] Autoriser ou bloquer les transferts selon les dates du mercato
+- [ ] Vérifier la cohérence des transferts : club vendeur, club acheteur, effectifs et budgets
+- [ ] Ajouter ou compléter contrats, salaires et fins de contrat
+
+## Étape 4 — Donner plus de profondeur à la carrière
+
+- [ ] Faire évoluer forme, fatigue et moral après les matchs
+- [ ] Compléter les blessures et suspensions avec durée et date de retour
+- [ ] Ajouter les trêves internationales et les convocations
+- [ ] Ajouter le centre de formation et la progression des jeunes
 - [ ] Ajouter les échéances des objectifs du manager et les événements de fin de saison
-- [ ] Afficher les événements sur le calendrier du club et de la ligue
-- [ ] Sauvegarder et restaurer la date courante et tous les événements lors du chargement d’une carrière
+- [ ] Améliorer les statistiques et l’historique des saisons
 
-## Plus tard
+## Étape 5 — Calendrier et compétitions avancées
+
+- [x] Première base du calendrier daté : dates par journée et structure d’événements persistante
+- [ ] Faire progresser la date de carrière de façon cohérente après les matchs et événements
+- [ ] Adapter les dates des matchs et éviter un espacement fixe systématique d’une semaine
+- [ ] Afficher les événements dans les calendriers du club et de la ligue
+- [ ] Ajouter les tirages au sort, les coupes, les finales et les compétitions européennes
+- [ ] Vérifier la sauvegarde et la restauration de la date courante et des événements
+
+## Étape 6 — Fonctions immersives, plus tard
+
 - [ ] Actualités et rumeurs de transferts
 - [ ] Conférences de presse
-- [ ] Coupes et compétitions européennes
-- [ ] Palmarès et historique des saisons
+- [ ] Palmarès et historique détaillé des saisons
 
-> Priorité : avancer par petites étapes et conserver les fonctionnalités déjà opérationnelles. La structure des dates et événements est commencée ; les systèmes qui en dépendent restent à implémenter et tester.
+## Règles de développement
+
+- Traiter une modification ciblée à la fois.
+- Examiner le code existant avant de le modifier.
+- Mettre à jour `index.html` lorsqu’un nouveau script ou une nouvelle ressource l’exige.
+- Tester les changements et vérifier le résultat GitHub Actions avant de déclarer le déploiement terminé.
+- Ne pas modifier la logique du jeu simplement pour faire passer un test incorrect.
