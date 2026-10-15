@@ -179,7 +179,23 @@ class UI {
                 box-sizing: border-box;
             }
             #manager-bottom-nav {
-                transition: none;
+                position: fixed;
+                isolation: isolate;
+            }
+            #manager-bottom-nav .manager-nav-indicator {
+                position: absolute;
+                z-index: 0;
+                top: 7px;
+                bottom: 6px;
+                left: 5px;
+                width: 0;
+                border-radius: 10px;
+                background: rgba(36, 214, 127, .14);
+                box-shadow: inset 0 0 0 1px rgba(53, 230, 138, .12);
+                opacity: 0;
+                pointer-events: none;
+                transition: left .34s cubic-bezier(.22, 1, .36, 1), width .34s cubic-bezier(.22, 1, .36, 1), opacity .15s ease;
+                will-change: left, width;
             }
             #manager-bottom-nav .manager-nav-item {
                 appearance: none;
@@ -202,6 +218,9 @@ class UI {
                 box-shadow: none;
                 line-height: 1;
                 cursor: pointer;
+                position: relative;
+                z-index: 1;
+                transition: color .2s ease;
             }
             #manager-bottom-nav .manager-nav-icon {
                 display: block;
@@ -221,7 +240,7 @@ class UI {
             }
             #manager-bottom-nav .manager-nav-item.is-active {
                 color: #35e68a;
-                background: rgba(36, 214, 127, .09);
+                background: transparent;
             }
             #manager-bottom-nav .manager-nav-item:focus-visible,
             #manager-plus-panel button:focus-visible {
@@ -277,6 +296,12 @@ class UI {
         const nav = document.createElement("nav");
         nav.id = "manager-bottom-nav";
         nav.setAttribute("aria-label", "Navigation principale");
+
+        const indicator = document.createElement("span");
+        indicator.className = "manager-nav-indicator";
+        indicator.setAttribute("aria-hidden", "true");
+        nav.appendChild(indicator);
+        this.bottomNavIndicator = indicator;
 
         const items = [
             { id: "home", icon: "⌂", label: "Accueil", action: () => {
@@ -371,12 +396,20 @@ class UI {
         if (this.bottomMorePanel && !visible) this.bottomMorePanel.style.display = "none";
         document.body.classList.toggle("manager-has-bottom-nav", Boolean(visible));
         if (active) {
-            this.bottomNav.querySelectorAll(".manager-nav-item").forEach(button => {
+            const buttons = Array.from(this.bottomNav.querySelectorAll(".manager-nav-item"));
+            buttons.forEach(button => {
                 const selected = button.dataset.nav === active;
                 button.classList.toggle("is-active", selected);
                 if (selected) button.setAttribute("aria-current", "page");
                 else button.removeAttribute("aria-current");
             });
+
+            const selectedButton = buttons.find(button => button.dataset.nav === active);
+            if (selectedButton && this.bottomNavIndicator) {
+                this.bottomNavIndicator.style.left = selectedButton.offsetLeft + "px";
+                this.bottomNavIndicator.style.width = selectedButton.offsetWidth + "px";
+                this.bottomNavIndicator.style.opacity = "1";
+            }
         }
     }
 
