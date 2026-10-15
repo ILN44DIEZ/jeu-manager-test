@@ -2,7 +2,7 @@
 
 Cette feuille de route définit les priorités de développement. On avance par petites étapes, on teste chaque changement et on préserve les fonctionnalités déjà opérationnelles.
 
-## Étape 1 — Finaliser et valider l’interface mobile (priorité actuelle)
+## Étape 1 — Finaliser et valider l’interface mobile (terminée)
 
 ### Déjà réalisé
 - [x] Interface assombrie et allégée, dans un style manager de football
@@ -15,11 +15,11 @@ Cette feuille de route définit les priorités de développement. On avance par 
 - [x] Correction du terrain tactique sur mobile
 
 ### Validation restante
-- [ ] Tester sur iPhone Safari les menus, la navigation et le défilement
-- [ ] Vérifier toutes les entrées du menu « Plus »
-- [ ] Vérifier les écrans Effectif, Matchs, Compétitions et Tactiques
-- [ ] Corriger les éventuels défauts visuels ou problèmes tactiles restants
-- [ ] Confirmer que la dernière version déployée fonctionne correctement
+- [x] Tester sur iPhone Safari les menus, la navigation et le défilement
+- [x] Vérifier toutes les entrées du menu « Plus »
+- [x] Vérifier les écrans Effectif, Matchs, Compétitions et Tactiques
+- [x] Vérifier les éventuels défauts visuels ou problèmes tactiles restants
+- [x] Confirmer que la dernière version déployée fonctionne correctement
 
 ## Étape 2 — Terminer la gestion de l’effectif
 
