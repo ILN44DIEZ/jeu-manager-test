@@ -305,21 +305,32 @@ class UI {
 
         const items = [
             { id: "home", icon: "⌂", label: "Accueil", action: () => {
-                if (this.currentManagerView) this.showManager(this.currentManagerView);
+                this.closeBottomMoreMenu();
+                if (this.currentManagerView) {
+                    this.setBottomNavigationVisible(true, "home");
+                    this.showManager(this.currentManagerView);
+                    this.resetPageScroll();
+                }
             }},
             { id: "squad", icon: "♟", label: "Effectif", action: () => {
+                this.closeBottomMoreMenu();
                 if (this.currentManagerView) {
                     this.setBottomNavigationVisible(true, "squad");
                     this.squadUI.showClubPlayers(game.players, this.currentManagerView);
+                    this.resetPageScroll();
                 }
             }},
             { id: "matches", icon: "▣", label: "Matchs", action: () => {
+                this.closeBottomMoreMenu();
                 this.setBottomNavigationVisible(true, "matches");
                 this.showCalendar();
+                this.resetPageScroll();
             }},
             { id: "competitions", icon: "🏆", label: "Compétitions", action: () => {
+                this.closeBottomMoreMenu();
                 this.setBottomNavigationVisible(true, "competitions");
                 this.showChampionship();
+                this.resetPageScroll();
             }},
             { id: "more", icon: "•••", label: "Plus", action: () => {
                 this.toggleBottomMoreMenu();
@@ -349,18 +360,22 @@ class UI {
             ["🧠 Tactiques", () => {
                 if (this.currentManagerView) this.tacticsUI.show(game.tactics, this.currentManagerView);
                 this.setBottomNavigationVisible(true, "more");
+                this.resetPageScroll();
             }],
             ["🏋️ Entraînement", () => {
                 if (this.currentManagerView) this.showTraining(this.currentManagerView);
                 this.setBottomNavigationVisible(true, "more");
+                this.resetPageScroll();
             }],
             ["↔️ Marché des transferts", () => {
                 if (this.currentManagerView) this.showTransferMarket(this.currentManagerView);
                 this.setBottomNavigationVisible(true, "more");
+                this.resetPageScroll();
             }],
             ["💾 Sauvegarder", () => {
                 if (this.currentManagerView) this.saveCurrentCareer(this.currentManagerView);
                 this.setBottomNavigationVisible(true, "more");
+                this.resetPageScroll();
             }]
         ];
         plusActions.forEach(([label, action]) => {
@@ -368,7 +383,7 @@ class UI {
             button.type = "button";
             button.textContent = label;
             button.addEventListener("click", () => {
-                panel.style.display = "none";
+                this.closeBottomMoreMenu();
                 action();
             });
             panel.appendChild(button);
@@ -376,6 +391,22 @@ class UI {
         document.body.appendChild(panel);
         this.bottomMorePanel = panel;
         this.initBottomNavigationScrollBehavior();
+    }
+
+    closeBottomMoreMenu() {
+        if (this.bottomMorePanel) this.bottomMorePanel.style.display = "none";
+    }
+
+    resetPageScroll() {
+        // Revenir en haut après le rendu de la nouvelle page.
+        window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+        document.documentElement.scrollTop = 0;
+        document.body.scrollTop = 0;
+        requestAnimationFrame(() => {
+            window.scrollTo({ top: 0, left: 0, behavior: "auto" });
+            document.documentElement.scrollTop = 0;
+            document.body.scrollTop = 0;
+        });
     }
 
     initBottomNavigationScrollBehavior() {
@@ -393,7 +424,9 @@ class UI {
     setBottomNavigationVisible(visible, active = null) {
         if (!this.bottomNav) return;
         this.bottomNav.style.display = visible ? "grid" : "none";
-        if (this.bottomMorePanel && !visible) this.bottomMorePanel.style.display = "none";
+        if (this.bottomMorePanel && (!visible || (active && active !== "more"))) {
+            this.closeBottomMoreMenu();
+        }
         document.body.classList.toggle("manager-has-bottom-nav", Boolean(visible));
         if (active) {
             const buttons = Array.from(this.bottomNav.querySelectorAll(".manager-nav-item"));
