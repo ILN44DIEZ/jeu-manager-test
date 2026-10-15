@@ -2325,298 +2325,126 @@ this.showMessage(
     /* ================================================= */
 
     showStandings() {
-
         this.clear();
+        this.container.classList.add("manager-standings-screen");
 
+        const leagueName = game.club?.league || game.manager?.league || "Championnat";
+        const season = game.manager?.season || "2026/2027";
+        const title = document.createElement("h2");
+        title.className = "standings-title";
+        title.textContent = "🏆 " + leagueName;
+        this.container.appendChild(title);
 
-        this.showTitle(
-            "📊 Classement"
-        );
+        const seasonLabel = document.createElement("p");
+        seasonLabel.className = "standings-season";
+        seasonLabel.textContent = "Saison " + season;
+        this.container.appendChild(seasonLabel);
 
+        const tabs = document.createElement("div");
+        tabs.className = "standings-tabs";
+        [
+            { label: "Classement", active: true, action: () => this.showStandings() },
+            { label: "Résultats", action: () => this.showLeagueCalendar() },
+            { label: "Buteurs", action: () => this.showScorers() }
+        ].forEach(tab => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = tab.label;
+            button.className = tab.active ? "is-active" : "";
+            button.addEventListener("click", tab.action);
+            tabs.appendChild(button);
+        });
+        this.container.appendChild(tabs);
 
-        if (
-            !game.standings
-        ) {
-
-            this.showMessage(
-                "❌ Classement indisponible."
-            );
-
-
-            this.createButton(
-
-                "⬅️ Retour championnat",
-
-                () => {
-
-                    this.showChampionship();
-
-                }
-
-            );
-
-
+        if (!game.standings) {
+            this.showMessage("❌ Classement indisponible.");
+            this.createButton("⬅️ Retour championnat", () => this.showChampionship());
             return;
-
         }
 
+        const table = game.standings.getTable();
+        const tableElement = document.createElement("table");
+        tableElement.className = "standings-table";
+        tableElement.innerHTML = "<thead><tr><th>#</th><th>Équipe</th><th>MJ</th><th>+/-</th><th>Pts</th></tr></thead>";
+        const tbody = document.createElement("tbody");
 
-        const table =
-            game.standings.getTable();
-
-
-        const tableElement =
-            document.createElement(
-                "table"
-            );
-
-
-        tableElement.style.width =
-            "100%";
-
-
-        tableElement.style.borderCollapse =
-            "collapse";
-
-
-        const header =
-            document.createElement(
-                "tr"
-            );
-
-
-        const headers = [
-
-            "Pos",
-            "Club",
-            "MJ",
-            "V",
-            "N",
-            "D",
-            "BP",
-            "BC",
-            "Diff",
-            "Pts",
-            "Forme"
-
-        ];
-
-
-        headers.forEach(
-            text => {
-
-                const th =
-                    document.createElement(
-                        "th"
-                    );
-
-
-                th.textContent =
-                    text;
-
-
-                th.style.border =
-                    "1px solid #ccc";
-
-
-                th.style.padding =
-                    "6px";
-
-
-                header.appendChild(
-                    th
-                );
-
+        table.forEach((team, index) => {
+            const row = document.createElement("tr");
+            if (game.club && team.team === game.club.name) {
+                row.classList.add("is-user-club");
+                row.setAttribute("aria-current", "true");
             }
-        );
-
-
-        tableElement.appendChild(
-            header
-        );
-
-
-        table.forEach(
-            (team, index) => {
-
-                const row =
-                    document.createElement(
-                        "tr"
-                    );
-
-
-                const values = [
-
-                    index + 1,
-
-                    team.team,
-
-                    team.played,
-
-                    team.wins,
-
-                    team.draws,
-
-                    team.losses,
-
-                    team.goalsFor,
-
-                    team.goalsAgainst,
-
-                    team.goalDifference,
-
-                    team.points
-
-                ];
-
-
-                values.forEach(
-                    value => {
-
-                        const td =
-                            document.createElement(
-                                "td"
-                            );
-
-
-                        td.textContent =
-                            value;
-
-
-                        td.style.border =
-                            "1px solid #ccc";
-
-
-                        td.style.padding =
-                            "6px";
-
-
-                        td.style.textAlign =
-                            "center";
-
-
-                        row.appendChild(
-                            td
-                        );
-
-                    }
-                );
-
-
-                const formCell =
-                    document.createElement(
-                        "td"
-                    );
-
-                formCell.style.border =
-                    "1px solid #ccc";
-
-                formCell.style.padding =
-                    "6px";
-
-                formCell.style.textAlign =
-                    "center";
-
-                const formRow =
-                    document.createElement("div");
-
-                formRow.style.display = "flex";
-                formRow.style.flexDirection = "row";
-                formRow.style.flexWrap = "nowrap";
-                formRow.style.alignItems = "center";
-                formRow.style.justifyContent = "center";
-                formRow.style.gap = "3px";
-                formRow.style.whiteSpace = "nowrap";
-
-                if (team.form && team.form.length > 0) {
-
-                    team.form.forEach(result => {
-
-                        const badge =
-                            document.createElement("span");
-
-                        badge.textContent = result;
-                        badge.style.display = "inline-flex";
-                        badge.style.alignItems = "center";
-                        badge.style.justifyContent = "center";
-                        badge.style.flex = "0 0 22px";
-                        badge.style.width = "22px";
-                        badge.style.height = "22px";
-                        badge.style.borderRadius = "50%";
-                        badge.style.fontWeight = "bold";
-                        badge.style.fontSize = "12px";
-
-                        if (result === "V") {
-                            badge.style.backgroundColor = "#4CAF50";
-                            badge.style.color = "white";
-                        } else if (result === "N") {
-                            badge.style.backgroundColor = "#FFC107";
-                            badge.style.color = "black";
-                        } else if (result === "D") {
-                            badge.style.backgroundColor = "#F44336";
-                            badge.style.color = "white";
-                        }
-
-                        formRow.appendChild(badge);
-
-                    });
-
-                } else {
-
-                    formRow.textContent = "-";
-
-                }
-
-                formCell.appendChild(formRow);
-
-
-                row.appendChild(
-                    formCell
-                );
-
-
-
-
-
-                if (
-                    game.club &&
-                    team.team ===
-                    game.club.name
-                ) {
-
-                    row.style.fontWeight =
-                        "bold";
-
-                }
-
-
-                tableElement.appendChild(
-                    row
-                );
-
-            }
-        );
-
-
-        this.container.appendChild(
-            tableElement
-        );
-
-
-        this.createButton(
-
-            "⬅️ Retour championnat",
-
-            () => {
-
-                this.showChampionship();
-
-            }
-
-        );
-
+            [
+                index + 1,
+                team.team,
+                team.played,
+                (team.goalDifference > 0 ? "+" : "") + team.goalDifference,
+                team.points
+            ].forEach((value, cellIndex) => {
+                const cell = document.createElement("td");
+                cell.textContent = value;
+                if (cellIndex === 1) cell.className = "standings-team-name";
+                if (cellIndex === 0 || cellIndex >= 2) cell.classList.add("standings-numeric");
+                row.appendChild(cell);
+            });
+            tbody.appendChild(row);
+        });
+
+        tableElement.appendChild(tbody);
+        this.container.appendChild(tableElement);
+        this.createButton("⬅️ Retour championnat", () => this.showChampionship());
     }
 
+    showScorers() {
+        this.clear();
+        this.container.classList.add("manager-standings-screen");
+        this.showTitle("⚽ Buteurs");
+
+        const tabs = document.createElement("div");
+        tabs.className = "standings-tabs";
+        [
+            { label: "Classement", action: () => this.showStandings() },
+            { label: "Résultats", action: () => this.showLeagueCalendar() },
+            { label: "Buteurs", action: () => this.showScorers(), active: true }
+        ].forEach(tab => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = tab.label;
+            button.className = tab.active ? "is-active" : "";
+            button.addEventListener("click", tab.action);
+            tabs.appendChild(button);
+        });
+        this.container.appendChild(tabs);
+
+        const players = Array.isArray(game.players) ? game.players : [];
+        const sorted = players.map(player => ({
+            name: [player.prenom || player.firstName || "", player.nom || player.lastName || ""].filter(Boolean).join(" ") || player.name || player.fullName || "Joueur",
+            goals: Number(player.butsSaison ?? player.seasonGoals ?? player.buts ?? player.goals ?? 0)
+        })).filter(item => item.goals > 0)
+          .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
+
+        if (!sorted.length) {
+            this.showMessage("Aucun buteur enregistré pour le moment.");
+        } else {
+            const list = document.createElement("table");
+            list.className = "standings-table scorers-table";
+            list.innerHTML = "<thead><tr><th>#</th><th>Joueur</th><th>Buts</th></tr></thead>";
+            const tbody = document.createElement("tbody");
+            sorted.forEach((item, index) => {
+                const row = document.createElement("tr");
+                [index + 1, item.name, item.goals].forEach((value, i) => {
+                    const cell = document.createElement("td");
+                    cell.textContent = value;
+                    if (i === 1) cell.className = "standings-team-name";
+                    row.appendChild(cell);
+                });
+                tbody.appendChild(row);
+            });
+            list.appendChild(tbody);
+            this.container.appendChild(list);
+        }
+        this.createButton("⬅️ Retour championnat", () => this.showChampionship());
+    }
 
 
     /* ================================================= */
