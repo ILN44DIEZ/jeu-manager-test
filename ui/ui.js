@@ -118,15 +118,17 @@ class UI {
             button.style.borderRadius = "8px";
             button.style.margin = "0";
             button.style.textAlign = "left";
-            // Le bouton reste dans le flux : il ne doit pas recouvrir le titre.
-            button.style.position = "static";
-            button.style.top = "auto";
+            // Le bouton suit le défilement, puis reste visible quand le haut de l'écran l'atteint.
+            button.classList.add("manager-return-sticky");
+            button.style.position = "sticky";
+            button.style.top = "calc(env(safe-area-inset-top, 0px) + 8px)";
             button.style.left = "auto";
-            button.style.zIndex = "auto";
+            button.style.zIndex = "100";
             button.style.width = "auto";
             button.style.maxWidth = "100%";
             button.style.boxShadow = "none";
             button.style.margin = "0 0 12px";
+            button.style.justifySelf = "start";
 
             this.container.insertBefore(
                 button,
