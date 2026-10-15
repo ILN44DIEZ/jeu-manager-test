@@ -2329,32 +2329,24 @@ this.showMessage(
         this.container.classList.add("manager-standings-screen");
 
         const leagueName = game.club?.league || game.manager?.league || "Championnat";
-        const season = game.manager?.season || "2026/2027";
-        const title = document.createElement("h2");
-        title.className = "standings-title";
-        title.textContent = "🏆 " + leagueName;
-        this.container.appendChild(title);
+        const season = game.manager?.season;
+        const leagueHeader = document.createElement("div");
+        leagueHeader.className = "standings-league-header";
 
+        const leagueFlag = document.createElement("div");
+        leagueFlag.className = "standings-league-flag";
+        leagueFlag.textContent = this.flags[leagueName] || "🏆";
+        leagueHeader.appendChild(leagueFlag);
+
+        const leagueInfo = document.createElement("div");
+        leagueInfo.className = "standings-league-info";
+        const leagueTitle = document.createElement("h2");
+        leagueTitle.textContent = leagueName;
         const seasonLabel = document.createElement("p");
-        seasonLabel.className = "standings-season";
-        seasonLabel.textContent = "Saison " + season;
-        this.container.appendChild(seasonLabel);
-
-        const tabs = document.createElement("div");
-        tabs.className = "standings-tabs";
-        [
-            { label: "Classement", active: true, action: () => this.showStandings() },
-            { label: "Résultats", action: () => this.showLeagueCalendar() },
-            { label: "Buteurs", action: () => this.showScorers() }
-        ].forEach(tab => {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.textContent = tab.label;
-            button.className = tab.active ? "is-active" : "";
-            button.addEventListener("click", tab.action);
-            tabs.appendChild(button);
-        });
-        this.container.appendChild(tabs);
+        seasonLabel.textContent = season ? "Saison " + season : "Classement du championnat";
+        leagueInfo.append(leagueTitle, seasonLabel);
+        leagueHeader.appendChild(leagueInfo);
+        this.container.appendChild(leagueHeader);
 
         if (!game.standings) {
             this.showMessage("❌ Classement indisponible.");
@@ -2363,89 +2355,68 @@ this.showMessage(
         }
 
         const table = game.standings.getTable();
+        const tableWrap = document.createElement("div");
+        tableWrap.className = "standings-table-wrap";
         const tableElement = document.createElement("table");
         tableElement.className = "standings-table";
-        tableElement.innerHTML = "<thead><tr><th>#</th><th>Équipe</th><th>MJ</th><th>+/-</th><th>Pts</th></tr></thead>";
-        const tbody = document.createElement("tbody");
+        tableElement.setAttribute("aria-label", "Classement du championnat");
 
+        const colgroup = document.createElement("colgroup");
+        ["8%", "minmax(0, 1fr)", "12%", "15%", "12%"].forEach((width, index) => {
+            const col = document.createElement("col");
+            if (index === 1) col.style.width = "auto";
+            else col.style.width = width;
+            colgroup.appendChild(col);
+        });
+        tableElement.appendChild(colgroup);
+
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        ["#", "Équipe", "J", "+/−", "Pts"].forEach(label => {
+            const th = document.createElement("th");
+            th.textContent = label;
+            th.scope = "col";
+            headerRow.appendChild(th);
+        });
+        thead.appendChild(headerRow);
+        tableElement.appendChild(thead);
+
+        const tbody = document.createElement("tbody");
         table.forEach((team, index) => {
             const row = document.createElement("tr");
-            if (game.club && team.team === game.club.name) {
-                row.classList.add("is-user-club");
-                row.setAttribute("aria-current", "true");
+            const isMyClub = Boolean(game.club && team.team === game.club.name);
+            if (isMyClub) {
+                row.classList.add("is-my-club");
+                row.setAttribute("aria-label", team.team + ", votre club");
             }
-            [
+
+            const values = [
                 index + 1,
                 team.team,
                 team.played,
                 (team.goalDifference > 0 ? "+" : "") + team.goalDifference,
                 team.points
-            ].forEach((value, cellIndex) => {
+            ];
+
+            values.forEach((value, cellIndex) => {
                 const cell = document.createElement("td");
                 cell.textContent = value;
-                if (cellIndex === 1) cell.className = "standings-team-name";
-                if (cellIndex === 0 || cellIndex >= 2) cell.classList.add("standings-numeric");
+                if (cellIndex === 1) {
+                    cell.className = "standings-team-name";
+                    cell.title = team.team;
+                } else {
+                    cell.className = "standings-number";
+                }
                 row.appendChild(cell);
             });
             tbody.appendChild(row);
         });
-
         tableElement.appendChild(tbody);
-        this.container.appendChild(tableElement);
+        tableWrap.appendChild(tableElement);
+        this.container.appendChild(tableWrap);
+
         this.createButton("⬅️ Retour championnat", () => this.showChampionship());
     }
-
-    showScorers() {
-        this.clear();
-        this.container.classList.add("manager-standings-screen");
-        this.showTitle("⚽ Buteurs");
-
-        const tabs = document.createElement("div");
-        tabs.className = "standings-tabs";
-        [
-            { label: "Classement", action: () => this.showStandings() },
-            { label: "Résultats", action: () => this.showLeagueCalendar() },
-            { label: "Buteurs", action: () => this.showScorers(), active: true }
-        ].forEach(tab => {
-            const button = document.createElement("button");
-            button.type = "button";
-            button.textContent = tab.label;
-            button.className = tab.active ? "is-active" : "";
-            button.addEventListener("click", tab.action);
-            tabs.appendChild(button);
-        });
-        this.container.appendChild(tabs);
-
-        const players = Array.isArray(game.players) ? game.players : [];
-        const sorted = players.map(player => ({
-            name: [player.prenom || player.firstName || "", player.nom || player.lastName || ""].filter(Boolean).join(" ") || player.name || player.fullName || "Joueur",
-            goals: Number(player.butsSaison ?? player.seasonGoals ?? player.buts ?? player.goals ?? 0)
-        })).filter(item => item.goals > 0)
-          .sort((a, b) => b.goals - a.goals || a.name.localeCompare(b.name));
-
-        if (!sorted.length) {
-            this.showMessage("Aucun buteur enregistré pour le moment.");
-        } else {
-            const list = document.createElement("table");
-            list.className = "standings-table scorers-table";
-            list.innerHTML = "<thead><tr><th>#</th><th>Joueur</th><th>Buts</th></tr></thead>";
-            const tbody = document.createElement("tbody");
-            sorted.forEach((item, index) => {
-                const row = document.createElement("tr");
-                [index + 1, item.name, item.goals].forEach((value, i) => {
-                    const cell = document.createElement("td");
-                    cell.textContent = value;
-                    if (i === 1) cell.className = "standings-team-name";
-                    row.appendChild(cell);
-                });
-                tbody.appendChild(row);
-            });
-            list.appendChild(tbody);
-            this.container.appendChild(list);
-        }
-        this.createButton("⬅️ Retour championnat", () => this.showChampionship());
-    }
-
 
     /* ================================================= */
     /* OUVRIR LA DERNIÈRE JOURNÉE JOUÉE */
