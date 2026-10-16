@@ -1594,3 +1594,159 @@ html, body {
 #game.manager-standings-screen table.standings-table tbody {
     width: 100% !important;
 }
+
+
+/* MARCHÉ DES TRANSFERTS — lignes compactes, sans initiales ni code couleur de poste */
+#game.manager-transfer-screen {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 14px 0 30px !important;
+    padding: 0 12px calc(130px + env(safe-area-inset-bottom, 0px)) !important;
+    box-sizing: border-box !important;
+    color: #edf3f8;
+}
+#game.manager-transfer-screen > h2 {
+    margin: 8px 0 4px;
+    border: 0;
+    text-align: center;
+    font-size: clamp(21px, 5.4vw, 27px);
+}
+#game.manager-transfer-screen .transfer-market-summary {
+    margin: 0 0 14px;
+    text-align: center;
+    color: #9eafbd;
+    font-size: 12px;
+}
+#game.manager-transfer-screen .transfer-market-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin: 14px 0 18px;
+}
+#game.manager-transfer-screen .transfer-market-tabs button {
+    min-width: 0;
+    margin: 0;
+    padding: 12px 3px;
+    border: 1px solid #233747;
+    border-radius: 9px;
+    background: #132433;
+    color: #dce6ee;
+    font-size: clamp(11px, 3.2vw, 14px);
+    font-weight: 700;
+    white-space: nowrap;
+    box-shadow: none;
+}
+#game.manager-transfer-screen .transfer-market-tabs button.is-active {
+    background: #19dc7d;
+    border-color: #19dc7d;
+    color: #052719;
+}
+#game.manager-transfer-screen .transfer-market-filters[hidden] {
+    display: none !important;
+}
+#game.manager-transfer-screen .transfer-market-results {
+    display: block !important;
+    width: 100%;
+    min-width: 0;
+}
+#game.manager-transfer-screen .transfer-market-count {
+    color: #9eafbd;
+    font-size: 12px;
+    margin: 0 0 8px;
+}
+#game.manager-transfer-screen .transfer-player-row {
+    width: 100%;
+    min-width: 0;
+    padding: 12px 0;
+    border: 0;
+    border-bottom: 1px solid rgba(125, 151, 170, .18);
+    border-radius: 0;
+    background: transparent;
+    text-align: left;
+    box-sizing: border-box;
+}
+#game.manager-transfer-screen .transfer-player-main-row {
+    display: grid;
+    grid-template-columns: minmax(34px, .55fr) minmax(0, 2fr) minmax(25px, .45fr) 42px minmax(65px, .95fr);
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+}
+#game.manager-transfer-screen .transfer-player-position {
+    color: #aab8c4;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: left;
+    white-space: nowrap;
+}
+#game.manager-transfer-screen .transfer-player-name {
+    min-width: 0;
+    color: #eef3f7;
+    font-size: clamp(12px, 3.5vw, 15px);
+    font-weight: 650;
+    overflow-wrap: anywhere;
+}
+#game.manager-transfer-screen .transfer-player-age {
+    color: #c7d1d9;
+    font-size: 12px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+#game.manager-transfer-screen .transfer-player-rating {
+    display: inline-grid;
+    place-items: center;
+    min-width: 34px;
+    min-height: 36px;
+    padding: 0 3px;
+    border-radius: 6px;
+    background: #7ee94e;
+    color: #10230b;
+    font-size: 14px;
+    font-weight: 800;
+    box-sizing: border-box;
+}
+#game.manager-transfer-screen .transfer-player-value {
+    min-width: 0;
+    color: #e6edf2;
+    font-size: clamp(10px, 3vw, 13px);
+    font-weight: 600;
+    text-align: right;
+    overflow-wrap: anywhere;
+}
+#game.manager-transfer-screen .transfer-player-club {
+    margin: 5px 0 0;
+    color: #91a3b1;
+    font-size: 11px;
+}
+#game.manager-transfer-screen .transfer-negotiate-button {
+    width: 100%;
+    margin: 8px 0 0;
+    padding: 9px;
+    border-radius: 7px;
+    font-size: 13px;
+}
+#game.manager-transfer-screen .transfer-negotiation-box {
+    margin-top: 10px;
+    padding: 10px;
+    border: 1px solid #263a49;
+    border-radius: 8px;
+    text-align: left;
+}
+#game.manager-transfer-screen .transfer-negotiation-box input {
+    max-width: 100%;
+}
+#game.manager-transfer-screen .transfer-offer-status {
+    margin: 5px 0;
+    color: #8eeaaf;
+    font-size: 12px;
+}
+@media (max-width: 380px) {
+    #game.manager-transfer-screen { padding-left: 8px !important; padding-right: 8px !important; }
+    #game.manager-transfer-screen .transfer-player-main-row {
+        grid-template-columns: minmax(28px, .5fr) minmax(0, 1.8fr) minmax(22px, .4fr) 36px minmax(58px, .85fr);
+        gap: 4px;
+    }
+    #game.manager-transfer-screen .transfer-player-position { font-size: 11px; }
+    #game.manager-transfer-screen .transfer-player-name { font-size: 12px; }
+    #game.manager-transfer-screen .transfer-player-rating { min-width: 32px; min-height: 34px; font-size: 13px; }
+}
