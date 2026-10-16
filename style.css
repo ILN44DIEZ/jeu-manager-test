@@ -1750,3 +1750,26 @@ html, body {
     #game.manager-transfer-screen .transfer-player-name { font-size: 12px; }
     #game.manager-transfer-screen .transfer-player-rating { min-width: 32px; min-height: 34px; font-size: 13px; }
 }
+
+
+#game.manager-transfer-screen .transfer-market-header-row {
+    display: grid;
+    grid-template-columns: minmax(34px, .55fr) minmax(0, 2fr) minmax(25px, .45fr) 42px minmax(65px, .95fr);
+    gap: 6px;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #263744;
+    color: #9eafbd;
+    font-size: clamp(10px, 3vw, 12px);
+    font-weight: 700;
+}
+#game.manager-transfer-screen .transfer-market-header-row span:nth-child(2) { text-align: left; }
+#game.manager-transfer-screen .transfer-market-header-row span:nth-child(3),
+#game.manager-transfer-screen .transfer-market-header-row span:nth-child(4) { text-align: center; }
+#game.manager-transfer-screen .transfer-market-header-row span:last-child { text-align: right; }
+@media (max-width: 380px) {
+    #game.manager-transfer-screen .transfer-market-header-row {
+        grid-template-columns: minmax(28px, .5fr) minmax(0, 1.8fr) minmax(22px, .4fr) 36px minmax(58px, .85fr);
+        gap: 4px;
+    }
+}
