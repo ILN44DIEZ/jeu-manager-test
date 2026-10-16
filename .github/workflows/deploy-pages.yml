@@ -432,7 +432,9 @@ jobs:
         run: |
           # Every script referenced by index.html must exist in the published artifact.
           grep -oE '<script[^>]+src="[^"]+"' index.html | sed -E 's/.*src="([^"]+)".*/\1/' | while IFS= read -r resource; do
-            if [ ! -f "$resource" ]; then
+            # Ignore cache-busting query strings when checking the physical file path.
+            file_path="${resource%%\?*}"
+            if [ ! -f "$file_path" ]; then
               echo "::error::Missing script referenced by index.html: $resource"
               exit 1
             fi
@@ -445,7 +447,7 @@ jobs:
 
           # Keep the key new modules explicitly present in the page.
           for resource in build-version.js ui/playerUI.js ui/squadUI.js ui/tacticsUI.js game/calendar.js matches.js standings.js players.js; do
-            grep -Fq "src=\"$resource\"" index.html || {
+            grep -oE '<script[^>]+src="[^"]+"' index.html | sed -E 's/.*src="([^"]+)".*/\1/' | sed 's/[?].*$//' | grep -Fxq "$resource" || {
               echo "::error::Expected module is not referenced by index.html: $resource"
               exit 1
             }
