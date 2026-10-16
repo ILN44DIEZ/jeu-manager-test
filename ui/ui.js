@@ -4326,6 +4326,7 @@ if (match.played && match.result) {
 
                 const negotiate = document.createElement("button");
                 negotiate.type = "button";
+                negotiate.className = "transfer-negotiate-button";
                 negotiate.textContent = "🤝 Négocier avec le club";
                 negotiate.style.width = "100%";
                 negotiate.style.padding = "10px";
