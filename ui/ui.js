@@ -4036,6 +4036,7 @@ if (match.played && match.result) {
 
     showTransferMarket(manager) {
         this.clear();
+        this.container.classList.add("manager-transfer-screen");
 
         const topBar = document.createElement("div");
         topBar.style.display = "flex";
@@ -4060,9 +4061,11 @@ if (match.played && match.result) {
         topBar.appendChild(backButton);
         this.container.appendChild(topBar);
 
-        this.showTitle("💰 Marché des transferts");
-        this.showMessage("🏟️ Club : " + manager.clubName);
-        this.showMessage("💰 Budget disponible : " + Number(manager.budget || 0).toLocaleString("fr-FR") + " €");
+        this.showTitle("Marché des transferts");
+        const marketSummary = document.createElement("p");
+        marketSummary.className = "transfer-market-summary";
+        marketSummary.textContent = manager.clubName + " · Budget : " + Number(manager.budget || 0).toLocaleString("fr-FR") + " €";
+        this.container.appendChild(marketSummary);
 
         const savedFilters = this.transferMarketFilters || {};
         const clubs = game.data?.clubs || [];
@@ -4189,9 +4192,7 @@ if (match.played && match.result) {
         });
 
         const results = document.createElement("div");
-        results.style.display = "grid";
-        results.style.gridTemplateColumns = "repeat(auto-fit, minmax(145px, 1fr))";
-        results.style.gap = "10px";
+        results.className = "transfer-market-results";
         this.container.appendChild(results);
 
         const saveFilters = () => {
@@ -4237,11 +4238,7 @@ if (match.played && match.result) {
 
             players.slice(0, 100).forEach(player => {
                 const card = document.createElement("div");
-                card.style.border = "1px solid #555";
-                card.style.borderRadius = "10px";
-                card.style.padding = "12px";
-                card.style.textAlign = "center";
-                card.style.minWidth = "0";
+                card.className = "transfer-player-row";
 
                 card.setAttribute("role", "button");
                 card.setAttribute("tabindex", "0");
@@ -4266,18 +4263,28 @@ if (match.played && match.result) {
                     }
                 });
 
+                const playerLine = document.createElement("div");
+                playerLine.className = "transfer-player-main-row";
+                const position = document.createElement("span");
+                position.className = "transfer-player-position";
+                position.textContent = player.poste || "—";
                 const name = document.createElement("strong");
+                name.className = "transfer-player-name";
                 name.textContent = [player.prenom || "", player.nom || ""].join(" ").trim();
-                const details = document.createElement("p");
-                details.style.fontSize = "13px";
-                details.style.color = "#bbb";
-                details.textContent = (player.poste || "Poste inconnu") + " • ⭐ " + (player.note ?? "—") + " • " + (player.age ?? "—") + " ans";
-                const club = document.createElement("p");
-                club.textContent = "🏟️ " + (player.club || "Club inconnu");
-                club.style.fontSize = "13px";
+                const age = document.createElement("span");
+                age.className = "transfer-player-age";
+                age.textContent = player.age ?? "—";
+                const rating = document.createElement("strong");
+                rating.className = "transfer-player-rating";
+                rating.textContent = player.note ?? "—";
                 const valuePrice = Math.max(0, Number(player.valeur) || 0);
                 const value = document.createElement("strong");
-                value.textContent = "💶 Valeur estimée : " + valuePrice.toLocaleString("fr-FR") + " €";
+                value.className = "transfer-player-value";
+                value.textContent = valuePrice.toLocaleString("fr-FR") + " €";
+                const club = document.createElement("p");
+                club.className = "transfer-player-club";
+                club.textContent = player.club || "Club inconnu";
+                playerLine.append(position, name, age, rating, value);
 
                 const negotiate = document.createElement("button");
                 negotiate.type = "button";
@@ -4415,7 +4422,7 @@ if (match.played && match.result) {
                 });
 
                 negotiationBox.append(stepLabel, offerLabel, offerInput, submitOffer, response);
-                card.append(name, details, club, value, negotiate, negotiationBox);
+                card.append(playerLine, club, negotiate, negotiationBox);
                 results.appendChild(card);
             });
 
