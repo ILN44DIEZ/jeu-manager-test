@@ -4067,13 +4067,37 @@ if (match.played && match.result) {
         marketSummary.textContent = manager.clubName + " · Budget : " + Number(manager.budget || 0).toLocaleString("fr-FR") + " €";
         this.container.appendChild(marketSummary);
 
+        const marketTabs = document.createElement("div");
+        marketTabs.className = "transfer-market-tabs";
         const savedFilters = this.transferMarketFilters || {};
+        let activeMarketTab = savedFilters.activeMarketTab || "all";
+        const filterPanelPlaceholder = null;
+        const tabConfig = [["all", "Tout"], ["search", "Recherche"], ["offers", "Mes offres"]];
+        const marketTabButtons = {};
+        tabConfig.forEach(([key, label]) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.textContent = label;
+            button.className = activeMarketTab === key ? "is-active" : "";
+            button.addEventListener("click", () => {
+                activeMarketTab = key;
+                Object.entries(marketTabButtons).forEach(([tab, btn]) => btn.classList.toggle("is-active", tab === key));
+                filters.hidden = key !== "search";
+                render();
+            });
+            marketTabButtons[key] = button;
+            marketTabs.appendChild(button);
+        });
+        this.container.appendChild(marketTabs);
+
+        const savedFilters2 = this.transferMarketFilters || {};
         const clubs = game.data?.clubs || [];
         const leagues = [...new Set(clubs.map(club => club.ligue).filter(Boolean))].sort((a, b) => a.localeCompare(b, "fr"));
         const filters = document.createElement("div");
         filters.style.display = "grid";
         filters.style.gap = "10px";
         filters.style.margin = "12px 0";
+        filters.hidden = activeMarketTab !== "search";
         this.container.appendChild(filters);
 
         const leagueLabel = document.createElement("label");
@@ -4201,7 +4225,8 @@ if (match.played && match.result) {
                 search: search.value,
                 minAge,
                 maxAge,
-                agePanelOpen: agePanel.style.display !== "none"
+                agePanelOpen: agePanel.style.display !== "none",
+                activeMarketTab
             };
         };
 
@@ -4210,6 +4235,10 @@ if (match.played && match.result) {
             results.innerHTML = "";
             const query = search.value.trim().toLocaleLowerCase("fr");
             const players = (game.data?.players || []).filter(player => {
+                const fullNameForOffer = [player.prenom || "", player.nom || ""].join(" ").trim();
+                const offerKey = player.id ?? fullNameForOffer;
+                const hasOffer = Array.isArray(this.transferMarketOffers) && this.transferMarketOffers.some(offer => offer.playerId === offerKey && offer.managerClub === manager.clubName);
+                if (activeMarketTab === "offers" && !hasOffer) return false;
                 const playerClub = String(player.club || "");
                 const clubData = clubs.find(club => club.nom === playerClub);
                 const playerLeague = clubData?.ligue || "";
@@ -4352,6 +4381,15 @@ if (match.played && match.result) {
                     }
 
                     negotiationRound++;
+                    if (!Array.isArray(this.transferMarketOffers)) this.transferMarketOffers = [];
+                    const offerPlayerId = player.id ?? [player.prenom || "", player.nom || ""].join(" ").trim();
+                    let trackedOffer = this.transferMarketOffers.find(item => item.playerId === offerPlayerId && item.managerClub === manager.clubName);
+                    if (!trackedOffer) {
+                        trackedOffer = { playerId: offerPlayerId, managerClub: manager.clubName, playerName: name.textContent, status: "En négociation", amount: offer };
+                        this.transferMarketOffers.push(trackedOffer);
+                    }
+                    trackedOffer.amount = offer;
+                    trackedOffer.status = "En négociation";
                     stepLabel.textContent = "Étape " + negotiationRound + "/3 — " +
                         (negotiationRound === 3 ? "Offre finale" : "Négociation en cours");
 
@@ -4382,6 +4420,7 @@ if (match.played && match.result) {
                             game.tactics.initializeSquad(game.players);
                         }
                         negotiationClosed = true;
+                        if (trackedOffer) trackedOffer.status = "Acceptée";
                         response.textContent = "✅ " + player.club + " accepte " + offer.toLocaleString("fr-FR") + " €. Transfert conclu !";
                         submitOffer.disabled = true;
                         offerInput.disabled = true;
