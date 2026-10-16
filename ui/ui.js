@@ -4319,9 +4319,6 @@ if (match.played && match.result) {
                 const value = document.createElement("strong");
                 value.className = "transfer-player-value";
                 value.textContent = valuePrice.toLocaleString("fr-FR") + " €";
-                const club = document.createElement("p");
-                club.className = "transfer-player-club";
-                club.textContent = player.club || "Club inconnu";
                 playerLine.append(position, name, age, rating, value);
 
                 const negotiate = document.createElement("button");
@@ -4471,7 +4468,7 @@ if (match.played && match.result) {
                 });
 
                 negotiationBox.append(stepLabel, offerLabel, offerInput, submitOffer, response);
-                card.append(playerLine, club, negotiate, negotiationBox);
+                card.append(playerLine);
                 if (activeMarketTab === "offers") {
                     const tracked = this.transferMarketOffers?.find(item => item.playerId === (player.id ?? [player.prenom || "", player.nom || ""].join(" ").trim()) && item.managerClub === manager.clubName);
                     const offerStatus = document.createElement("p");
