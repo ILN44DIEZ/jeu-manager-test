@@ -4215,6 +4215,15 @@ if (match.played && match.result) {
             render();
         });
 
+        const tableHeader = document.createElement("div");
+        tableHeader.className = "transfer-market-header-row";
+        ["Poste", "Nom", "Âge", "Note", "Valeur"].forEach(label => {
+            const cell = document.createElement("span");
+            cell.textContent = label;
+            tableHeader.appendChild(cell);
+        });
+        this.container.appendChild(tableHeader);
+
         const results = document.createElement("div");
         results.className = "transfer-market-results";
         this.container.appendChild(results);
@@ -4238,7 +4247,7 @@ if (match.played && match.result) {
                 const fullNameForOffer = [player.prenom || "", player.nom || ""].join(" ").trim();
                 const offerKey = player.id ?? fullNameForOffer;
                 const hasOffer = Array.isArray(this.transferMarketOffers) && this.transferMarketOffers.some(offer => offer.playerId === offerKey && offer.managerClub === manager.clubName);
-                if (activeMarketTab === "offers" && !hasOffer) return false;
+                if (activeMarketTab === "offers") return hasOffer;
                 const playerClub = String(player.club || "");
                 const clubData = clubs.find(club => club.nom === playerClub);
                 const playerLeague = clubData?.ligue || "";
@@ -4462,6 +4471,13 @@ if (match.played && match.result) {
 
                 negotiationBox.append(stepLabel, offerLabel, offerInput, submitOffer, response);
                 card.append(playerLine, club, negotiate, negotiationBox);
+                if (activeMarketTab === "offers") {
+                    const tracked = this.transferMarketOffers?.find(item => item.playerId === (player.id ?? [player.prenom || "", player.nom || ""].join(" ").trim()) && item.managerClub === manager.clubName);
+                    const offerStatus = document.createElement("p");
+                    offerStatus.className = "transfer-offer-status";
+                    offerStatus.textContent = (tracked?.status || "En attente") + (tracked?.amount ? " · " + Number(tracked.amount).toLocaleString("fr-FR") + " €" : "");
+                    card.appendChild(offerStatus);
+                }
                 results.appendChild(card);
             });
 
