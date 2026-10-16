@@ -4253,9 +4253,11 @@ if (match.played && match.result) {
                 const playerLeague = clubData?.ligue || "";
                 const fullName = [player.prenom || "", player.nom || ""].join(" ");
                 const age = Number(player.age) || 0;
-                return playerClub !== manager.clubName &&
-                    player.retraite !== true && player.retraite !== "true" &&
-                    (!leagueSelect.value || playerLeague === leagueSelect.value) &&
+                const available = playerClub !== manager.clubName &&
+                    player.retraite !== true && player.retraite !== "true";
+                if (!available) return false;
+                if (activeMarketTab !== "search") return true;
+                return (!leagueSelect.value || playerLeague === leagueSelect.value) &&
                     age >= minAge && age <= maxAge &&
                     [fullName, playerClub, player.poste || "", player.nationalite || ""]
                         .join(" ").toLocaleLowerCase("fr").includes(query);
