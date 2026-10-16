@@ -68,6 +68,106 @@ class PlayerUI {
         header.appendChild(identity);
         overlay.appendChild(header);
 
+        // La négociation est disponible uniquement pour les joueurs d'un autre club.
+        const belongsToManager = Boolean(manager && player.club === manager.clubName);
+        if (manager && !belongsToManager && options.allowNegotiation !== false) {
+            const negotiationSection = document.createElement("section");
+            negotiationSection.className = "player-transfer-negotiation";
+            negotiationSection.style.cssText = "margin:12px 0 16px;padding:12px;border:1px solid #344656;border-radius:14px;background:#121f2a;";
+            const negotiateButton = document.createElement("button");
+            negotiateButton.type = "button";
+            negotiateButton.textContent = "🤝 Négocier avec le club";
+            negotiateButton.style.cssText = "width:100%;margin:0;padding:12px;border-radius:10px;font-weight:700;";
+            const negotiationForm = document.createElement("div");
+            negotiationForm.style.cssText = "display:none;margin-top:12px;";
+            const offerLabel = document.createElement("label");
+            offerLabel.textContent = "Montant de l'offre (€)";
+            offerLabel.style.cssText = "display:block;margin-bottom:6px;color:#d5e0e8;";
+            const offerInput = document.createElement("input");
+            offerInput.type = "number";
+            offerInput.min = "1";
+            offerInput.step = "50000";
+            offerInput.value = String(Math.round(Math.max(0, Number(player.valeur ?? player.marketValue) || 0) * 0.75));
+            offerInput.style.cssText = "width:100%;box-sizing:border-box;padding:11px;border-radius:8px;margin-bottom:8px;";
+            const sendOffer = document.createElement("button");
+            sendOffer.type = "button";
+            sendOffer.textContent = "Envoyer l'offre";
+            sendOffer.style.cssText = "width:100%;margin:0;padding:11px;border-radius:8px;";
+            const negotiationMessage = document.createElement("p");
+            negotiationMessage.style.cssText = "font-size:13px;line-height:1.45;margin:10px 0 0;color:#d8e3ea;white-space:pre-line;";
+            let negotiationRound = 0;
+            let negotiationClosed = false;
+            const marketValue = Math.max(0, Number(player.valeur ?? player.marketValue) || 0);
+            const overallRating = Math.max(1, Math.min(99, Number(player.note ?? player.overall) || 70));
+            const potentialRating = Math.max(overallRating, Math.min(99, Number(player.potentiel ?? player.potential) || overallRating));
+            negotiateButton.addEventListener("click", () => {
+                negotiationForm.style.display = negotiationForm.style.display === "none" ? "block" : "none";
+            });
+            sendOffer.addEventListener("click", () => {
+                if (negotiationClosed) return;
+                const offer = Math.floor(Number(offerInput.value));
+                if (!Number.isFinite(offer) || offer <= 0) {
+                    negotiationMessage.textContent = "Entre un montant supérieur à 0 €.";
+                    return;
+                }
+                if (offer > Number(manager.budget || 0)) {
+                    negotiationMessage.textContent = "Cette offre dépasse ton budget actuel.";
+                    return;
+                }
+                if (player.club === manager.clubName) {
+                    negotiationMessage.textContent = "Ce joueur appartient déjà à ton club.";
+                    negotiationClosed = true;
+                    return;
+                }
+                negotiationRound++;
+                let acceptanceRatio;
+                if (overallRating < 70) acceptanceRatio = 0.78;
+                else if (overallRating < 75) acceptanceRatio = 0.83;
+                else if (overallRating < 80) acceptanceRatio = 0.90;
+                else if (overallRating < 85) acceptanceRatio = 1;
+                else if (overallRating < 90) acceptanceRatio = 1.08;
+                else acceptanceRatio = 1.18;
+                const potentialResistance = 1 + Math.min(0.20, Math.max(0, potentialRating - overallRating) * 0.01);
+                const minimumAcceptable = Math.round(marketValue * acceptanceRatio * potentialResistance);
+                if (offer >= minimumAcceptable || (marketValue === 0 && offer > 0)) {
+                    const previousClub = player.club || "Sans club";
+                    manager.budget = Number(manager.budget || 0) - offer;
+                    if (game.club) game.club.budget = manager.budget;
+                    player.club = manager.clubName;
+                    if (!Array.isArray(game.players)) game.players = [];
+                    if (!game.players.some(existing => existing === player || (existing.prenom === player.prenom && existing.nom === player.nom))) game.players.push(player);
+                    if (game.tactics && typeof game.tactics.initializeSquad === "function") game.tactics.initializeSquad(game.players);
+                    negotiationClosed = true;
+                    offerInput.disabled = true;
+                    sendOffer.disabled = true;
+                    negotiateButton.disabled = true;
+                    negotiationMessage.textContent = "✅ Transfert conclu pour " + offer.toLocaleString("fr-FR") + " € ! " + fullName + " rejoint " + manager.clubName + ".";
+                    return;
+                }
+                if (negotiationRound >= 3) {
+                    negotiationClosed = true;
+                    offerInput.disabled = true;
+                    sendOffer.disabled = true;
+                    negotiationMessage.textContent = "❌ " + (player.club || "Le club") + " refuse l'offre finale de " + offer.toLocaleString("fr-FR") + " €.";
+                    return;
+                }
+                let counterRatio;
+                if (overallRating < 70) counterRatio = 0.88;
+                else if (overallRating < 75) counterRatio = 0.92;
+                else if (overallRating < 80) counterRatio = 0.97;
+                else if (overallRating < 85) counterRatio = 1.05;
+                else if (overallRating < 90) counterRatio = 1.12;
+                else counterRatio = 1.22;
+                const counterOffer = Math.max(offer + 1, Math.ceil((marketValue * counterRatio) / 100000) * 100000);
+                negotiationMessage.textContent = "🤝 " + (player.club || "Le club") + " refuse cette offre et propose " + counterOffer.toLocaleString("fr-FR") + " €. Il te reste " + (3 - negotiationRound) + " tentative(s).";
+                offerInput.value = String(Math.min(counterOffer, Number(manager.budget || 0)));
+                sendOffer.textContent = negotiationRound === 2 ? "Envoyer l'offre finale" : "Répondre à la contre-offre";
+            });
+            negotiationForm.append(offerLabel, offerInput, sendOffer, negotiationMessage);
+            negotiationSection.append(negotiateButton, negotiationForm);
+            overlay.appendChild(negotiationSection);
+        }
+
         const tabs = document.createElement("div");
         tabs.style.cssText = "display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin:18px 0 12px;";
         const content = document.createElement("div");
