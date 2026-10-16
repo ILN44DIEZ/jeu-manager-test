@@ -120,6 +120,15 @@ class PlayerUI {
                     return;
                 }
                 negotiationRound++;
+                if (!Array.isArray(this.ui.transferMarketOffers)) this.ui.transferMarketOffers = [];
+                const playerId = player.id ?? fullName;
+                let trackedOffer = this.ui.transferMarketOffers.find(item => item.playerId === playerId && item.managerClub === manager.clubName);
+                if (!trackedOffer) {
+                    trackedOffer = { playerId, managerClub: manager.clubName, playerName: fullName, status: "En négociation", amount: offer };
+                    this.ui.transferMarketOffers.push(trackedOffer);
+                }
+                trackedOffer.amount = offer;
+                trackedOffer.status = "En négociation";
                 let acceptanceRatio;
                 if (overallRating < 70) acceptanceRatio = 0.78;
                 else if (overallRating < 75) acceptanceRatio = 0.83;
@@ -138,6 +147,7 @@ class PlayerUI {
                     if (!game.players.some(existing => existing === player || (existing.prenom === player.prenom && existing.nom === player.nom))) game.players.push(player);
                     if (game.tactics && typeof game.tactics.initializeSquad === "function") game.tactics.initializeSquad(game.players);
                     negotiationClosed = true;
+                    trackedOffer.status = "Acceptée";
                     offerInput.disabled = true;
                     sendOffer.disabled = true;
                     negotiateButton.disabled = true;
@@ -146,6 +156,7 @@ class PlayerUI {
                 }
                 if (negotiationRound >= 3) {
                     negotiationClosed = true;
+                    trackedOffer.status = "Refusée";
                     offerInput.disabled = true;
                     sendOffer.disabled = true;
                     negotiationMessage.textContent = "❌ " + (player.club || "Le club") + " refuse l'offre finale de " + offer.toLocaleString("fr-FR") + " €.";
